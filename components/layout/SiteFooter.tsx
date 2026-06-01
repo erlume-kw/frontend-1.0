@@ -7,20 +7,29 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS, BREAKPOINT, FOOTER_DATA, SOCIAL_ICONS } from '../../constants/brand';
+import MaxWidthContainer from './MaxWidthContainer';
+import {
+  handleFooterLink,
+  openEmail,
+  openExternalUrl,
+  openPhone,
+  SOCIAL_URLS,
+} from '../../utils/interactions';
 
 function FooterCopyright() {
   return (
     <View style={s.copyright}>
       <Text style={s.copyrightText}>Copyright © 2026 Erlume</Text>
       <View style={s.socialRow}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.instagram)} accessibilityRole="link">
           <Image source={{ uri: SOCIAL_ICONS.instagram }} style={s.socialLg} resizeMode="contain" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.whatsapp)} accessibilityRole="link">
           <Image source={{ uri: SOCIAL_ICONS.whatsapp }} style={s.socialLg} resizeMode="contain" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.tiktok)} accessibilityRole="link">
           <Image source={{ uri: SOCIAL_ICONS.tiktok }} style={s.socialSm} resizeMode="contain" />
         </TouchableOpacity>
       </View>
@@ -30,6 +39,7 @@ function FooterCopyright() {
 
 function MobileFooter() {
   const [open, setOpen] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   return (
     <View style={s.footer}>
@@ -46,7 +56,7 @@ function MobileFooter() {
             {open === label && (
               <View style={s.accordionBody}>
                 {FOOTER_DATA.columns[label as keyof typeof FOOTER_DATA.columns].map((item: string) => (
-                  <TouchableOpacity key={item}>
+                  <TouchableOpacity key={item} onPress={() => handleFooterLink(item, navigation)}>
                     <Text style={s.footerLink}>{item}</Text>
                   </TouchableOpacity>
                 ))}
@@ -57,8 +67,12 @@ function MobileFooter() {
 
         <View style={s.divider} />
         <Text style={s.contactLabel}>Contact us at</Text>
-        <Text style={s.footerLink}>{FOOTER_DATA.contact.phone}</Text>
-        <Text style={s.footerLink}>{FOOTER_DATA.contact.email}</Text>
+        <TouchableOpacity onPress={() => openPhone(FOOTER_DATA.contact.phone)}>
+          <Text style={s.footerLink}>{FOOTER_DATA.contact.phone}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => openEmail(FOOTER_DATA.contact.email)}>
+          <Text style={s.footerLink}>{FOOTER_DATA.contact.email}</Text>
+        </TouchableOpacity>
       </View>
       <FooterCopyright />
     </View>
@@ -66,26 +80,36 @@ function MobileFooter() {
 }
 
 function DesktopFooter() {
+  const navigation = useNavigation();
+
   return (
     <View style={s.footer}>
+      <MaxWidthContainer>
       <View style={s.desktopGrid}>
         <View style={s.desktopCol}>
           <Text style={s.colHeader}>Contact</Text>
-          <Text style={s.footerLink}>{FOOTER_DATA.contact.phone}</Text>
-          <Text style={s.footerLink}>{FOOTER_DATA.contact.email}</Text>
+          <TouchableOpacity onPress={() => openPhone(FOOTER_DATA.contact.phone)}>
+            <Text style={s.footerLink}>{FOOTER_DATA.contact.phone}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => openEmail(FOOTER_DATA.contact.email)}>
+            <Text style={s.footerLink}>{FOOTER_DATA.contact.email}</Text>
+          </TouchableOpacity>
         </View>
         {Object.entries(FOOTER_DATA.columns).map(([heading, links]) => (
           <View key={heading} style={s.desktopCol}>
             <Text style={s.colHeader}>{heading}</Text>
             {links.map((item: string) => (
-              <TouchableOpacity key={item}>
+              <TouchableOpacity key={item} onPress={() => handleFooterLink(item, navigation)}>
                 <Text style={s.footerLink}>{item}</Text>
               </TouchableOpacity>
             ))}
           </View>
         ))}
       </View>
-      <FooterCopyright />
+      </MaxWidthContainer>
+      <MaxWidthContainer>
+        <FooterCopyright />
+      </MaxWidthContainer>
     </View>
   );
 }

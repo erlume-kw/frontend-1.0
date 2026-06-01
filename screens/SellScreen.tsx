@@ -3,27 +3,22 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
-  Linking,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import SiteHeader from '../components/layout/SiteHeader';
-import SiteFooter from '../components/layout/SiteFooter';
+import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
-import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
-
-const WHATSAPP_NUMBER = '+96597226735';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
+import { openWhatsApp } from '../utils/interactions';
 
 export default function SellScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleWhatsApp = () => {
-    const url = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, '')}`;
-    Linking.openURL(url).catch(() => {});
+  const handleWhatsApp = (prefill?: string) => {
+    openWhatsApp(prefill);
   };
 
   const headlineSize = isDesktop ? 60 : 32;
@@ -55,7 +50,12 @@ export default function SellScreen() {
 
       {/* Upload + CTA block */}
       <View style={[s.rightBlock, isDesktop && s.rightBlockDesktop]}>
-        <TouchableOpacity style={[s.uploadBox, { width: uploadW, height: uploadH }]}>
+        <TouchableOpacity
+          style={[s.uploadBox, { width: uploadW, height: uploadH }]}
+          onPress={() =>
+            handleWhatsApp("Hi, I'd like to sell an item with erlume. I'll send photos shortly.")
+          }
+        >
           <Text style={[s.uploadLabel, isDesktop && { fontSize: 24, lineHeight: 30 }]}>
             Upload a photo of what you would like to sell
           </Text>
@@ -63,7 +63,7 @@ export default function SellScreen() {
 
         <TouchableOpacity
           style={[s.chatBtn, { width: btnW, height: btnH }]}
-          onPress={handleWhatsApp}
+          onPress={() => handleWhatsApp()}
           activeOpacity={0.85}
         >
           <Text style={[s.chatIcon, { fontSize: btnFontSize }]}>💬</Text>
@@ -74,31 +74,32 @@ export default function SellScreen() {
   );
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
-      <SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SiteHeader onMenuPress={() => setMenuOpen(true)} />
-        {content}
-        <SiteFooter />
-      </ScrollView>
-    </SafeAreaView>
+    <PageLayout
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+    >
+      {content}
+    </PageLayout>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
-
   body: { paddingHorizontal: 19, paddingVertical: 32, gap: 40 },
   bodyDesktop: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 1280,
+    alignSelf: 'center',
     flexDirection: 'row',
-    paddingHorizontal: 150,
+    paddingHorizontal: SCREEN_PADDING.desktop,
     paddingVertical: 80,
     gap: 60,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   copyBlock: { gap: 20 },
-  copyBlockDesktop: { flex: 1, maxWidth: 704 },
+  copyBlockDesktop: { maxWidth: 704 },
 
   headline: {
     fontFamily: FONTS.clashMedium,

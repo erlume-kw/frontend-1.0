@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
-import SiteFooter from '../components/layout/SiteFooter';
+import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
 
@@ -29,11 +28,10 @@ export default function DropDetailScreen() {
   const numCols = isDesktop ? 4 : 2;
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
-      <SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SiteHeader onMenuPress={() => setMenuOpen(true)} />
-
+    <PageLayout
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+    >
         {/* Drop header */}
         <View style={s.dropHeader}>
           <Text style={[s.dropTitle, isDesktop && { fontSize: 56 }]}>{dropTitle}</Text>
@@ -57,15 +55,11 @@ export default function DropDetailScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
-        <SiteFooter />
-      </ScrollView>
-    </SafeAreaView>
+    </PageLayout>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
   dropHeader: { paddingHorizontal: 16, paddingVertical: 32 },
   dropTitle: {
     fontFamily: FONTS.clashMedium,

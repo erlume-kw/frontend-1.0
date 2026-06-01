@@ -27,6 +27,13 @@ export const FONTS = {
 
 export const BREAKPOINT = 768;
 
+/** Horizontal page margins — see docs/DESIGN_SYSTEM.md */
+export const SCREEN_PADDING = {
+  mobile: 16,
+  tablet: 32,
+  desktop: 64,
+} as const;
+
 export const FOOTER_DATA = {
   contact: {
     phone: '+965 97226735',

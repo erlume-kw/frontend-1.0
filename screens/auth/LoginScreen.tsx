@@ -9,10 +9,15 @@ import {
   StatusBar,
   Pressable,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { FOOTER_DATA } from '../../constants/brand';
+import { openEmail } from '../../utils/interactions';
 
 export default function LoginScreen() {
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -92,14 +97,21 @@ export default function LoginScreen() {
           </View>
 
           {/* Forgot password */}
-          <TouchableOpacity className="items-end mb-8">
+          <TouchableOpacity
+            className="items-end mb-8"
+            onPress={() => openEmail(FOOTER_DATA.contact.email, 'Password reset request')}
+          >
             <Text className="font-dm-medium text-[#C5705D] text-[12px]">
               Forgot password?
             </Text>
           </TouchableOpacity>
 
           {/* Log in button */}
-          <TouchableOpacity style={styles.button} activeOpacity={0.85}>
+          <TouchableOpacity
+            style={styles.button}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('Home' as never)}
+          >
             <Text className="font-dm-medium text-white text-[14px] uppercase tracking-widest">
               Log In
             </Text>
@@ -119,7 +131,11 @@ export default function LoginScreen() {
             <Text className="font-dm-regular text-[#7A7060] text-[16px]">
               New to erlume?{' '}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert('Create account', 'Account registration is coming soon. Contact us to get started.')
+              }
+            >
               <Text className="font-dm-medium text-[#18230F] text-[16px] underline">
                 Create an account
               </Text>

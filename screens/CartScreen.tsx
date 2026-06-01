@@ -4,18 +4,18 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   Image,
   StyleSheet,
   useWindowDimensions,
   ImageStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
-import SiteFooter from '../components/layout/SiteFooter';
+import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
+import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
+import { showPromoApplied } from '../utils/interactions';
 
 const PRODUCT_IMG = 'https://www.figma.com/api/mcp/asset/72c8b842-0787-4fe0-9911-5e1681b701b6';
 
@@ -33,16 +33,10 @@ export default function CartScreen() {
   const [promoCode, setPromoCode] = useState('');
   const navigation = useNavigation();
 
-  const updateQty = (id: string, delta: number) => {
-    setItems(prev => prev.map(item =>
-      item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item
-    ));
-  };
-
   const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id));
 
   const activeItems = items.filter(i => !i.sold);
-  const subtotal = activeItems.reduce((sum, i) => sum + (parseInt(i.price) || 0) * i.qty, 0);
+  const subtotal = activeItems.reduce((sum, i) => sum + (parseInt(i.price) || 0), 0);
 
   const OrderSummary = () => (
     <View style={[s.summary, isDesktop && s.summaryDesktop]}>
@@ -57,16 +51,16 @@ export default function CartScreen() {
           onChangeText={setPromoCode}
           autoCapitalize="none"
         />
-        <TouchableOpacity style={s.applyBtn}>
+        <TouchableOpacity style={s.applyBtn} onPress={showPromoApplied}>
           <Text style={s.applyText}>APPLY</Text>
         </TouchableOpacity>
       </View>
 
       {[
         { label: 'Shipping', value: 'Free' },
-        { label: 'Tax', value: '0' },
-        { label: 'Subtotal', value: `${subtotal}` },
-        { label: 'Total', value: `${subtotal}` },
+        { label: 'Tax', value: '0 KWD' },
+        { label: 'Subtotal', value: `${subtotal} KWD` },
+        { label: 'Total', value: `${subtotal} KWD` },
       ].map(({ label, value }) => (
         <View key={label} style={s.lineItem}>
           <Text style={[s.lineLabel, isDesktop && { fontSize: 24 }]}>{label}</Text>
@@ -84,76 +78,64 @@ export default function CartScreen() {
   );
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
-      <SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SiteHeader onMenuPress={() => setMenuOpen(true)} />
+    <PageLayout
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+    >
+        <MaxWidthContainer>
+          <View style={isDesktop ? s.desktopLayout : undefined}>
+            {/* Cart items */}
+            <View style={isDesktop ? s.desktopItems : undefined}>
+              <Text style={[s.pageTitle, isDesktop && { fontSize: 36, marginLeft: 35 }]}>
+                YOUR CART ({activeItems.length})
+              </Text>
 
-        <View style={isDesktop ? s.desktopLayout : undefined}>
-          {/* Cart items */}
-          <View style={isDesktop ? s.desktopItems : undefined}>
-            <Text style={[s.pageTitle, isDesktop && { fontSize: 36, marginLeft: 35 }]}>
-              YOUR CART ({activeItems.length})
-            </Text>
+              {items.map(item => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={[s.itemRow, item.sold && s.itemRowSold]}
+                  activeOpacity={0.85}
+                  onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: item.id })}
+                >
+                  <View style={[s.itemImgWrap, item.sold && s.itemImgSold]}>
+                    <Image source={{ uri: PRODUCT_IMG }} style={s.itemImg as ImageStyle} resizeMode="cover" />
+                  </View>
 
-            {items.map(item => (
-              <View
-                key={item.id}
-                style={[s.itemRow, item.sold && s.itemRowSold]}
-              >
-                <View style={[s.itemImgWrap, item.sold && s.itemImgSold]}>
-                  <Image source={{ uri: PRODUCT_IMG }} style={s.itemImg as ImageStyle} resizeMode="cover" />
-                </View>
+                  <View style={s.itemInfo}>
+                    <Text style={[s.itemBrand, item.sold && s.itemTextMuted, isDesktop && { fontSize: 24 }]}>
+                      {item.brand}
+                    </Text>
+                    <Text style={[s.itemName, item.sold && s.itemTextMuted]}>
+                      {item.name}
+                    </Text>
+                    {item.sold ? (
+                      <Text style={s.soldLabel}>SOLD</Text>
+                    ) : (
+                      <View style={s.priceRow}>
+                        <Text style={s.strikePrice}>{item.price}</Text>
+                        <Text style={s.activePrice}>{item.price}</Text>
+                      </View>
+                    )}
+                  </View>
 
-                <View style={s.itemInfo}>
-                  <Text style={[s.itemBrand, item.sold && s.itemTextMuted, isDesktop && { fontSize: 24 }]}>
-                    {item.brand}
-                  </Text>
-                  <Text style={[s.itemName, item.sold && s.itemTextMuted]}>
-                    {item.name}
-                  </Text>
-
-                  {item.sold ? (
-                    <Text style={s.soldLabel}>SOLD</Text>
-                  ) : (
-                    <View style={s.priceRow}>
-                      <Text style={s.strikePrice}>{item.price}</Text>
-                      <Text style={s.activePrice}>{item.price}</Text>
-                    </View>
-                  )}
-                </View>
-
-                <View style={s.itemControls}>
-                  {!item.sold && (
-                    <View style={s.qtyRow}>
-                      <TouchableOpacity onPress={() => updateQty(item.id, -1)} hitSlop={8}>
-                        <Text style={s.qtyBtn}>−</Text>
-                      </TouchableOpacity>
-                      <Text style={s.qtyNum}>{item.qty}</Text>
-                      <TouchableOpacity onPress={() => updateQty(item.id, 1)} hitSlop={8}>
-                        <Text style={s.qtyBtn}>+</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-                  <TouchableOpacity onPress={() => removeItem(item.id)}>
+                  <TouchableOpacity
+                    style={s.itemControls}
+                    onPress={e => { e.stopPropagation?.(); removeItem(item.id); }}
+                  >
                     <Text style={[s.removeBtn, item.sold && s.removeBtnBold]}>REMOVE</Text>
                   </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <OrderSummary />
           </View>
-
-          <OrderSummary />
-        </View>
-
-        <SiteFooter />
-      </ScrollView>
-    </SafeAreaView>
+        </MaxWidthContainer>
+    </PageLayout>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
   pageTitle: { fontFamily: FONTS.clashMedium, fontSize: 24, color: COLORS.black, padding: 16, marginBottom: 4 },
 
   desktopLayout: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 0 },

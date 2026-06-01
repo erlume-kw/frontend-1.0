@@ -5,6 +5,7 @@ import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from '@expo-g
 import { Sarina_400Regular } from '@expo-google-fonts/sarina';
 import { View, ActivityIndicator } from 'react-native';
 import MainNavigation from 'components/navigation/MainNavigation';
+import { WishlistProvider } from './contexts/WishlistContext';
 
 import './global.css';
 
@@ -29,11 +30,11 @@ export default function App() {
   }
 
   return (
-    <>
+    <WishlistProvider>
       <NavigationContainer>
         <MainNavigation />
       </NavigationContainer>
       <StatusBar style="auto" />
-    </>
+    </WishlistProvider>
   );
 }

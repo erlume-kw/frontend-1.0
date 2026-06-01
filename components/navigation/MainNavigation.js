@@ -7,6 +7,7 @@ import ProductDetailScreen from '../../screens/ProductDetailScreen';
 import CartScreen from '../../screens/CartScreen';
 import CheckoutScreen from '../../screens/CheckoutScreen';
 import SellScreen from '../../screens/SellScreen';
+import WishlistScreen from '../../screens/WishlistScreen';
 import LoginScreen from '../../screens/auth/LoginScreen';
 
 const Stack = createNativeStackNavigator();
@@ -21,6 +22,7 @@ const MainNavigation = () => {
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Sell" component={SellScreen} />
+      <Stack.Screen name="Wishlist" component={WishlistScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
     </Stack.Navigator>
   );

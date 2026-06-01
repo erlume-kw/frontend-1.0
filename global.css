@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Full-height app shell so desktop sticky footers can use flexGrow / min-height */
+html,
+body,
+#root {
+  height: 100%;
+}

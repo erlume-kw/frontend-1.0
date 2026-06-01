@@ -7,6 +7,7 @@ import {
   Pressable,
   StyleSheet,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS } from '../../constants/brand';
 
@@ -18,17 +19,17 @@ interface SideMenuProps {
 
 const NAV_LINKS = [
   { label: 'new', screen: 'Home' },
-  { label: 'shop', screen: 'AllDrops' },
+  { label: 'drops', screen: 'AllDrops' },
   { label: 'sell', screen: 'Sell' },
-  { label: 'wishlist', screen: null },
+  { label: 'wishlist', screen: 'Wishlist' },
 ];
 
 export default function SideMenu({ visible, onClose, cartCount = 0 }: SideMenuProps) {
   const navigation = useNavigation();
 
-  const handleNav = (screen: string | null) => {
+  const handleNav = (screen: string) => {
     onClose();
-    if (screen) navigation.navigate(screen as never);
+    navigation.navigate(screen as never);
   };
 
   return (
@@ -37,34 +38,55 @@ export default function SideMenu({ visible, onClose, cartCount = 0 }: SideMenuPr
       transparent
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <Pressable style={s.backdrop} onPress={onClose}>
-        <Pressable style={s.panel} onPress={e => e.stopPropagation()}>
-          {/* Close button */}
-          <TouchableOpacity style={s.closeBtn} onPress={onClose} hitSlop={12}>
-            <Text style={s.closeText}>✕</Text>
+      <View style={s.root}>
+        <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel="Close menu" />
+
+        <View style={s.panel}>
+          <TouchableOpacity
+            style={s.closeBtn}
+            onPress={onClose}
+            hitSlop={16}
+            activeOpacity={0.6}
+            delayPressIn={0}
+            accessibilityRole="button"
+            accessibilityLabel="Close menu"
+          >
+            <Ionicons name="close" size={28} color={COLORS.white} />
           </TouchableOpacity>
 
-          {/* Nav links */}
           <View style={s.links}>
             {NAV_LINKS.map(({ label, screen }) => (
-              <TouchableOpacity key={label} onPress={() => handleNav(screen)}>
+              <TouchableOpacity
+                key={label}
+                onPress={() => handleNav(screen)}
+                activeOpacity={0.7}
+                delayPressIn={0}
+              >
                 <Text style={s.link}>{label}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity onPress={() => handleNav('Cart')}>
+            <TouchableOpacity
+              onPress={() => handleNav('Cart')}
+              activeOpacity={0.7}
+              delayPressIn={0}
+            >
               <Text style={s.link}>cart ({cartCount})</Text>
             </TouchableOpacity>
           </View>
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const s = StyleSheet.create({
-  backdrop: {
+  root: {
     flex: 1,
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   panel: {
@@ -72,26 +94,20 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingTop: 26,
     paddingBottom: 40,
-    overflow: 'hidden',
+    zIndex: 1,
   },
   closeBtn: {
-    position: 'absolute',
-    top: 26,
-    left: 23,
-    width: 34,
-    height: 34,
+    alignSelf: 'flex-start',
+    marginLeft: 15,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  closeText: {
-    fontFamily: FONTS.clashRegular,
-    fontSize: 20,
-    color: COLORS.white,
   },
   links: {
     alignItems: 'center',
     gap: 34,
-    paddingTop: 75,
+    paddingTop: 40,
   },
   link: {
     fontFamily: FONTS.clashMedium,

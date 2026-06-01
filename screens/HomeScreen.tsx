@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
   Image,
   StyleSheet,
   useWindowDimensions,
+  StatusBar,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
-import SiteFooter from '../components/layout/SiteFooter';
+import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
+import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
 
 // Update DROP_DATE to the actual next drop date/time (UTC)
@@ -73,16 +74,17 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
-      <SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
-      <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
-        <SiteHeader onMenuPress={() => setMenuOpen(true)} />
+    <PageLayout
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+    >
         <CountdownHero isDesktop={isDesktop} />
 
         <View style={s.shopPrevWrap}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('AllDrops' as never)}>
             <Text style={[s.shopPrevLink, isDesktop && { fontSize: 32 }]}>
               SHOP PREVIOUS DROPS HERE
             </Text>
@@ -93,17 +95,22 @@ export default function HomeScreen() {
           <>
             <View style={s.sectionHeader}>
               <Text style={s.sectionTitle}>Our Latest Drop</Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('AllDrops' as never)}>
                 <Text style={s.shopAllLink}>Shop all</Text>
               </TouchableOpacity>
             </View>
             <View style={s.productGrid}>
               {PLACEHOLDER_PRODUCTS.map(p => (
-                <View key={p.id} style={s.productCard}>
+                <TouchableOpacity
+                  key={p.id}
+                  style={s.productCard}
+                  activeOpacity={0.85}
+                  onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: p.id })}
+                >
                   <View style={s.productImg} />
                   <Text style={s.productName}>{p.name}</Text>
                   <Text style={s.productPrice}>{p.price}</Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
             <View style={s.spotlight}>
@@ -113,23 +120,22 @@ export default function HomeScreen() {
                 <Text style={s.spotlightSub}>
                   Introduced in 1984 for Jane Birkin; now a symbol of luxury and craftsmanship.
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    (navigation.navigate as Function)('ProductDetail', { productId: '1' })
+                  }
+                >
                   <Text style={s.spotlightCta}>Shop Now</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </>
         )}
-
-        <SiteFooter />
-      </ScrollView>
-    </SafeAreaView>
+    </PageLayout>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
-  scroll: { flex: 1 },
   hero: {
     backgroundColor: 'rgba(56,69,45,0.2)',
     alignItems: 'center',

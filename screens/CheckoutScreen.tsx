@@ -4,14 +4,15 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { showOrderPlaced, showPromoApplied } from '../utils/interactions';
 import SiteHeader from '../components/layout/SiteHeader';
-import SiteFooter from '../components/layout/SiteFooter';
+import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
+import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
 
 type PaymentMethod = 'card' | 'paypal' | 'cod';
@@ -22,6 +23,7 @@ export default function CheckoutScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -167,15 +169,15 @@ export default function CheckoutScreen() {
           value={discountCode}
           onChangeText={setDiscountCode}
         />
-        <TouchableOpacity style={s.applyBtn}>
+        <TouchableOpacity style={s.applyBtn} onPress={showPromoApplied}>
           <Text style={s.applyText}>Apply</Text>
         </TouchableOpacity>
       </View>
 
       {[
-        { label: 'Subtotal • 3 items', value: '$36.00' },
-        { label: 'Shipping', value: 'Enter shipping address' },
-        { label: 'Estimated taxes', value: '$1.80' },
+        { label: 'Subtotal • 3 items', value: '36 KWD' },
+        { label: 'Shipping', value: 'Enter address' },
+        { label: 'Estimated taxes', value: '1.8 KWD' },
       ].map(({ label, value }) => (
         <View key={label} style={s.lineItem}>
           <Text style={s.lineLabel}>{label}</Text>
@@ -185,41 +187,38 @@ export default function CheckoutScreen() {
 
       <View style={s.totalRow}>
         <Text style={s.totalLabel}>Total</Text>
-        <Text style={s.totalValue}>$37.80</Text>
+        <Text style={s.totalValue}>37.8 KWD</Text>
       </View>
 
-      <TouchableOpacity style={s.payBtn}>
+      <TouchableOpacity style={s.payBtn} onPress={() => showOrderPlaced(navigation)}>
         <Text style={s.payBtnText}>PAY NOW</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <SafeAreaView style={s.root} edges={['top']}>
-      <SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <SiteHeader onMenuPress={() => setMenuOpen(true)} />
-
-        {isDesktop ? (
-          <View style={s.desktopLayout}>
-            <CheckoutForm />
-            <OrderSummary />
-          </View>
-        ) : (
-          <>
-            <CheckoutForm />
-            <OrderSummary />
-          </>
-        )}
-
-        <SiteFooter />
-      </ScrollView>
-    </SafeAreaView>
+    <PageLayout
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+    >
+        <MaxWidthContainer>
+          {isDesktop ? (
+            <View style={s.desktopLayout}>
+              <CheckoutForm />
+              <OrderSummary />
+            </View>
+          ) : (
+            <>
+              <CheckoutForm />
+              <OrderSummary />
+            </>
+          )}
+        </MaxWidthContainer>
+    </PageLayout>
   );
 }
 
 const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: COLORS.white },
   desktopLayout: { flexDirection: 'row', alignItems: 'flex-start' },
 
   formCol: { padding: 21 },

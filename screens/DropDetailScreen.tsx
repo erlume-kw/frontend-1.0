@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
+import ProductCard from '../components/ui/ProductCard';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
 
 const DROP_DESCRIPTION =
@@ -11,8 +12,9 @@ const DROP_DESCRIPTION =
 
 const PLACEHOLDER_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
   id: String(i + 1),
-  name: 'PRODUCT NAME',
-  price: 'PRICE',
+  brand: 'JWPEI',
+  name: 'TOP-HANDLE BAG',
+  price: '15 KWD',
 }));
 
 export default function DropDetailScreen() {
@@ -23,38 +25,37 @@ export default function DropDetailScreen() {
   const route = useRoute<any>();
   const dropTitle: string = route.params?.dropTitle ?? 'DROP III';
 
-  const cardW = isDesktop ? 343 : 177;
-  const cardH = isDesktop ? 411 : 229;
-  const numCols = isDesktop ? 4 : 2;
+  // Desktop: 4-col grid with 255px cards. Mobile: 2-col grid with 160px cards.
+  const cardWidth = isDesktop ? 255 : 160;
 
   return (
     <PageLayout
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
-        {/* Drop header */}
-        <View style={s.dropHeader}>
-          <Text style={[s.dropTitle, isDesktop && { fontSize: 56 }]}>{dropTitle}</Text>
-          <Text style={[s.dropDesc, isDesktop && { fontSize: 24, lineHeight: 32 }]}>
-            {DROP_DESCRIPTION}
-          </Text>
-        </View>
+      {/* Drop header */}
+      <View style={s.dropHeader}>
+        <Text style={[s.dropTitle, isDesktop && { fontSize: 56 }]}>{dropTitle}</Text>
+        <Text style={[s.dropDesc, isDesktop && { fontSize: 24, lineHeight: 32 }]}>
+          {DROP_DESCRIPTION}
+        </Text>
+      </View>
 
-        {/* Product grid */}
-        <View style={[s.grid, isDesktop && s.gridDesktop]}>
-          {PLACEHOLDER_PRODUCTS.map(p => (
-            <TouchableOpacity
-              key={p.id}
-              style={[s.card, { width: cardW, height: cardH }]}
-              activeOpacity={0.85}
-              onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: p.id })}
-            >
-              <View style={s.cardImg} />
-              <Text style={[s.cardName, isDesktop && { fontSize: 16 }]}>{p.name}</Text>
-              <Text style={[s.cardPrice, isDesktop && { fontSize: 14 }]}>{p.price}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+      {/* Product grid */}
+      <View style={[s.grid, isDesktop && s.gridDesktop]}>
+        {PLACEHOLDER_PRODUCTS.map(p => (
+          <ProductCard
+            key={p.id}
+            brand={p.brand}
+            name={p.name}
+            price={p.price}
+            cardWidth={cardWidth}
+            onPress={() =>
+              (navigation.navigate as Function)('ProductDetail', { productId: p.id })
+            }
+          />
+        ))}
+      </View>
     </PageLayout>
   );
 }
@@ -87,23 +88,5 @@ const s = StyleSheet.create({
     paddingHorizontal: 32,
     gap: 16,
     rowGap: 32,
-  },
-  card: { overflow: 'hidden', backgroundColor: COLORS.white },
-  cardImg: { flex: 1, backgroundColor: COLORS.placeholder },
-  cardName: {
-    fontFamily: FONTS.clashRegular,
-    fontSize: 16,
-    color: COLORS.black,
-    textAlign: 'center',
-    height: 33,
-    textAlignVertical: 'center',
-  },
-  cardPrice: {
-    fontFamily: FONTS.clashRegular,
-    fontSize: 12,
-    color: COLORS.black,
-    textAlign: 'center',
-    height: 29,
-    textAlignVertical: 'center',
   },
 });

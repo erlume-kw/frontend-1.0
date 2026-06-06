@@ -1,0 +1,77 @@
+- generic [ref=e521]:
+  - generic [ref=e524]:
+    - generic [ref=e526] [cursor=pointer]: erlume
+    - generic [ref=e527]:
+      - generic [ref=e529] [cursor=pointer]: new
+      - generic [ref=e531] [cursor=pointer]: drops
+      - generic [ref=e533] [cursor=pointer]: sell
+    - generic [ref=e534]:
+      - generic [ref=e536] [cursor=pointer]: wishlist
+      - generic [ref=e538] [cursor=pointer]: cart (0)
+  - generic [ref=e540]:
+    - generic [ref=e541]:
+      - generic [ref=e542]: YOUR CART (2)
+      - generic [ref=e543] [cursor=pointer]:
+        - generic [ref=e547]:
+          - generic [ref=e548]: CHLOE
+          - generic [ref=e549]: TOP-HANDLE BAG
+          - generic [ref=e550]:
+            - generic [ref=e551]: 234 KWD
+            - generic [ref=e552]: 234 KWD
+        - generic [ref=e554]: REMOVE
+      - generic [ref=e555] [cursor=pointer]:
+        - generic [ref=e559]:
+          - generic [ref=e560]: CHLOE
+          - generic [ref=e561]: TOP-HANDLE BAG
+          - generic [ref=e562]:
+            - generic [ref=e563]: 234 KWD
+            - generic [ref=e564]: 234 KWD
+        - generic [ref=e566]: REMOVE
+      - generic [ref=e567] [cursor=pointer]:
+        - generic [ref=e571]:
+          - generic [ref=e572]: CHLOE
+          - generic [ref=e573]: TOP-HANDLE BAG
+          - generic [ref=e574]: SOLD
+        - generic [ref=e576]: REMOVE
+    - generic [ref=e577]:
+      - generic [ref=e578]: TOTAL
+      - generic [ref=e579]:
+        - textbox "Promo code" [ref=e580]
+        - generic [ref=e582] [cursor=pointer]: APPLY
+      - generic [ref=e583]:
+        - generic [ref=e584]: Shipping
+        - generic [ref=e585]: Free
+      - generic [ref=e586]:
+        - generic [ref=e587]: Tax
+        - generic [ref=e588]: 0 KWD
+      - generic [ref=e589]:
+        - generic [ref=e590]: Subtotal
+        - generic [ref=e591]: 468 KWD
+      - generic [ref=e592]:
+        - generic [ref=e593]: Total
+        - generic [ref=e594]: 468 KWD
+      - generic [ref=e596] [cursor=pointer]: CHECKOUT
+  - generic [ref=e597]:
+    - generic [ref=e599]:
+      - generic [ref=e600]:
+        - generic [ref=e601]: Contact
+        - generic [ref=e602]: +965 97226735
+        - generic [ref=e603]: erlumekw@gmail.com
+      - generic [ref=e604]:
+        - generic [ref=e605]: Our Drops
+        - generic [ref=e607] [cursor=pointer]: Drop I
+        - generic [ref=e609] [cursor=pointer]: Drop II
+        - generic [ref=e611] [cursor=pointer]: Drop III
+        - generic [ref=e613] [cursor=pointer]: Drop IV
+        - generic [ref=e615] [cursor=pointer]: Drop VI
+      - generic [ref=e616]:
+        - generic [ref=e617]: Erlume
+        - generic [ref=e619] [cursor=pointer]: Cookies
+        - generic [ref=e621] [cursor=pointer]: Terms & Conditions
+        - generic [ref=e623] [cursor=pointer]: Privacy Policy
+      - generic [ref=e624]:
+        - generic [ref=e625]: Sellers
+        - generic [ref=e627] [cursor=pointer]: Selling Policy
+        - generic [ref=e629] [cursor=pointer]: Commission Breakdown
+        - generic [ref=e631] [cursor=pointer]: Pricing Calculator
+    - generic [ref=e634]: Copyright © 2026 Erlume

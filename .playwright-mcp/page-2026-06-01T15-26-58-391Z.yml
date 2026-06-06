@@ -1,0 +1,56 @@
+- generic [ref=e192]:
+  - generic [ref=e195]:
+    - generic [ref=e197] [cursor=pointer]: erlume
+    - generic [ref=e198]:
+      - generic [ref=e200] [cursor=pointer]: new
+      - generic [ref=e202] [cursor=pointer]: drops
+      - generic [ref=e204] [cursor=pointer]: sell
+    - generic [ref=e205]:
+      - generic [ref=e207] [cursor=pointer]: wishlist
+      - generic [ref=e209] [cursor=pointer]: cart (0)
+  - generic [ref=e210]:
+    - generic [ref=e211]: DROP I
+    - generic [ref=e212]: ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in elementum tellus.
+  - generic [ref=e213]:
+    - generic [ref=e214] [cursor=pointer]:
+      - generic [ref=e216]: PRODUCT NAME
+      - generic [ref=e217]: PRICE
+    - generic [ref=e218] [cursor=pointer]:
+      - generic [ref=e220]: PRODUCT NAME
+      - generic [ref=e221]: PRICE
+    - generic [ref=e222] [cursor=pointer]:
+      - generic [ref=e224]: PRODUCT NAME
+      - generic [ref=e225]: PRICE
+    - generic [ref=e226] [cursor=pointer]:
+      - generic [ref=e228]: PRODUCT NAME
+      - generic [ref=e229]: PRICE
+    - generic [ref=e230] [cursor=pointer]:
+      - generic [ref=e232]: PRODUCT NAME
+      - generic [ref=e233]: PRICE
+    - generic [ref=e234] [cursor=pointer]:
+      - generic [ref=e236]: PRODUCT NAME
+      - generic [ref=e237]: PRICE
+  - generic [ref=e238]:
+    - generic [ref=e240]:
+      - generic [ref=e241]:
+        - generic [ref=e242]: Contact
+        - generic [ref=e243]: +965 97226735
+        - generic [ref=e244]: erlumekw@gmail.com
+      - generic [ref=e245]:
+        - generic [ref=e246]: Our Drops
+        - generic [ref=e248] [cursor=pointer]: Drop I
+        - generic [ref=e250] [cursor=pointer]: Drop II
+        - generic [ref=e252] [cursor=pointer]: Drop III
+        - generic [ref=e254] [cursor=pointer]: Drop IV
+        - generic [ref=e256] [cursor=pointer]: Drop VI
+      - generic [ref=e257]:
+        - generic [ref=e258]: Erlume
+        - generic [ref=e260] [cursor=pointer]: Cookies
+        - generic [ref=e262] [cursor=pointer]: Terms & Conditions
+        - generic [ref=e264] [cursor=pointer]: Privacy Policy
+      - generic [ref=e265]:
+        - generic [ref=e266]: Sellers
+        - generic [ref=e268] [cursor=pointer]: Selling Policy
+        - generic [ref=e270] [cursor=pointer]: Commission Breakdown
+        - generic [ref=e272] [cursor=pointer]: Pricing Calculator
+    - generic [ref=e275]: Copyright © 2026 Erlume

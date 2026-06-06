@@ -1,0 +1,46 @@
+- generic [ref=e15]:
+  - generic [ref=e16]:
+    - generic [ref=e18] [cursor=pointer]: erlume
+    - generic [ref=e19]:
+      - generic [ref=e21] [cursor=pointer]: new
+      - generic [ref=e23] [cursor=pointer]: drops
+      - generic [ref=e25] [cursor=pointer]: sell
+    - generic [ref=e26]:
+      - generic [ref=e28] [cursor=pointer]: wishlist
+      - generic [ref=e30] [cursor=pointer]: cart (0)
+  - generic [ref=e31]:
+    - generic [ref=e32]: NEXT DROP IN
+    - generic [ref=e33]:
+      - generic [ref=e34]: "03"
+      - generic [ref=e35]: DAYS
+    - generic [ref=e36]:
+      - generic [ref=e37]: "01"
+      - generic [ref=e38]: HOURS
+    - generic [ref=e39]:
+      - generic [ref=e40]: "41"
+      - generic [ref=e41]: MINS
+  - generic [ref=e44] [cursor=pointer]: SHOP PREVIOUS DROPS HERE
+  - generic [ref=e45]:
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]: Contact
+        - generic [ref=e49]: +965 97226735
+        - generic [ref=e50]: erlumekw@gmail.com
+      - generic [ref=e51]:
+        - generic [ref=e52]: Our Drops
+        - generic [ref=e54] [cursor=pointer]: Drop I
+        - generic [ref=e56] [cursor=pointer]: Drop II
+        - generic [ref=e58] [cursor=pointer]: Drop III
+        - generic [ref=e60] [cursor=pointer]: Drop IV
+        - generic [ref=e62] [cursor=pointer]: Drop VI
+      - generic [ref=e63]:
+        - generic [ref=e64]: Erlume
+        - generic [ref=e66] [cursor=pointer]: Cookies
+        - generic [ref=e68] [cursor=pointer]: Terms & Conditions
+        - generic [ref=e70] [cursor=pointer]: Privacy Policy
+      - generic [ref=e71]:
+        - generic [ref=e72]: Sellers
+        - generic [ref=e74] [cursor=pointer]: Selling Policy
+        - generic [ref=e76] [cursor=pointer]: Commission Breakdown
+        - generic [ref=e78] [cursor=pointer]: Pricing Calculator
+    - generic [ref=e80]: Copyright © 2026 Erlume

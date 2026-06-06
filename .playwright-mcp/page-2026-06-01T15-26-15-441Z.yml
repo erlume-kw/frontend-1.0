@@ -1,0 +1,47 @@
+- generic [ref=e100]:
+  - generic [ref=e103]:
+    - generic [ref=e105] [cursor=pointer]: erlume
+    - generic [ref=e106]:
+      - generic [ref=e108] [cursor=pointer]: new
+      - generic [ref=e110] [cursor=pointer]: drops
+      - generic [ref=e112] [cursor=pointer]: sell
+    - generic [ref=e113]:
+      - generic [ref=e115] [cursor=pointer]: wishlist
+      - generic [ref=e117] [cursor=pointer]: cart (0)
+  - generic [ref=e118]:
+    - generic [ref=e121] [cursor=pointer]:
+      - generic [ref=e122]: DROP I
+      - generic [ref=e123]: Vintage mid-range bags from London
+    - generic [ref=e126] [cursor=pointer]:
+      - generic [ref=e127]: DROP II
+      - generic [ref=e128]: Vintage mid-range bags from London
+    - generic [ref=e131] [cursor=pointer]:
+      - generic [ref=e132]: DROP III
+      - generic [ref=e133]: Vintage mid-range bags from London
+    - generic [ref=e136] [cursor=pointer]:
+      - generic [ref=e137]: DROP IV
+      - generic [ref=e138]: Vintage mid-range bags from London
+  - generic [ref=e139]:
+    - generic [ref=e141]:
+      - generic [ref=e142]:
+        - generic [ref=e143]: Contact
+        - generic [ref=e144]: +965 97226735
+        - generic [ref=e145]: erlumekw@gmail.com
+      - generic [ref=e146]:
+        - generic [ref=e147]: Our Drops
+        - generic [ref=e149] [cursor=pointer]: Drop I
+        - generic [ref=e151] [cursor=pointer]: Drop II
+        - generic [ref=e153] [cursor=pointer]: Drop III
+        - generic [ref=e155] [cursor=pointer]: Drop IV
+        - generic [ref=e157] [cursor=pointer]: Drop VI
+      - generic [ref=e158]:
+        - generic [ref=e159]: Erlume
+        - generic [ref=e161] [cursor=pointer]: Cookies
+        - generic [ref=e163] [cursor=pointer]: Terms & Conditions
+        - generic [ref=e165] [cursor=pointer]: Privacy Policy
+      - generic [ref=e166]:
+        - generic [ref=e167]: Sellers
+        - generic [ref=e169] [cursor=pointer]: Selling Policy
+        - generic [ref=e171] [cursor=pointer]: Commission Breakdown
+        - generic [ref=e173] [cursor=pointer]: Pricing Calculator
+    - generic [ref=e176]: Copyright © 2026 Erlume

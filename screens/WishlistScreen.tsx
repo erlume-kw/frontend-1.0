@@ -3,18 +3,17 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   StyleSheet,
   useWindowDimensions,
-  ImageStyle,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
+import ProductCard from '../components/ui/ProductCard';
 import { useWishlist } from '../contexts/WishlistContext';
-import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 
 const RELATED_IMG = 'https://www.figma.com/api/mcp/asset/7413ba79-30a9-4e7a-9c54-18d8647a3678';
 
@@ -25,15 +24,20 @@ export default function WishlistScreen() {
   const navigation = useNavigation();
   const { items, toggleWishlist } = useWishlist();
 
-  const cardW = isDesktop ? 220 : 177;
-  const cardH = isDesktop ? 290 : 229;
+  // Row-filling card widths (same formula as DropDetailScreen)
+  const numCols = isDesktop ? 4 : 2;
+  const gapSize = isDesktop ? 16 : 8;
+  const contentWidth = isDesktop
+    ? Math.min(width, 1280) - SCREEN_PADDING.desktop * 2
+    : width - 12 * 2; // grid paddingHorizontal: 12 on mobile
+  const cardW = Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
 
   return (
     <PageLayout
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
-        <MaxWidthContainer>
+        <MaxWidthContainer style={isDesktop ? s.desktopPad : undefined}>
           <View style={s.header}>
             <Text style={[s.title, isDesktop && { fontSize: 40 }]}>WISHLIST</Text>
             {items.length > 0 && (
@@ -55,31 +59,17 @@ export default function WishlistScreen() {
           ) : (
             <View style={[s.grid, isDesktop && s.gridDesktop]}>
               {items.map(item => (
-                <TouchableOpacity
+                <ProductCard
                   key={item.id}
-                  style={[s.card, { width: cardW, height: cardH }]}
-                  activeOpacity={0.85}
+                  brand={item.brand}
+                  name={item.sub}
+                  price={item.price}
+                  imageUri={item.imageUri ?? RELATED_IMG}
+                  cardWidth={cardW}
+                  isWishlisted
                   onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: item.id })}
-                >
-                  <View style={s.cardImgWrap}>
-                    <Image
-                      source={{ uri: item.imageUri ?? RELATED_IMG }}
-                      style={s.cardImg as ImageStyle}
-                      resizeMode="cover"
-                    />
-                    {/* Remove from wishlist */}
-                    <TouchableOpacity
-                      style={s.heartBtn}
-                      onPress={() => toggleWishlist(item)}
-                      hitSlop={10}
-                    >
-                      <Text style={s.heartActive}>♥</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <Text style={s.cardBrand}>{item.brand}</Text>
-                  <Text style={s.cardSub}>{item.sub}</Text>
-                  <Text style={s.cardPrice}>{item.price}</Text>
-                </TouchableOpacity>
+                  onWishlistPress={() => toggleWishlist(item)}
+                />
               ))}
             </View>
           )}
@@ -89,6 +79,7 @@ export default function WishlistScreen() {
 }
 
 const s = StyleSheet.create({
+  desktopPad: { paddingHorizontal: SCREEN_PADDING.desktop },
   header: { paddingHorizontal: 16, paddingTop: 32, paddingBottom: 16, flexDirection: 'row', alignItems: 'baseline', gap: 12 },
   title: { fontFamily: FONTS.clashMedium, fontSize: 28, color: COLORS.black },
   count: { fontFamily: FONTS.dmRegular, fontSize: 14, color: COLORS.muted },
@@ -99,15 +90,6 @@ const s = StyleSheet.create({
   browseBtn: { marginTop: 16, height: 50, paddingHorizontal: 32, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
   browseBtnText: { fontFamily: FONTS.dmMedium, fontSize: 14, color: COLORS.white, letterSpacing: 1.4, textTransform: 'uppercase' },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 8, justifyContent: 'center' },
-  gridDesktop: { paddingHorizontal: 32, gap: 16, rowGap: 24 },
-
-  card: { overflow: 'hidden' },
-  cardImgWrap: { flex: 1, backgroundColor: COLORS.placeholder },
-  cardImg: { width: '100%', height: '100%' },
-  heartBtn: { position: 'absolute', top: 8, right: 8, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.85)' },
-  heartActive: { fontSize: 16, color: COLORS.secondary },
-  cardBrand: { fontFamily: FONTS.clashMedium, fontSize: 14, color: COLORS.black, textTransform: 'uppercase', marginTop: 6, paddingHorizontal: 4 },
-  cardSub: { fontFamily: FONTS.clashRegular, fontSize: 12, color: COLORS.olive, textTransform: 'uppercase', paddingHorizontal: 4 },
-  cardPrice: { fontFamily: FONTS.clashMedium, fontSize: 14, color: COLORS.secondary, paddingHorizontal: 4, marginBottom: 4 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingVertical: 12, gap: 8, justifyContent: 'flex-start' },
+  gridDesktop: { paddingHorizontal: 0, gap: 16, rowGap: 24, justifyContent: 'flex-start' },
 });

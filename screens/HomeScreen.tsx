@@ -14,7 +14,7 @@ import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
-import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 
 // Update to real drop date/time (UTC)
 const DROP_DATE = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 60 * 1000);
@@ -212,7 +212,7 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   latestSectionDesktop: {
-    paddingHorizontal: 24,
+    paddingHorizontal: SCREEN_PADDING.desktop,
     paddingTop: 24,
     paddingBottom: 32,
   },

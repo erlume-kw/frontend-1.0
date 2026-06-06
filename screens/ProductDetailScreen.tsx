@@ -15,8 +15,9 @@ import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
+import ProductCard from '../components/ui/ProductCard';
 import { useWishlist } from '../contexts/WishlistContext';
-import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 
 const IMAGES = [
   'https://www.figma.com/api/mcp/asset/86444fc0-8ab3-49c3-8011-cf1514d5f8ea',
@@ -124,8 +125,17 @@ function DesktopGallery() {
 function RelatedGrid({ isDesktop }: { isDesktop: boolean }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const navigation = useNavigation();
-  const cardW = isDesktop ? 220 : 180;
-  const cardH = isDesktop ? 290 : 216;
+  const { width } = useWindowDimensions();
+
+  // Row-filling card widths matching the same logic as DropDetailScreen
+  const numCols = isDesktop ? 4 : 2;
+  const gapSize = isDesktop ? 16 : 8;
+  // Desktop: inside MaxWidthContainer (max 1280) with SCREEN_PADDING.desktop each side
+  // Mobile:  relatedSection has 16px horizontal padding each side
+  const contentWidth = isDesktop
+    ? Math.min(width, 1280) - SCREEN_PADDING.desktop * 2
+    : width - 16 * 2;
+  const cardW = Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
 
   return (
     <View style={[s.relatedSection, isDesktop && s.relatedSectionDesktop]}>
@@ -137,28 +147,17 @@ function RelatedGrid({ isDesktop }: { isDesktop: boolean }) {
       </View>
       <View style={[s.relatedGrid, isDesktop && s.relatedGridDesktop]}>
         {RELATED.map(p => (
-          <TouchableOpacity
+          <ProductCard
             key={p.id}
-            style={[s.relatedCard, { width: cardW, height: cardH }]}
-            activeOpacity={0.85}
+            brand={p.brand}
+            name={p.sub}
+            price={p.price}
+            imageUri={RELATED_IMG}
+            cardWidth={cardW}
             onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: p.id })}
-          >
-            <View style={s.relatedImgWrap}>
-              <Image source={{ uri: RELATED_IMG }} style={s.relatedImg as ImageStyle} resizeMode="cover" />
-              <TouchableOpacity
-                style={s.heartBtn}
-                onPress={() => toggleWishlist({ ...p, imageUri: RELATED_IMG })}
-                hitSlop={8}
-              >
-                <Text style={isInWishlist(p.id) ? s.heartActive : s.heartInactive}>
-                  {isInWishlist(p.id) ? '♥' : '♡'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={s.relatedBrand}>{p.brand}</Text>
-            <Text style={s.relatedSub}>{p.sub}</Text>
-            <Text style={s.relatedPrice}>{p.price}</Text>
-          </TouchableOpacity>
+            onWishlistPress={() => toggleWishlist({ ...p, imageUri: RELATED_IMG })}
+            isWishlisted={isInWishlist(p.id)}
+          />
         ))}
       </View>
     </View>
@@ -368,15 +367,6 @@ const s = StyleSheet.create({
   relatedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   relatedTitle: { fontFamily: FONTS.clashMedium, fontSize: 20, color: COLORS.olive },
   shopAllLink: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.secondary },
-  relatedGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
+  relatedGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'flex-start' },
   relatedGridDesktop: { gap: 16, rowGap: 24, justifyContent: 'flex-start' },
-  relatedCard: { overflow: 'hidden' },
-  relatedImgWrap: { flex: 1, backgroundColor: 'rgba(197,112,93,0.2)', position: 'relative' },
-  relatedImg: { width: '100%', height: '100%' },
-  heartBtn: { position: 'absolute', top: 6, right: 6, width: 28, height: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.8)' },
-  heartActive: { fontSize: 14, color: COLORS.secondary },
-  heartInactive: { fontSize: 14, color: COLORS.muted },
-  relatedBrand: { fontFamily: FONTS.clashMedium, fontSize: 12, color: COLORS.black, textTransform: 'uppercase', marginTop: 6, paddingHorizontal: 4 },
-  relatedSub: { fontFamily: FONTS.clashRegular, fontSize: 10, color: COLORS.olive, textTransform: 'uppercase', paddingHorizontal: 4 },
-  relatedPrice: { fontFamily: FONTS.clashMedium, fontSize: 12, color: COLORS.secondary, paddingHorizontal: 4, marginBottom: 4 },
 });

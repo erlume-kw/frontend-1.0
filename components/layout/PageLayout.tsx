@@ -36,8 +36,10 @@ export default function PageLayout({
         showsVerticalScrollIndicator={false}
       >
         {header}
-        <View style={isDesktop ? s.main : undefined}>{children}</View>
-        <SiteFooter />
+        <View>{children}</View>
+        <View style={isDesktop ? s.footerPush : undefined}>
+          <SiteFooter />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -48,5 +50,8 @@ const s = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: { flexGrow: 1 },
   scrollContentWeb: { minHeight: '100%' },
-  main: { flex: 1 },
+  // On desktop the footer wrapper uses marginTop:'auto' so it sticks to the
+  // bottom of the viewport on short pages without adding phantom whitespace
+  // inside the content area on tall pages.
+  footerPush: { marginTop: 'auto' as any },
 });

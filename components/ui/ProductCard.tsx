@@ -1,15 +1,21 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, useWindowDimensions, ImageStyle } from 'react-native';
 import { COLORS, FONTS, BREAKPOINT } from '../../constants/brand';
 
 interface ProductCardProps {
   brand?: string;
   name?: string;
   price?: string;
+  /** Optional image URI — shows a gray placeholder when omitted */
+  imageUri?: string;
   onPress?: () => void;
   onWishlistPress?: () => void;
   isWishlisted?: boolean;
-  /** Override card width (defaults to 255 on desktop, 160 on mobile) */
+  /**
+   * Override card width in px.
+   * Defaults to 255 on desktop / 160 on mobile.
+   * Card height and image area are scaled proportionally (Figma ratio 255:340).
+   */
   cardWidth?: number;
 }
 
@@ -17,6 +23,7 @@ export default function ProductCard({
   brand = 'BRAND',
   name = 'PRODUCT NAME',
   price = 'PRICE',
+  imageUri,
   onPress,
   onWishlistPress,
   isWishlisted = false,
@@ -25,13 +32,13 @@ export default function ProductCard({
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
 
-  // Figma card: 255 × 340, image area 239px, info area 101px
+  // Figma base: 255 × 340 card, 239px image area, 101px info area
   const baseW = cardWidth ?? (isDesktop ? 255 : 160);
   const scale = baseW / 255;
   const cardH = Math.round(340 * scale);
   const imgH = Math.round(239 * scale);
   const textSize = isDesktop ? 14 : 11;
-  const heartSize = isDesktop ? 24 : 18;
+  const heartSize = isDesktop ? 22 : 18;
 
   return (
     <TouchableOpacity
@@ -39,10 +46,18 @@ export default function ProductCard({
       style={[s.card, { width: baseW, height: cardH }]}
       onPress={onPress}
     >
-      {/* Image area */}
-      <View style={[s.imageArea, { height: imgH }]} />
+      {/* Image / placeholder area */}
+      <View style={[s.imageArea, { height: imgH }]}>
+        {imageUri ? (
+          <Image
+            source={{ uri: imageUri }}
+            style={s.image as ImageStyle}
+            resizeMode="cover"
+          />
+        ) : null}
+      </View>
 
-      {/* Info area */}
+      {/* Info area — left-aligned */}
       <View style={s.infoArea}>
         <Text style={[s.brand, { fontSize: textSize }]} numberOfLines={1}>
           {brand}
@@ -55,9 +70,17 @@ export default function ProductCard({
         </Text>
       </View>
 
-      {/* Heart / wishlist */}
+      {/* Wishlist heart — top-right of image area */}
       <TouchableOpacity
-        style={[s.heart, { top: Math.round(12 * scale), right: Math.round(12 * scale), width: heartSize, height: heartSize }]}
+        style={[
+          s.heart,
+          {
+            top: Math.round(10 * scale),
+            right: Math.round(10 * scale),
+            width: heartSize,
+            height: heartSize,
+          },
+        ]}
         onPress={onWishlistPress}
         hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
       >
@@ -78,28 +101,32 @@ const s = StyleSheet.create({
     width: '100%',
     backgroundColor: '#F2F2F2',
   },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
   infoArea: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 8,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'center',
     gap: 3,
   },
   brand: {
     fontFamily: FONTS.clashMedium,
     color: COLORS.primary,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   itemName: {
     fontFamily: FONTS.clashRegular,
     color: COLORS.olive,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   price: {
     fontFamily: FONTS.clashRegular,
     color: COLORS.olive,
-    textAlign: 'center',
+    textAlign: 'left',
   },
   heart: {
     position: 'absolute',

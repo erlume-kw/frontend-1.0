@@ -14,7 +14,7 @@ import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
-import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { showPromoApplied } from '../utils/interactions';
 
 const PRODUCT_IMG = 'https://www.figma.com/api/mcp/asset/72c8b842-0787-4fe0-9911-5e1681b701b6';
@@ -63,8 +63,8 @@ export default function CartScreen() {
         { label: 'Total', value: `${subtotal} KWD` },
       ].map(({ label, value }) => (
         <View key={label} style={s.lineItem}>
-          <Text style={[s.lineLabel, isDesktop && { fontSize: 24 }]}>{label}</Text>
-          <Text style={[s.lineValue, isDesktop && { fontSize: 24 }]}>{value}</Text>
+          <Text style={s.lineLabel}>{label}</Text>
+          <Text style={s.lineValue}>{value}</Text>
         </View>
       ))}
 
@@ -82,18 +82,18 @@ export default function CartScreen() {
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
-        <MaxWidthContainer>
+        <MaxWidthContainer style={isDesktop ? [s.desktopPad, s.desktopBottom] : undefined}>
           <View style={isDesktop ? s.desktopLayout : undefined}>
             {/* Cart items */}
             <View style={isDesktop ? s.desktopItems : undefined}>
-              <Text style={[s.pageTitle, isDesktop && { fontSize: 36, marginLeft: 35 }]}>
+              <Text style={[s.pageTitle, isDesktop && { fontSize: 36, paddingHorizontal: 0 }]}>
                 YOUR CART ({activeItems.length})
               </Text>
 
               {items.map(item => (
                 <TouchableOpacity
                   key={item.id}
-                  style={[s.itemRow, item.sold && s.itemRowSold]}
+                  style={[s.itemRow, item.sold && s.itemRowSold, isDesktop && s.itemRowDesktop]}
                   activeOpacity={0.85}
                   onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: item.id })}
                 >
@@ -136,18 +136,21 @@ export default function CartScreen() {
 }
 
 const s = StyleSheet.create({
+  desktopPad: { paddingHorizontal: SCREEN_PADDING.desktop },
+  desktopBottom: { paddingBottom: 48 },
   pageTitle: { fontFamily: FONTS.clashMedium, fontSize: 24, color: COLORS.black, padding: 16, marginBottom: 4 },
 
-  desktopLayout: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 0 },
-  desktopItems: { flex: 1, paddingLeft: 35 },
+  desktopLayout: { flexDirection: 'row', alignItems: 'flex-start' },
+  desktopItems: { flex: 1 },
 
-  itemRow: { flexDirection: 'row', padding: 16, borderBottomWidth: 1, borderBottomColor: COLORS.border, gap: 12 },
-  itemRowSold: { backgroundColor: COLORS.lightGrey },
+  itemRow: { flexDirection: 'row', padding: 16, gap: 12 },
+  itemRowDesktop: { paddingHorizontal: 0 },
+  itemRowSold: {},
   itemImgWrap: { width: 137, height: 145, backgroundColor: 'rgba(197,112,93,0.2)' },
   itemImgSold: { backgroundColor: COLORS.lightGrey },
   itemImg: { width: '100%', height: '100%' },
 
-  itemInfo: { flex: 1, justifyContent: 'center', gap: 4 },
+  itemInfo: { flex: 1, justifyContent: 'flex-start', gap: 4 },
   itemBrand: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black, textTransform: 'uppercase' },
   itemName: { fontFamily: FONTS.clashMedium, fontSize: 12, color: COLORS.black, textTransform: 'uppercase' },
   itemTextMuted: { color: COLORS.grey },
@@ -164,7 +167,10 @@ const s = StyleSheet.create({
   removeBtnBold: { fontFamily: FONTS.clashSemibold },
 
   summary: { padding: 16 },
-  summaryDesktop: { width: 428, paddingHorizontal: 24, paddingVertical: 24, marginTop: 16 },
+  // paddingTop: 16 matches pageTitle's top so headings sit on the same baseline.
+  // paddingLeft: 24 gives inner breathing room; no paddingRight so the checkout
+  // button's right edge aligns with the header/footer boundary.
+  summaryDesktop: { width: 428, paddingLeft: 24, paddingTop: 16, paddingBottom: 24 },
   summaryTitle: { fontFamily: FONTS.clashMedium, fontSize: 24, color: COLORS.black, marginBottom: 16 },
 
   promoRow: { flexDirection: 'row', height: 50, backgroundColor: COLORS.lightGrey, marginBottom: 16, overflow: 'hidden' },
@@ -172,9 +178,9 @@ const s = StyleSheet.create({
   applyBtn: { width: 100, backgroundColor: COLORS.secondary, alignItems: 'center', justifyContent: 'center' },
   applyText: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.white },
 
-  lineItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: COLORS.border },
-  lineLabel: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
-  lineValue: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
+  lineItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  lineLabel: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.muted },
+  lineValue: { fontFamily: FONTS.dmSemibold, fontSize: 13, color: COLORS.black },
 
   checkoutBtn: { height: 75, backgroundColor: COLORS.secondary, alignItems: 'center', justifyContent: 'center', marginTop: 16 },
   checkoutText: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.white, textTransform: 'uppercase', letterSpacing: 1.4 },

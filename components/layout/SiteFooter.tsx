@@ -66,18 +66,23 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
 
 // ─── Copyright bar ────────────────────────────────────────────────────────────
 function FooterCopyright() {
+  const { width } = useWindowDimensions();
+  const isDesktop = width >= BREAKPOINT;
+  const hPad = isDesktop ? SCREEN_PADDING.desktop : 32;
+
   return (
-    <View style={s.copyright}>
+    <View style={[s.copyright, { paddingHorizontal: hPad }]}>
       <Text style={s.copyrightText}>Copyright © 2026 Erlume</Text>
       <View style={s.socialRow}>
         <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.instagram)} accessibilityRole="link">
-          <Image source={{ uri: SOCIAL_ICONS.instagram }} style={s.socialIcon} resizeMode="contain" />
+          <Image source={SOCIAL_ICONS.instagram} style={s.socialIcon} resizeMode="contain" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.whatsapp)} accessibilityRole="link">
-          <Image source={{ uri: SOCIAL_ICONS.whatsapp }} style={s.socialIcon} resizeMode="contain" />
+        {/* WhatsApp PNG has slightly more left-side whitespace — nudge right */}
+        <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.whatsapp)} accessibilityRole="link" style={{ marginLeft: 4 }}>
+          <Image source={SOCIAL_ICONS.whatsapp} style={s.socialIcon} resizeMode="contain" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => openExternalUrl(SOCIAL_URLS.tiktok)} accessibilityRole="link">
-          <Image source={{ uri: SOCIAL_ICONS.tiktok }} style={s.socialIcon} resizeMode="contain" />
+          <Image source={SOCIAL_ICONS.tiktok} style={s.socialIcon} resizeMode="contain" />
         </TouchableOpacity>
       </View>
     </View>
@@ -294,12 +299,11 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SCREEN_PADDING.desktop,
     paddingVertical: 24,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)',
   },
   copyrightText: { fontFamily: FONTS.dmMedium, fontSize: 16, color: COLORS.white, lineHeight: 20 },
-  socialRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
-  socialIcon: { width: 32, height: 32 },
+  socialRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  socialIcon: { width: 24, height: 24 },
 });

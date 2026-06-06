@@ -46,9 +46,8 @@ export const FOOTER_DATA = {
   },
 } as const;
 
-// Social icon URLs — replace with bundled local assets before production
 export const SOCIAL_ICONS = {
-  instagram: 'https://www.figma.com/api/mcp/asset/d7dc3550-f24e-4ce5-81b0-9f047b783c33',
-  whatsapp: 'https://www.figma.com/api/mcp/asset/4c1f6b0b-6fed-4399-b0fd-c269a7f2631a',
-  tiktok: 'https://www.figma.com/api/mcp/asset/b1b95d60-3561-49d0-82e6-9e15e4cdc575',
-} as const;
+  instagram: require('../assets/logos/instagram-white-icon.png'),
+  whatsapp: require('../assets/logos/whatsapp-white-icon.png'),
+  tiktok: require('../assets/logos/tiktok-64.png'),
+};

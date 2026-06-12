@@ -149,14 +149,15 @@ const s = StyleSheet.create({
   body: { paddingHorizontal: 19, paddingVertical: 32, gap: 40 },
   bodyDesktop: {
     flexDirection: 'row',
+    paddingHorizontal: 0,
     paddingVertical: 80,
     gap: 60,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
 
   copyBlock: { gap: 20 },
-  copyBlockDesktop: { maxWidth: 704 },
+  copyBlockDesktop: { flex: 1 },
 
   headline: { fontFamily: FONTS.clashMedium, color: COLORS.primary },
   bodyText: { fontFamily: FONTS.clashMedium, color: COLORS.primary },

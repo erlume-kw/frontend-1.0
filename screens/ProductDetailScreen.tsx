@@ -10,6 +10,7 @@ import {
   ImageStyle,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { showNotifySignup } from '../utils/interactions';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
@@ -39,7 +40,11 @@ const RELATED = [
 ];
 
 const PRODUCT_ID = 'paddington-chloe-2023';
+const PRODUCT_NAME = 'Paddington';
 const PRODUCT_ITEM = { id: PRODUCT_ID, brand: 'CHLOE', sub: 'PADDINGTON TOTE', price: '234 KWD', imageUri: IMAGES[0] };
+const IS_SOLD = Math.random() > 0.5;
+
+const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
 function Toast({ message }: { message: string }) {
   return (
@@ -59,14 +64,11 @@ function MobileCarousel() {
     <View style={s.carouselWrap}>
       <Image source={{ uri: IMAGES[idx] }} style={s.carouselImg as ImageStyle} resizeMode="cover" />
 
-      {/* Prev arrow */}
       <TouchableOpacity style={[s.arrowBtn, s.arrowLeft]} onPress={prev} hitSlop={12}>
-        <Text style={s.arrowText}>‹</Text>
+        <Feather name="chevron-left" size={22} color={COLORS.primary} />
       </TouchableOpacity>
-
-      {/* Next arrow */}
       <TouchableOpacity style={[s.arrowBtn, s.arrowRight]} onPress={next} hitSlop={12}>
-        <Text style={s.arrowText}>›</Text>
+        <Feather name="chevron-right" size={22} color={COLORS.primary} />
       </TouchableOpacity>
 
       {/* Dots */}
@@ -107,16 +109,36 @@ function DesktopGallery() {
           onPress={() => setSelectedIdx(i => (i - 1 + IMAGES.length) % IMAGES.length)}
           hitSlop={12}
         >
-          <Text style={s.arrowText}>‹</Text>
+          <Feather name="chevron-left" size={22} color={COLORS.primary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[s.arrowBtn, s.arrowRight, s.arrowDesktop]}
           onPress={() => setSelectedIdx(i => (i + 1) % IMAGES.length)}
           hitSlop={12}
         >
-          <Text style={s.arrowText}>›</Text>
+          <Feather name="chevron-right" size={22} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
+    </View>
+  );
+}
+
+// ─── About Dropdown ───────────────────────────────────────────────────────────
+function AboutDropdown({ bodySize, bodyLine }: { bodySize: number; bodyLine: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <View>
+      <TouchableOpacity style={s.aboutRow} onPress={() => setOpen(o => !o)} activeOpacity={0.7}>
+        <Text style={[s.aboutHeading, { fontSize: bodySize }]}>About your {PRODUCT_NAME}</Text>
+        <Feather name={open ? 'chevron-up' : 'chevron-down'} size={22} color={COLORS.primary} />
+      </TouchableOpacity>
+      {open && (
+        <View style={s.aboutBody}>
+          {SPECS.map(spec => (
+            <Text key={spec} style={[s.spec, { fontSize: bodySize, lineHeight: bodyLine }]}>• {spec}</Text>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -171,6 +193,7 @@ export default function ProductDetailScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
+  const [notifyEmailError, setNotifyEmailError] = useState('');
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleAddToCart = () => {
@@ -194,34 +217,75 @@ export default function ProductDetailScreen() {
               <DesktopGallery />
 
               <View style={s.desktopRight}>
-                {/* Title + wishlist */}
-                <View style={s.titleRow}>
-                  <View>
-                    <Text style={s.productName}>PADDINGTON</Text>
-                    <Text style={s.productBrand}>CHLOE</Text>
-                    <Text style={s.productYear}>2023</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={s.wishlistBtn}
-                    onPress={() => toggleWishlist(PRODUCT_ITEM)}
-                    hitSlop={12}
-                  >
-                    <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
-                      {inWishlist ? '♥' : '♡'}
-                    </Text>
-                  </TouchableOpacity>
+                {/* Title */}
+                <View>
+                  <Text style={s.productName}>PADDINGTON</Text>
+                  <Text style={s.productBrand}>CHLOE</Text>
+                  <Text style={s.productYear}>2023</Text>
                 </View>
 
                 <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>{DESCRIPTION}</Text>
 
-                <TouchableOpacity style={s.addToCartBtn} onPress={handleAddToCart}>
-                  <Text style={s.addToCartText}>ADD TO CART</Text>
-                </TouchableOpacity>
+                {/* CTA row: wishlist heart + add to cart */}
+                <View style={s.ctaRow}>
+                  {!IS_SOLD && (
+                    <TouchableOpacity
+                      style={s.heartBtn}
+                      onPress={() => toggleWishlist(PRODUCT_ITEM)}
+                      hitSlop={12}
+                    >
+                      <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
+                        {inWishlist ? '♥' : '♡'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  {IS_SOLD ? (
+                    <View style={[s.soldBanner, s.ctaBtn]}>
+                      <Text style={s.soldText}>SOLD</Text>
+                    </View>
+                  ) : (
+                    <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
+                      <Text style={s.addToCartText}>ADD TO CART</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-                <Text style={[s.sectionHeading, { fontSize: 24 }]}>Product Details</Text>
-                {SPECS.map(spec => (
-                  <Text key={spec} style={[s.spec, { fontSize: bodySize, lineHeight: bodyLine }]}>• {spec}</Text>
-                ))}
+                <AboutDropdown bodySize={bodySize} bodyLine={bodyLine} />
+
+                {IS_SOLD && (
+                  <View style={s.notifySection}>
+                    <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
+                      Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
+                    </Text>
+                    <View>
+                      <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
+                        <TextInput
+                          style={s.emailInput}
+                          placeholder="your@email.com"
+                          placeholderTextColor={COLORS.muted}
+                          value={notifyEmail}
+                          onChangeText={v => { setNotifyEmail(v); if (notifyEmailError) setNotifyEmailError(''); }}
+                          keyboardType="email-address"
+                          autoCapitalize="none"
+                        />
+                        <TouchableOpacity
+                          style={s.signupBtn}
+                          onPress={() => {
+                            if (!isValidEmail(notifyEmail)) {
+                              setNotifyEmailError('Please enter a valid email address.');
+                              return;
+                            }
+                            setNotifyEmailError('');
+                            showNotifySignup();
+                          }}
+                        >
+                          <Text style={s.signupBtnText}>SIGN UP</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
+                    </View>
+                  </View>
+                )}
 
                 <Text style={[s.sectionHeading, { fontSize: 24 }]}>Delivery &amp; Returns</Text>
                 <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>
@@ -245,50 +309,74 @@ export default function ProductDetailScreen() {
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
         <View style={s.mobileContent}>
-          {/* Title + wishlist */}
-          <View style={s.titleRow}>
-            <View>
-              <Text style={s.productName}>PADDINGTON</Text>
-              <Text style={s.productBrand}>CHLOE</Text>
-              <Text style={s.productYear}>2023</Text>
-            </View>
-            <TouchableOpacity onPress={() => toggleWishlist(PRODUCT_ITEM)} hitSlop={12}>
-              <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
-                {inWishlist ? '♥' : '♡'}
-              </Text>
-            </TouchableOpacity>
+          {/* Title */}
+          <View>
+            <Text style={s.productName}>PADDINGTON</Text>
+            <Text style={s.productBrand}>CHLOE</Text>
+            <Text style={s.productYear}>2023</Text>
           </View>
 
           <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>{DESCRIPTION}</Text>
 
           <MobileCarousel />
 
-          <View style={s.soldBanner}>
-            <Text style={s.soldText}>SOLD</Text>
+          {/* CTA row: wishlist heart + sold/add-to-cart */}
+          <View style={s.ctaRow}>
+            {!IS_SOLD && (
+              <TouchableOpacity style={s.heartBtn} onPress={() => toggleWishlist(PRODUCT_ITEM)} hitSlop={12}>
+                <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
+                  {inWishlist ? '♥' : '♡'}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {IS_SOLD ? (
+              <View style={[s.soldBanner, s.ctaBtn]}>
+                <Text style={s.soldText}>SOLD</Text>
+              </View>
+            ) : (
+              <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
+                <Text style={s.addToCartText}>ADD TO CART</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          {SPECS.map(spec => (
-            <Text key={spec} style={[s.spec, { fontSize: bodySize, lineHeight: bodyLine }]}>• {spec}</Text>
-          ))}
+          <AboutDropdown bodySize={bodySize} bodyLine={bodyLine} />
 
-          <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
-            Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
-          </Text>
+          {IS_SOLD && (
+            <View style={s.notifySection}>
+              <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
+                Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
+              </Text>
 
-          <View style={s.emailStrip}>
-            <TextInput
-              style={s.emailInput}
-              placeholder="your@email.com"
-              placeholderTextColor={COLORS.muted}
-              value={notifyEmail}
-              onChangeText={setNotifyEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TouchableOpacity style={s.signupBtn} onPress={showNotifySignup}>
-              <Text style={s.signupBtnText}>SIGN UP</Text>
-            </TouchableOpacity>
-          </View>
+              <View>
+                <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
+                  <TextInput
+                    style={s.emailInput}
+                    placeholder="your@email.com"
+                    placeholderTextColor={COLORS.muted}
+                    value={notifyEmail}
+                    onChangeText={v => { setNotifyEmail(v); if (notifyEmailError) setNotifyEmailError(''); }}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity
+                    style={s.signupBtn}
+                    onPress={() => {
+                      if (!isValidEmail(notifyEmail)) {
+                        setNotifyEmailError('Please enter a valid email address.');
+                        return;
+                      }
+                      setNotifyEmailError('');
+                      showNotifySignup();
+                    }}
+                  >
+                    <Text style={s.signupBtnText}>SIGN UP</Text>
+                  </TouchableOpacity>
+                </View>
+                {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
+              </View>
+            </View>
+          )}
         </View>
 
         {/* Recommended items — mobile */}
@@ -317,7 +405,6 @@ const s = StyleSheet.create({
   arrowLeft: { left: 8 },
   arrowRight: { right: 8 },
   arrowDesktop: { backgroundColor: 'rgba(255,255,255,0.85)', width: 48, height: 48 },
-  arrowText: { fontFamily: FONTS.clashSemibold, fontSize: 28, color: COLORS.primary, lineHeight: 32 },
   dots: { position: 'absolute', bottom: 12, left: 0, right: 0, flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.5)' },
   dotActive: { backgroundColor: COLORS.white },
@@ -334,32 +421,37 @@ const s = StyleSheet.create({
   desktopBody: { flexDirection: 'row', alignItems: 'flex-start' },
   desktopRight: { flex: 1, paddingHorizontal: 48, paddingVertical: 48, gap: 16 },
 
-  // Title / wishlist
-  titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  wishlistBtn: { padding: 8 },
-  wishlistIcon: { fontSize: 28, color: COLORS.muted },
-  wishlistIconActive: { color: COLORS.secondary },
-
   productName: { fontFamily: FONTS.clashMedium, fontSize: 32, color: COLORS.black, lineHeight: 40 },
   productBrand: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
   productYear: { fontFamily: FONTS.clashRegular, fontSize: 16, color: COLORS.black },
 
-  addToCartBtn: { backgroundColor: COLORS.secondary, height: 75, alignItems: 'center', justifyContent: 'center' },
+  ctaRow: { flexDirection: 'row', height: 75 },
+  ctaBtn: { flex: 1 },
+  addToCartBtn: { backgroundColor: COLORS.secondary, alignItems: 'center', justifyContent: 'center' },
   addToCartText: { fontFamily: FONTS.clashSemibold, fontSize: 20, color: COLORS.white, letterSpacing: 1 },
+  heartBtn: { width: 75, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORS.lightGrey },
+  wishlistIcon: { fontSize: 28, color: COLORS.muted },
+  wishlistIconActive: { color: COLORS.secondary },
 
   sectionHeading: { fontFamily: FONTS.clashMedium, color: COLORS.black, marginTop: 8, marginBottom: 4 },
   desc: { fontFamily: FONTS.dmRegular, color: COLORS.black, textAlign: 'justify' },
   spec: { fontFamily: FONTS.dmRegular, color: COLORS.black },
+  aboutRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+  aboutHeading: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
+  aboutBody: { gap: 4, paddingBottom: 8 },
 
   // Mobile
-  mobileContent: { paddingHorizontal: 16, gap: 14 },
-  soldBanner: { backgroundColor: 'rgba(197,112,93,0.5)', height: 75, alignItems: 'center', justifyContent: 'center' },
+  mobileContent: { paddingHorizontal: 16, paddingTop: 24, gap: 14 },
+  soldBanner: { backgroundColor: 'rgba(197,112,93,0.5)', alignItems: 'center', justifyContent: 'center' },
   soldText: { fontFamily: FONTS.clashSemibold, fontSize: 16, color: COLORS.white },
+  notifySection: { gap: 14, marginTop: 28, marginBottom: 28 },
   notifyText: { fontFamily: FONTS.dmMedium, color: COLORS.black, textAlign: 'justify' },
   emailStrip: { flexDirection: 'row', height: 50, backgroundColor: COLORS.lightGrey, overflow: 'hidden' },
+  emailStripError: { backgroundColor: 'rgba(185,64,64,0.1)' },
   emailInput: { flex: 1, paddingHorizontal: 12, fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
   signupBtn: { width: 104, backgroundColor: COLORS.secondary, alignItems: 'center', justifyContent: 'center' },
   signupBtnText: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.white },
+  emailError: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.error, marginTop: 6 },
 
   // Related section
   relatedSection: { paddingHorizontal: 16, paddingVertical: 24 },

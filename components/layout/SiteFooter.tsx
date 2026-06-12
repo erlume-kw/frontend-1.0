@@ -21,11 +21,18 @@ import {
 } from '../../utils/interactions';
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────
+const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
+
 function NewsletterSection({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const handleSubscribe = () => {
-    if (!email.trim()) return;
+    if (!isValidEmail(email)) {
+      setEmailError('Please enter a valid email address.');
+      return;
+    }
+    setEmailError('');
     Alert.alert('Subscribed!', 'You\'ll be the first to hear about new drops.');
     setEmail('');
   };
@@ -40,25 +47,28 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
           Be the first to hear about new drops and exclusive pieces
         </Text>
       </View>
-      <View style={[s.newsletterRow, compact && s.newsletterRowCompact]}>
-        <TextInput
-          style={[s.newsletterInput, compact && { height: 48 }]}
-          placeholder="your@email.com"
-          placeholderTextColor="rgba(255,255,255,0.45)"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TouchableOpacity
-          style={[s.newsletterBtn, compact && { height: 48 }]}
-          onPress={handleSubscribe}
-          activeOpacity={0.85}
-        >
-          <Text style={[s.newsletterBtnText, compact && { fontSize: 13 }]}>
-            SUBSCRIBE
-          </Text>
-        </TouchableOpacity>
+      <View>
+        <View style={[s.newsletterRow, compact && s.newsletterRowCompact]}>
+          <TextInput
+            style={[s.newsletterInput, compact && { height: 48 }, !!emailError && s.newsletterInputError]}
+            placeholder="your@email.com"
+            placeholderTextColor="rgba(255,255,255,0.45)"
+            value={email}
+            onChangeText={v => { setEmail(v); if (emailError) setEmailError(''); }}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TouchableOpacity
+            style={[s.newsletterBtn, compact && { height: 48 }]}
+            onPress={handleSubscribe}
+            activeOpacity={0.85}
+          >
+            <Text style={[s.newsletterBtnText, compact && { fontSize: 13 }]}>
+              SUBSCRIBE
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {!!emailError && <Text style={s.emailError}>{emailError}</Text>}
       </View>
     </View>
   );
@@ -124,7 +134,6 @@ function MobileFooter() {
           </View>
         ))}
 
-        <View style={s.divider} />
         <Text style={s.contactLabel}>Contact us at</Text>
         <TouchableOpacity onPress={() => openPhone(FOOTER_DATA.contact.phone)}>
           <Text style={s.footerLink}>{FOOTER_DATA.contact.phone}</Text>
@@ -243,6 +252,8 @@ const s = StyleSheet.create({
     color: COLORS.white,
     letterSpacing: 1.2,
   },
+  newsletterInputError: { backgroundColor: 'rgba(185,64,64,0.18)' },
+  emailError: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.error, marginTop: 6 },
 
   // Desktop layout
   desktopNewsletter: {
@@ -292,16 +303,12 @@ const s = StyleSheet.create({
     lineHeight: 25,
     marginBottom: 4,
   },
-  divider: { height: 1, backgroundColor: 'rgba(255,255,255,0.15)', marginVertical: 12 },
-
   // Copyright bar
   copyright: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 24,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.1)',
   },
   copyrightText: { fontFamily: FONTS.dmMedium, fontSize: 16, color: COLORS.white, lineHeight: 20 },
   socialRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },

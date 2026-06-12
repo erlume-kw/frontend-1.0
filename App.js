@@ -9,6 +9,23 @@ import { WishlistProvider } from './contexts/WishlistContext';
 
 import './global.css';
 
+const linking = {
+  prefixes: [],
+  config: {
+    screens: {
+      Home: '',
+      AllDrops: 'drops',
+      DropDetail: 'drops/:dropTitle',
+      ProductDetail: 'product/:productId',
+      Cart: 'cart',
+      Checkout: 'checkout',
+      Sell: 'sell',
+      Wishlist: 'wishlist',
+      Login: 'login',
+    },
+  },
+};
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     DMSans_400Regular,
@@ -31,7 +48,7 @@ export default function App() {
 
   return (
     <WishlistProvider>
-      <NavigationContainer>
+      <NavigationContainer linking={linking}>
         <MainNavigation />
       </NavigationContainer>
       <StatusBar style="auto" />

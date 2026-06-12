@@ -83,6 +83,13 @@ export default function HomeScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
 
+  const numCols = isDesktop ? 4 : 2;
+  const gapSize = isDesktop ? 16 : 8;
+  const contentWidth = isDesktop
+    ? Math.min(width, 1280) - SCREEN_PADDING.desktop * 2
+    : width - SCREEN_PADDING.mobile * 2;
+  const cardW = Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
+
   return (
     <PageLayout
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
@@ -140,6 +147,7 @@ export default function HomeScreen() {
                 brand={p.brand}
                 name={p.name}
                 price={p.price}
+                cardWidth={cardW}
                 onPress={() =>
                   (navigation.navigate as Function)('ProductDetail', { productId: p.id })
                 }
@@ -240,7 +248,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
 
   spotlight: {

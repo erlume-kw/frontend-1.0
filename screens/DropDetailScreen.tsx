@@ -26,7 +26,7 @@ function useCardWidth(isDesktop: boolean, viewportWidth: number) {
   // Mobile:  grid itself has 12px horizontal padding on each side
   const contentWidth = isDesktop
     ? Math.min(viewportWidth, 1280) - SCREEN_PADDING.desktop * 2
-    : viewportWidth - 12 * 2;
+    : viewportWidth - SCREEN_PADDING.mobile * 2;
   return Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
 }
 
@@ -79,7 +79,7 @@ const s = StyleSheet.create({
     paddingHorizontal: SCREEN_PADDING.desktop,
   },
 
-  dropHeader: { paddingHorizontal: 12, paddingVertical: 32 },
+  dropHeader: { paddingHorizontal: 16, paddingVertical: 32 },
   dropHeaderDesktop: { paddingHorizontal: 0, paddingTop: 48, paddingBottom: 32 },
   dropTitle: {
     fontFamily: FONTS.clashMedium,
@@ -100,7 +100,7 @@ const s = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     gap: 8,
     justifyContent: 'flex-start',
   },

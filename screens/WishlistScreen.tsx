@@ -29,7 +29,7 @@ export default function WishlistScreen() {
   const gapSize = isDesktop ? 16 : 8;
   const contentWidth = isDesktop
     ? Math.min(width, 1280) - SCREEN_PADDING.desktop * 2
-    : width - 12 * 2; // grid paddingHorizontal: 12 on mobile
+    : width - SCREEN_PADDING.mobile * 2;
   const cardW = Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
 
   return (
@@ -90,6 +90,6 @@ const s = StyleSheet.create({
   browseBtn: { marginTop: 16, height: 50, paddingHorizontal: 32, backgroundColor: COLORS.primary, alignItems: 'center', justifyContent: 'center' },
   browseBtnText: { fontFamily: FONTS.dmMedium, fontSize: 14, color: COLORS.white, letterSpacing: 1.4, textTransform: 'uppercase' },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingVertical: 12, gap: 8, justifyContent: 'flex-start' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, paddingVertical: 12, gap: 8, justifyContent: 'flex-start' },
   gridDesktop: { paddingHorizontal: 0, gap: 16, rowGap: 24, justifyContent: 'flex-start' },
 });

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
@@ -7,23 +7,11 @@ import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
+import { fetchDropById, fetchDropItems, type Drop, type Item } from '../services/api';
 
-const DROP_DESCRIPTION =
-  'ac scelerisque ante pulvinar. Donec ut rhoncus ex. Suspendisse ac rhoncus nisl, eu tempor urna. Curabitur vel bibendum lorem. Morbi convallis convallis diam sit amet lacinia. Aliquam in elementum tellus.';
-
-const PLACEHOLDER_PRODUCTS = Array.from({ length: 6 }, (_, i) => ({
-  id: String(i + 1),
-  brand: 'JWPEI',
-  name: 'TOP-HANDLE BAG',
-  price: '15 KWD',
-}));
-
-/** Returns a card width so N cards + gaps fill the available row exactly. */
 function useCardWidth(isDesktop: boolean, viewportWidth: number) {
   const numCols = isDesktop ? 4 : 2;
   const gapSize = isDesktop ? 16 : 8;
-  // Desktop: inside MaxWidthContainer (max 1280) with SCREEN_PADDING.desktop on each side
-  // Mobile:  grid itself has 12px horizontal padding on each side
   const contentWidth = isDesktop
     ? Math.min(viewportWidth, 1280) - SCREEN_PADDING.desktop * 2
     : viewportWidth - SCREEN_PADDING.mobile * 2;
@@ -36,7 +24,20 @@ export default function DropDetailScreen() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
   const route = useRoute<any>();
-  const dropTitle: string = route.params?.dropTitle ?? 'DROP III';
+  const dropId: string = route.params?.dropId;
+  const dropTitleFallback: string = route.params?.dropTitle ?? 'Drop';
+
+  const [drop, setDrop] = useState<Drop | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!dropId) { setLoading(false); return; }
+    Promise.all([fetchDropById(dropId), fetchDropItems(dropId)])
+      .then(([d, i]) => { setDrop(d); setItems(i); })
+      .catch(e => console.error('DropDetailScreen fetch error:', e))
+      .finally(() => setLoading(false));
+  }, [dropId]);
 
   const cardWidth = useCardWidth(isDesktop, width);
 
@@ -46,29 +47,36 @@ export default function DropDetailScreen() {
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
       <MaxWidthContainer style={isDesktop ? s.desktopContainer : undefined}>
-        {/* Drop header */}
         <View style={[s.dropHeader, isDesktop && s.dropHeaderDesktop]}>
-          <Text style={[s.dropTitle, isDesktop && { fontSize: 56 }]}>{dropTitle}</Text>
-          <Text style={[s.dropDesc, isDesktop && { fontSize: 24, lineHeight: 32 }]}>
-            {DROP_DESCRIPTION}
+          <Text style={[s.dropTitle, isDesktop && { fontSize: 56 }]}>
+            {drop ? drop.name.toUpperCase() : dropTitleFallback.toUpperCase()}
           </Text>
+          {drop?.description ? (
+            <Text style={[s.dropDesc, isDesktop && { fontSize: 24, lineHeight: 32 }]}>
+              {drop.description}
+            </Text>
+          ) : null}
         </View>
 
-        {/* Product grid — row-filling, left-aligned */}
-        <View style={[s.grid, isDesktop && s.gridDesktop]}>
-          {PLACEHOLDER_PRODUCTS.map(p => (
-            <ProductCard
-              key={p.id}
-              brand={p.brand}
-              name={p.name}
-              price={p.price}
-              cardWidth={cardWidth}
-              onPress={() =>
-                (navigation.navigate as Function)('ProductDetail', { productId: p.id })
-              }
-            />
-          ))}
-        </View>
+        {loading ? (
+          <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 48 }} />
+        ) : (
+          <View style={[s.grid, isDesktop && s.gridDesktop]}>
+            {items.map(item => (
+              <ProductCard
+                key={item._id}
+                brand={item.brandName}
+                name={item.itemName}
+                price={`${item.listingPrice} KWD`}
+                imageUri={item.imageUrls?.[0]}
+                cardWidth={cardWidth}
+                onPress={() =>
+                  (navigation.navigate as Function)('ProductDetail', { productId: item._id })
+                }
+              />
+            ))}
+          </View>
+        )}
       </MaxWidthContainer>
     </PageLayout>
   );

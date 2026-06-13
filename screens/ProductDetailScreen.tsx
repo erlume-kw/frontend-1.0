@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   StyleSheet,
   useWindowDimensions,
   ImageStyle,
+  ActivityIndicator,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { showNotifySignup } from '../utils/interactions';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
@@ -19,30 +19,7 @@ import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
 import { useWishlist } from '../contexts/WishlistContext';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
-
-const IMAGES = [
-  'https://www.figma.com/api/mcp/asset/86444fc0-8ab3-49c3-8011-cf1514d5f8ea',
-  'https://www.figma.com/api/mcp/asset/f65a6432-17f7-41b9-9c8f-55e79e3ee309',
-  'https://www.figma.com/api/mcp/asset/a8995563-f9f9-409e-87a5-e44d1572b900',
-];
-const RELATED_IMG = 'https://www.figma.com/api/mcp/asset/7413ba79-30a9-4e7a-9c54-18d8647a3678';
-
-const DESCRIPTION =
-  "Chemena Kamali revives Chloé's iconic 'Paddington' tote with updated details, marking 20 years since its debut on the Spring '05 runway. This version is made from black leather in an East-West barrel shape with adjustable gussets and gold-tone hardware, including a padlock and key.";
-
-const SPECS = ['Black leather (Buffalo)', 'Top handles', 'Year purchased: 2023', 'Country purchased: Italy'];
-
-const RELATED = [
-  { id: 'r1', brand: 'CHLOE', sub: 'TOP HANDLE BAG', price: '234 KWD' },
-  { id: 'r2', brand: 'CHLOE', sub: 'MINI TOTE', price: '185 KWD' },
-  { id: 'r3', brand: 'CHLOE', sub: 'SHOULDER BAG', price: '210 KWD' },
-  { id: 'r4', brand: 'CHLOE', sub: 'CLUTCH', price: '120 KWD' },
-];
-
-const PRODUCT_ID = 'paddington-chloe-2023';
-const PRODUCT_NAME = 'Paddington';
-const PRODUCT_ITEM = { id: PRODUCT_ID, brand: 'CHLOE', sub: 'PADDINGTON TOTE', price: '234 KWD', imageUri: IMAGES[0] };
-const IS_SOLD = Math.random() > 0.5;
+import { fetchItemById, fetchItems, submitNotifyRequest, type Item } from '../services/api';
 
 const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
@@ -55,14 +32,14 @@ function Toast({ message }: { message: string }) {
 }
 
 // ─── Image Carousel (mobile) ──────────────────────────────────────────────────
-function MobileCarousel() {
+function MobileCarousel({ images }: { images: string[] }) {
   const [idx, setIdx] = useState(0);
-  const prev = () => setIdx(i => (i - 1 + IMAGES.length) % IMAGES.length);
-  const next = () => setIdx(i => (i + 1) % IMAGES.length);
+  const prev = () => setIdx(i => (i - 1 + images.length) % images.length);
+  const next = () => setIdx(i => (i + 1) % images.length);
 
   return (
     <View style={s.carouselWrap}>
-      <Image source={{ uri: IMAGES[idx] }} style={s.carouselImg as ImageStyle} resizeMode="cover" />
+      <Image source={{ uri: images[idx] }} style={s.carouselImg as ImageStyle} resizeMode="cover" />
 
       <TouchableOpacity style={[s.arrowBtn, s.arrowLeft]} onPress={prev} hitSlop={12}>
         <Feather name="chevron-left" size={22} color={COLORS.primary} />
@@ -71,9 +48,8 @@ function MobileCarousel() {
         <Feather name="chevron-right" size={22} color={COLORS.primary} />
       </TouchableOpacity>
 
-      {/* Dots */}
       <View style={s.dots}>
-        {IMAGES.map((_, i) => (
+        {images.map((_, i) => (
           <TouchableOpacity key={i} onPress={() => setIdx(i)}>
             <View style={[s.dot, i === idx && s.dotActive]} />
           </TouchableOpacity>
@@ -84,14 +60,13 @@ function MobileCarousel() {
 }
 
 // ─── Image Gallery (desktop) ─────────────────────────────────────────────────
-function DesktopGallery() {
+function DesktopGallery({ images }: { images: string[] }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
 
   return (
     <View style={s.desktopLeft}>
-      {/* Thumbnail strip */}
       <View style={s.thumbRow}>
-        {IMAGES.map((uri, i) => (
+        {images.map((uri, i) => (
           <TouchableOpacity key={i} onPress={() => setSelectedIdx(i)}>
             <Image
               source={{ uri }}
@@ -101,19 +76,18 @@ function DesktopGallery() {
           </TouchableOpacity>
         ))}
       </View>
-      {/* Main image with arrows */}
       <View style={s.desktopMainImgWrap}>
-        <Image source={{ uri: IMAGES[selectedIdx] }} style={s.desktopHero as ImageStyle} resizeMode="cover" />
+        <Image source={{ uri: images[selectedIdx] }} style={s.desktopHero as ImageStyle} resizeMode="cover" />
         <TouchableOpacity
           style={[s.arrowBtn, s.arrowLeft, s.arrowDesktop]}
-          onPress={() => setSelectedIdx(i => (i - 1 + IMAGES.length) % IMAGES.length)}
+          onPress={() => setSelectedIdx(i => (i - 1 + images.length) % images.length)}
           hitSlop={12}
         >
           <Feather name="chevron-left" size={22} color={COLORS.primary} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[s.arrowBtn, s.arrowRight, s.arrowDesktop]}
-          onPress={() => setSelectedIdx(i => (i + 1) % IMAGES.length)}
+          onPress={() => setSelectedIdx(i => (i + 1) % images.length)}
           hitSlop={12}
         >
           <Feather name="chevron-right" size={22} color={COLORS.primary} />
@@ -124,17 +98,17 @@ function DesktopGallery() {
 }
 
 // ─── About Dropdown ───────────────────────────────────────────────────────────
-function AboutDropdown({ bodySize, bodyLine }: { bodySize: number; bodyLine: number }) {
+function AboutDropdown({ productName, specs, bodySize, bodyLine }: { productName: string; specs: string[]; bodySize: number; bodyLine: number }) {
   const [open, setOpen] = useState(false);
   return (
     <View>
       <TouchableOpacity style={s.aboutRow} onPress={() => setOpen(o => !o)} activeOpacity={0.7}>
-        <Text style={[s.aboutHeading, { fontSize: bodySize }]}>About your {PRODUCT_NAME}</Text>
+        <Text style={[s.aboutHeading, { fontSize: bodySize }]}>About your {productName}</Text>
         <Feather name={open ? 'chevron-up' : 'chevron-down'} size={22} color={COLORS.primary} />
       </TouchableOpacity>
       {open && (
         <View style={s.aboutBody}>
-          {SPECS.map(spec => (
+          {specs.map(spec => (
             <Text key={spec} style={[s.spec, { fontSize: bodySize, lineHeight: bodyLine }]}>• {spec}</Text>
           ))}
         </View>
@@ -144,20 +118,26 @@ function AboutDropdown({ bodySize, bodyLine }: { bodySize: number; bodyLine: num
 }
 
 // ─── Related Products Grid ────────────────────────────────────────────────────
-function RelatedGrid({ isDesktop }: { isDesktop: boolean }) {
+function RelatedGrid({ isDesktop, excludeId }: { isDesktop: boolean; excludeId: string }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
+  const [related, setRelated] = useState<Item[]>([]);
 
-  // Row-filling card widths matching the same logic as DropDetailScreen
+  useEffect(() => {
+    fetchItems({ itemStatus: 'available', limit: '4' })
+      .then(items => setRelated(items.filter(i => i._id !== excludeId).slice(0, 4)))
+      .catch(() => {});
+  }, [excludeId]);
+
   const numCols = isDesktop ? 4 : 2;
   const gapSize = isDesktop ? 16 : 8;
-  // Desktop: inside MaxWidthContainer (max 1280) with SCREEN_PADDING.desktop each side
-  // Mobile:  relatedSection has 16px horizontal padding each side
   const contentWidth = isDesktop
     ? Math.min(width, 1280) - SCREEN_PADDING.desktop * 2
     : width - 16 * 2;
   const cardW = Math.floor((contentWidth - gapSize * (numCols - 1)) / numCols);
+
+  if (related.length === 0) return null;
 
   return (
     <View style={[s.relatedSection, isDesktop && s.relatedSectionDesktop]}>
@@ -168,17 +148,17 @@ function RelatedGrid({ isDesktop }: { isDesktop: boolean }) {
         </TouchableOpacity>
       </View>
       <View style={[s.relatedGrid, isDesktop && s.relatedGridDesktop]}>
-        {RELATED.map(p => (
+        {related.map(item => (
           <ProductCard
-            key={p.id}
-            brand={p.brand}
-            name={p.sub}
-            price={p.price}
-            imageUri={RELATED_IMG}
+            key={item._id}
+            brand={item.brandName}
+            name={item.itemName}
+            price={`${item.listingPrice} KWD`}
+            imageUri={item.imageUrls?.[0]}
             cardWidth={cardW}
-            onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: p.id })}
-            onWishlistPress={() => toggleWishlist({ ...p, imageUri: RELATED_IMG })}
-            isWishlisted={isInWishlist(p.id)}
+            onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: item._id })}
+            onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+            isWishlisted={isInWishlist(item._id)}
           />
         ))}
       </View>
@@ -194,16 +174,99 @@ export default function ProductDetailScreen() {
   const [toastVisible, setToastVisible] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifyEmailError, setNotifyEmailError] = useState('');
+  const [notifySuccess, setNotifySuccess] = useState(false);
+  const [item, setItem] = useState<Item | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const route = useRoute<any>();
+  const productId: string = route.params?.productId;
+
+  useEffect(() => {
+    if (!productId) { setLoading(false); return; }
+    fetchItemById(productId)
+      .then(setItem)
+      .catch(e => console.error('ProductDetailScreen fetch error:', e))
+      .finally(() => setLoading(false));
+  }, [productId]);
 
   const handleAddToCart = () => {
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2500);
   };
 
+  const handleNotifySubmit = async () => {
+    if (!isValidEmail(notifyEmail)) {
+      setNotifyEmailError('Please enter a valid email address.');
+      return;
+    }
+    setNotifyEmailError('');
+    try {
+      await submitNotifyRequest(notifyEmail, { _id: item!._id, itemName: item!.itemName, brandName: item!.brandName });
+      setNotifySuccess(true);
+      setNotifyEmail('');
+    } catch {
+      setNotifyEmailError('Something went wrong. Please try again.');
+    }
+  };
+
   const bodySize = isDesktop ? 24 : 16;
   const bodyLine = isDesktop ? 30 : 22;
-  const inWishlist = isInWishlist(PRODUCT_ID);
+
+  if (loading) {
+    return (
+      <PageLayout header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}>
+        <ActivityIndicator color={COLORS.primary} style={{ marginTop: 80 }} />
+      </PageLayout>
+    );
+  }
+
+  if (!item) {
+    return (
+      <PageLayout header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}>
+        <Text style={{ padding: 32, fontFamily: FONTS.clashMedium, color: COLORS.primary }}>Item not found.</Text>
+      </PageLayout>
+    );
+  }
+
+  const isSold = item.itemStatus === 'sold';
+  const productName = item.itemModel ?? item.itemName;
+  const specs = [
+    item.color !== 'Unknown' ? `Color: ${item.color}` : null,
+    item.size !== 'Unknown' ? `Size: ${item.size}` : null,
+    item.condition ? `Condition: ${item.condition.replace(/_/g, ' ')}` : null,
+    item.year ? `Year: ${item.year}` : null,
+  ].filter(Boolean) as string[];
+  const productItem = { id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] };
+  const inWishlist = isInWishlist(item._id);
+
+  const notifyBlock = isSold ? (
+    <View style={s.notifySection}>
+      <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
+        Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
+      </Text>
+      {notifySuccess ? (
+        <Text style={[s.notifyText, { color: COLORS.secondary, fontSize: bodySize }]}>You're on the list!</Text>
+      ) : (
+        <View>
+          <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
+            <TextInput
+              style={s.emailInput}
+              placeholder="your@email.com"
+              placeholderTextColor={COLORS.muted}
+              value={notifyEmail}
+              onChangeText={v => { setNotifyEmail(v); if (notifyEmailError) setNotifyEmailError(''); }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TouchableOpacity style={s.signupBtn} onPress={handleNotifySubmit}>
+              <Text style={s.signupBtnText}>SIGN UP</Text>
+            </TouchableOpacity>
+          </View>
+          {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
+        </View>
+      )}
+    </View>
+  ) : null;
 
   if (isDesktop) {
     return (
@@ -212,175 +275,74 @@ export default function ProductDetailScreen() {
         overlay={toastVisible ? <Toast message="Added to cart!" /> : undefined}
         header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
       >
-          <MaxWidthContainer>
-            <View style={s.desktopBody}>
-              <DesktopGallery />
-
-              <View style={s.desktopRight}>
-                {/* Title */}
-                <View>
-                  <Text style={s.productName}>PADDINGTON</Text>
-                  <Text style={s.productBrand}>CHLOE</Text>
-                  <Text style={s.productYear}>2023</Text>
-                </View>
-
-                <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>{DESCRIPTION}</Text>
-
-                {/* CTA row: wishlist heart + add to cart */}
-                <View style={s.ctaRow}>
-                  {!IS_SOLD && (
-                    <TouchableOpacity
-                      style={s.heartBtn}
-                      onPress={() => toggleWishlist(PRODUCT_ITEM)}
-                      hitSlop={12}
-                    >
-                      <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
-                        {inWishlist ? '♥' : '♡'}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  {IS_SOLD ? (
-                    <View style={[s.soldBanner, s.ctaBtn]}>
-                      <Text style={s.soldText}>SOLD</Text>
-                    </View>
-                  ) : (
-                    <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
-                      <Text style={s.addToCartText}>ADD TO CART</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                <AboutDropdown bodySize={bodySize} bodyLine={bodyLine} />
-
-                {IS_SOLD && (
-                  <View style={s.notifySection}>
-                    <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
-                      Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
-                    </Text>
-                    <View>
-                      <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
-                        <TextInput
-                          style={s.emailInput}
-                          placeholder="your@email.com"
-                          placeholderTextColor={COLORS.muted}
-                          value={notifyEmail}
-                          onChangeText={v => { setNotifyEmail(v); if (notifyEmailError) setNotifyEmailError(''); }}
-                          keyboardType="email-address"
-                          autoCapitalize="none"
-                        />
-                        <TouchableOpacity
-                          style={s.signupBtn}
-                          onPress={() => {
-                            if (!isValidEmail(notifyEmail)) {
-                              setNotifyEmailError('Please enter a valid email address.');
-                              return;
-                            }
-                            setNotifyEmailError('');
-                            showNotifySignup();
-                          }}
-                        >
-                          <Text style={s.signupBtnText}>SIGN UP</Text>
-                        </TouchableOpacity>
-                      </View>
-                      {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
-                    </View>
-                  </View>
-                )}
-
-                <Text style={[s.sectionHeading, { fontSize: 24 }]}>Delivery &amp; Returns</Text>
-                <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>
-                  {'Try items in the comfort of your own home. If they\'re not quite right, you\'ve got 28 days to request an exchange or return.'}
-                </Text>
+        <MaxWidthContainer>
+          <View style={s.desktopBody}>
+            <DesktopGallery images={item.imageUrls} />
+            <View style={s.desktopRight}>
+              <View>
+                <Text style={s.productName}>{item.itemName.toUpperCase()}</Text>
+                <Text style={s.productBrand}>{item.brandName}</Text>
+                {item.year ? <Text style={s.productYear}>{item.year}</Text> : null}
               </View>
+              <View style={s.ctaRow}>
+                {!isSold && (
+                  <TouchableOpacity style={s.heartBtn} onPress={() => toggleWishlist(productItem)} hitSlop={12}>
+                    <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>{inWishlist ? '♥' : '♡'}</Text>
+                  </TouchableOpacity>
+                )}
+                {isSold ? (
+                  <View style={[s.soldBanner, s.ctaBtn]}><Text style={s.soldText}>SOLD</Text></View>
+                ) : (
+                  <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
+                    <Text style={s.addToCartText}>ADD TO CART</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} />
+              {notifyBlock}
+              <Text style={[s.sectionHeading, { fontSize: 24 }]}>Delivery &amp; Returns</Text>
+              <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>
+                {'Try items in the comfort of your own home. If they\'re not quite right, you\'ve got 28 days to request an exchange or return.'}
+              </Text>
             </View>
-
-            {/* Recommended items — desktop */}
-            <RelatedGrid isDesktop={isDesktop} />
-          </MaxWidthContainer>
+          </View>
+          <RelatedGrid isDesktop={isDesktop} excludeId={item._id} />
+        </MaxWidthContainer>
       </PageLayout>
     );
   }
 
-  // Mobile layout
   return (
     <PageLayout
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       overlay={toastVisible ? <Toast message="Added to cart!" /> : undefined}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
-        <View style={s.mobileContent}>
-          {/* Title */}
-          <View>
-            <Text style={s.productName}>PADDINGTON</Text>
-            <Text style={s.productBrand}>CHLOE</Text>
-            <Text style={s.productYear}>2023</Text>
-          </View>
-
-          <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>{DESCRIPTION}</Text>
-
-          <MobileCarousel />
-
-          {/* CTA row: wishlist heart + sold/add-to-cart */}
-          <View style={s.ctaRow}>
-            {!IS_SOLD && (
-              <TouchableOpacity style={s.heartBtn} onPress={() => toggleWishlist(PRODUCT_ITEM)} hitSlop={12}>
-                <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>
-                  {inWishlist ? '♥' : '♡'}
-                </Text>
-              </TouchableOpacity>
-            )}
-            {IS_SOLD ? (
-              <View style={[s.soldBanner, s.ctaBtn]}>
-                <Text style={s.soldText}>SOLD</Text>
-              </View>
-            ) : (
-              <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
-                <Text style={s.addToCartText}>ADD TO CART</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          <AboutDropdown bodySize={bodySize} bodyLine={bodyLine} />
-
-          {IS_SOLD && (
-            <View style={s.notifySection}>
-              <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
-                Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
-              </Text>
-
-              <View>
-                <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
-                  <TextInput
-                    style={s.emailInput}
-                    placeholder="your@email.com"
-                    placeholderTextColor={COLORS.muted}
-                    value={notifyEmail}
-                    onChangeText={v => { setNotifyEmail(v); if (notifyEmailError) setNotifyEmailError(''); }}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                  />
-                  <TouchableOpacity
-                    style={s.signupBtn}
-                    onPress={() => {
-                      if (!isValidEmail(notifyEmail)) {
-                        setNotifyEmailError('Please enter a valid email address.');
-                        return;
-                      }
-                      setNotifyEmailError('');
-                      showNotifySignup();
-                    }}
-                  >
-                    <Text style={s.signupBtnText}>SIGN UP</Text>
-                  </TouchableOpacity>
-                </View>
-                {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
-              </View>
-            </View>
+      <View style={s.mobileContent}>
+        <View>
+          <Text style={s.productName}>{item.itemName.toUpperCase()}</Text>
+          <Text style={s.productBrand}>{item.brandName}</Text>
+          {item.year ? <Text style={s.productYear}>{item.year}</Text> : null}
+        </View>
+        <MobileCarousel images={item.imageUrls} />
+        <View style={s.ctaRow}>
+          {!isSold && (
+            <TouchableOpacity style={s.heartBtn} onPress={() => toggleWishlist(productItem)} hitSlop={12}>
+              <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>{inWishlist ? '♥' : '♡'}</Text>
+            </TouchableOpacity>
+          )}
+          {isSold ? (
+            <View style={[s.soldBanner, s.ctaBtn]}><Text style={s.soldText}>SOLD</Text></View>
+          ) : (
+            <TouchableOpacity style={[s.addToCartBtn, s.ctaBtn]} onPress={handleAddToCart}>
+              <Text style={s.addToCartText}>ADD TO CART</Text>
+            </TouchableOpacity>
           )}
         </View>
-
-        {/* Recommended items — mobile */}
-        <RelatedGrid isDesktop={false} />
+        <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} />
+        {notifyBlock}
+      </View>
+      <RelatedGrid isDesktop={false} excludeId={item._id} />
     </PageLayout>
   );
 }

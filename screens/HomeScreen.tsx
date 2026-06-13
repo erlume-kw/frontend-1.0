@@ -7,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
@@ -15,20 +16,12 @@ import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
+import { fetchDrops, fetchDropItems, fetchItems, type Drop, type Item } from '../services/api';
 
 // Update to real drop date/time (UTC)
 const DROP_DATE = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 60 * 1000);
 
 const SPOTLIGHT_IMG = 'https://www.figma.com/api/mcp/asset/d6f1e861-670e-4cf8-8261-c4a81f9a9892';
-
-const PLACEHOLDER_PRODUCTS = [
-  { id: '1', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-  { id: '2', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-  { id: '3', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-  { id: '4', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-  { id: '5', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-  { id: '6', brand: 'JWPEI', name: 'TOP-HANDLE BAG', price: '15 KWD' },
-];
 
 function getTimeRemaining(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -82,6 +75,30 @@ export default function HomeScreen() {
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const [items, setItems] = useState<Item[]>([]);
+  const [activeDrop, setActiveDrop] = useState<Drop | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const drops = await fetchDrops('active');
+        const drop = drops[0] ?? null;
+        setActiveDrop(drop);
+        if (drop) {
+          const dropItems = await fetchDropItems(drop._id);
+          setItems(dropItems.slice(0, 6));
+        } else {
+          const fallback = await fetchItems({ itemStatus: 'available', limit: '6' });
+          setItems(fallback);
+        }
+      } catch (e) {
+        console.error('HomeScreen fetch error:', e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const numCols = isDesktop ? 4 : 2;
   const gapSize = isDesktop ? 16 : 8;
@@ -111,45 +128,48 @@ export default function HomeScreen() {
 
       {/* Our Latest Drop — shown on both mobile and desktop */}
       <MaxWidthContainer style={isDesktop ? [s.latestSection, s.latestSectionDesktop] : s.latestSection}>
-        {/* Section header — same horizontal padding as the card row */}
         <View style={s.sectionHeader}>
-          <Text style={[s.sectionTitle, isDesktop && { fontSize: 32 }]}>Our Latest Drop</Text>
+          <Text style={[s.sectionTitle, isDesktop && { fontSize: 32 }]}>
+            {activeDrop ? activeDrop.name : 'Our Latest Drop'}
+          </Text>
           <TouchableOpacity onPress={() => navigation.navigate('AllDrops' as never)}>
             <Text style={[s.shopAllLink, isDesktop && { fontSize: 24 }]}>Shop all</Text>
           </TouchableOpacity>
         </View>
 
-        {isDesktop ? (
-          // Desktop: horizontal scrolling row of fixed-width cards
+        {loading ? (
+          <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 32 }} />
+        ) : isDesktop ? (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={s.desktopRow}
           >
-            {PLACEHOLDER_PRODUCTS.map(p => (
+            {items.map(item => (
               <ProductCard
-                key={p.id}
-                brand={p.brand}
-                name={p.name}
-                price={p.price}
+                key={item._id}
+                brand={item.brandName}
+                name={item.itemName}
+                price={`${item.listingPrice} KWD`}
+                imageUri={item.imageUrls?.[0]}
                 onPress={() =>
-                  (navigation.navigate as Function)('ProductDetail', { productId: p.id })
+                  (navigation.navigate as Function)('ProductDetail', { productId: item._id })
                 }
               />
             ))}
           </ScrollView>
         ) : (
-          // Mobile: 2-column wrapping grid
           <View style={s.mobileGrid}>
-            {PLACEHOLDER_PRODUCTS.map(p => (
+            {items.map(item => (
               <ProductCard
-                key={p.id}
-                brand={p.brand}
-                name={p.name}
-                price={p.price}
+                key={item._id}
+                brand={item.brandName}
+                name={item.itemName}
+                price={`${item.listingPrice} KWD`}
+                imageUri={item.imageUrls?.[0]}
                 cardWidth={cardW}
                 onPress={() =>
-                  (navigation.navigate as Function)('ProductDetail', { productId: p.id })
+                  (navigation.navigate as Function)('ProductDetail', { productId: item._id })
                 }
               />
             ))}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { subscribeNewsletter } from '../../services/api';
 import {
   View,
   Text,
@@ -7,7 +8,6 @@ import {
   Image,
   StyleSheet,
   useWindowDimensions,
-  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING, FOOTER_DATA, SOCIAL_ICONS } from '../../constants/brand';
@@ -26,15 +26,21 @@ const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim
 function NewsletterSection({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (!isValidEmail(email)) {
       setEmailError('Please enter a valid email address.');
       return;
     }
     setEmailError('');
-    Alert.alert('Subscribed!', 'You\'ll be the first to hear about new drops.');
-    setEmail('');
+    try {
+      await subscribeNewsletter(email);
+      setSuccess(true);
+      setEmail('');
+    } catch {
+      setEmailError('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -47,29 +53,33 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
           Be the first to hear about new drops and exclusive pieces
         </Text>
       </View>
-      <View>
-        <View style={[s.newsletterRow, compact && s.newsletterRowCompact]}>
-          <TextInput
-            style={[s.newsletterInput, compact && { height: 48 }, !!emailError && s.newsletterInputError]}
-            placeholder="your@email.com"
-            placeholderTextColor="rgba(255,255,255,0.45)"
-            value={email}
-            onChangeText={v => { setEmail(v); if (emailError) setEmailError(''); }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TouchableOpacity
-            style={[s.newsletterBtn, compact && { height: 48 }]}
-            onPress={handleSubscribe}
-            activeOpacity={0.85}
-          >
-            <Text style={[s.newsletterBtnText, compact && { fontSize: 13 }]}>
-              SUBSCRIBE
-            </Text>
-          </TouchableOpacity>
+      {success ? (
+        <Text style={s.newsletterSuccess}>You're subscribed!</Text>
+      ) : (
+        <View>
+          <View style={[s.newsletterRow, compact && s.newsletterRowCompact]}>
+            <TextInput
+              style={[s.newsletterInput, compact && { height: 48 }, !!emailError && s.newsletterInputError]}
+              placeholder="your@email.com"
+              placeholderTextColor="rgba(255,255,255,0.45)"
+              value={email}
+              onChangeText={v => { setEmail(v); if (emailError) setEmailError(''); }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={[s.newsletterBtn, compact && { height: 48 }]}
+              onPress={handleSubscribe}
+              activeOpacity={0.85}
+            >
+              <Text style={[s.newsletterBtnText, compact && { fontSize: 13 }]}>
+                SUBSCRIBE
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {!!emailError && <Text style={s.emailError}>{emailError}</Text>}
         </View>
-        {!!emailError && <Text style={s.emailError}>{emailError}</Text>}
-      </View>
+      )}
     </View>
   );
 }
@@ -253,6 +263,7 @@ const s = StyleSheet.create({
     letterSpacing: 1.2,
   },
   newsletterInputError: { backgroundColor: 'rgba(185,64,64,0.18)' },
+  newsletterSuccess: { fontFamily: FONTS.dmMedium, fontSize: 15, color: COLORS.white },
   emailError: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.error, marginTop: 6 },
 
   // Desktop layout

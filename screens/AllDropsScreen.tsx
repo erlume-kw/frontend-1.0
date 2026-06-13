@@ -1,23 +1,26 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
-
-const DROPS = [
-  { id: 'drop-1', title: 'DROP I',   subtitle: 'Vintage mid-range bags from London' },
-  { id: 'drop-2', title: 'DROP II',  subtitle: 'Vintage mid-range bags from London' },
-  { id: 'drop-3', title: 'DROP III', subtitle: 'Vintage mid-range bags from London' },
-  { id: 'drop-4', title: 'DROP IV',  subtitle: 'Vintage mid-range bags from London' },
-];
+import { fetchDrops, type Drop } from '../services/api';
 
 export default function AllDropsScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const [drops, setDrops] = useState<Drop[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDrops()
+      .then(setDrops)
+      .catch(e => console.error('AllDropsScreen fetch error:', e))
+      .finally(() => setLoading(false));
+  }, []);
 
   const cardH = 202;
   const titleSize = isDesktop ? 56 : 32;
@@ -28,23 +31,32 @@ export default function AllDropsScreen() {
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
+      {loading ? (
+        <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 48 }} />
+      ) : (
         <View style={[s.dropsStack, isDesktop && { gap: 14 }]}>
-          {DROPS.map(drop => (
+          {drops.map(drop => (
             <TouchableOpacity
-              key={drop.id}
+              key={drop._id}
               style={[s.card, { height: cardH }]}
               activeOpacity={0.85}
-              onPress={() => (navigation.navigate as Function)('DropDetail', { dropId: drop.id, dropTitle: drop.title })}
+              onPress={() => (navigation.navigate as Function)('DropDetail', { dropId: drop._id, dropTitle: drop.name })}
             >
-              {/* Background image placeholder — replace with drop.imageUri in production */}
-              <View style={[StyleSheet.absoluteFillObject, { backgroundColor: COLORS.placeholder }]} />
+              {drop.bannerImageUrl ? (
+                <Image source={{ uri: drop.bannerImageUrl }} style={StyleSheet.absoluteFillObject as any} resizeMode="cover" />
+              ) : (
+                <View style={[StyleSheet.absoluteFillObject, { backgroundColor: COLORS.placeholder }]} />
+              )}
               <View style={s.cardOverlay}>
-                <Text style={[s.cardTitle, { fontSize: titleSize }]}>{drop.title}</Text>
-                <Text style={[s.cardSubtitle, { fontSize: subtitleSize }]}>{drop.subtitle}</Text>
+                <Text style={[s.cardTitle, { fontSize: titleSize }]}>{drop.name.toUpperCase()}</Text>
+                {drop.description ? (
+                  <Text style={[s.cardSubtitle, { fontSize: subtitleSize }]}>{drop.description}</Text>
+                ) : null}
               </View>
             </TouchableOpacity>
           ))}
         </View>
+      )}
     </PageLayout>
   );
 }

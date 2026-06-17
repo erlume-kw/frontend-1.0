@@ -10,7 +10,9 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { showOrderPlaced, showPromoApplied } from '../utils/interactions';
+import { showOrderPlaced } from '../utils/interactions';
+import { useCart } from '../contexts/CartContext';
+import { validateDiscountCode } from '../services/api';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
@@ -177,6 +179,22 @@ export default function CheckoutScreen() {
 
   // Order summary
   const [discountCode, setDiscountCode] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [discountError, setDiscountError] = useState('');
+  const { items: cartItems, subtotal } = useCart();
+  const total = Math.max(0, subtotal - discountAmount);
+
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return;
+    try {
+      const result = await validateDiscountCode(discountCode.trim(), subtotal);
+      setDiscountAmount(result.discountAmount);
+      setDiscountError('');
+    } catch (e: any) {
+      setDiscountError(e.message ?? 'Invalid discount code');
+      setDiscountAmount(0);
+    }
+  };
 
   const inputStyle = [s.input, isDesktop && s.inputDesktop];
 
@@ -366,23 +384,31 @@ export default function CheckoutScreen() {
     <View style={[s.summaryCol, isDesktop && s.summaryColDesktop]}>
       <Text style={s.sectionTitle}>Order summary</Text>
 
+      {cartItems.map(item => (
+        <View key={item.id} style={s.summaryItem}>
+          <Text style={s.summaryItemName} numberOfLines={1}>{item.brand} — {item.name}</Text>
+          <Text style={s.summaryItemPrice}>{item.price}</Text>
+        </View>
+      ))}
+
       <View style={s.promoRow}>
         <TextInput
           style={[inputStyle, { flex: 1 }, isDesktop && { backgroundColor: COLORS.white }]}
           placeholder="Discount code"
           placeholderTextColor={COLORS.muted}
           value={discountCode}
-          onChangeText={setDiscountCode}
+          onChangeText={v => { setDiscountCode(v); setDiscountError(''); }}
         />
-        <TouchableOpacity style={s.applyBtn} onPress={showPromoApplied}>
+        <TouchableOpacity style={s.applyBtn} onPress={handleApplyDiscount}>
           <Text style={s.applyText}>Apply</Text>
         </TouchableOpacity>
       </View>
+      {!!discountError && <Text style={s.discountError}>{discountError}</Text>}
+      {discountAmount > 0 && <Text style={s.discountSuccess}>Discount: -{discountAmount.toFixed(2)} KWD</Text>}
 
       {[
-        { label: 'Subtotal • 3 items', value: '36 KWD' },
-        { label: 'Shipping', value: 'Enter address' },
-        { label: 'Estimated taxes', value: '1.8 KWD' },
+        { label: `Subtotal • ${cartItems.length} item${cartItems.length !== 1 ? 's' : ''}`, value: `${subtotal.toFixed(2)} KWD` },
+        { label: 'Shipping', value: 'Free' },
       ].map(({ label, value }) => (
         <View key={label} style={s.lineItem}>
           <Text style={s.lineLabel}>{label}</Text>
@@ -392,7 +418,7 @@ export default function CheckoutScreen() {
 
       <View style={s.totalRow}>
         <Text style={s.totalLabel}>Total</Text>
-        <Text style={s.totalValue}>37.8 KWD</Text>
+        <Text style={s.totalValue}>{total.toFixed(2)} KWD</Text>
       </View>
 
       <TouchableOpacity style={s.payBtn} onPress={() => showOrderPlaced(navigation)}>
@@ -513,7 +539,12 @@ const s = StyleSheet.create({
   knetTitle: { fontFamily: FONTS.clashMedium, fontSize: 15, color: COLORS.primary },
   knetBody: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.muted, lineHeight: 20 },
 
-  promoRow: { flexDirection: 'row', gap: 14, marginBottom: 16 },
+  summaryItem: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4, marginBottom: 4 },
+  summaryItemName: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.black, flex: 1, marginRight: 8 },
+  summaryItemPrice: { fontFamily: FONTS.dmSemibold, fontSize: 13, color: COLORS.black },
+  discountError: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.error, marginBottom: 8 },
+  discountSuccess: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.olive, marginBottom: 8 },
+  promoRow: { flexDirection: 'row', gap: 14, marginBottom: 16, marginTop: 12 },
   applyBtn: {
     height: 52,
     paddingHorizontal: 16,

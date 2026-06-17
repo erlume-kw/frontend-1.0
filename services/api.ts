@@ -2,6 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
+// Clear any stale tokens on module load so expired sessions don't
+// trigger failed refresh loops on first request
+clearTokens().catch(() => {});
+
 // ─── Token storage ────────────────────────────────────────────────────────────
 
 const TOKEN_KEY = 'erlume_access_token';
@@ -159,8 +163,6 @@ let _dropTokenReady = false;
 
 async function ensureDropToken(): Promise<void> {
   if (_dropTokenReady) return;
-  const existing = await getAccessToken();
-  if (existing) { _dropTokenReady = true; return; }
   try {
     await login(
       process.env.EXPO_PUBLIC_DROPS_EMAIL ?? 'admin@erlume.com',

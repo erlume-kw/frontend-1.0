@@ -3,9 +3,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from '@expo-google-fonts/dm-sans';
 import { Sarina_400Regular } from '@expo-google-fonts/sarina';
-import { View, ActivityIndicator } from 'react-native';
+import { View } from 'react-native';
 import MainNavigation from 'components/navigation/MainNavigation';
 import { WishlistProvider } from './contexts/WishlistContext';
+import { CartProvider } from './contexts/CartContext';
 
 import './global.css';
 
@@ -22,6 +23,8 @@ const linking = {
       Sell: 'sell',
       Wishlist: 'wishlist',
       Login: 'login',
+      SellerPolicy: 'seller-policy',
+      PrivacyPolicy: 'privacy-policy',
     },
   },
 };
@@ -40,18 +43,18 @@ export default function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#18230F' }}>
-        <ActivityIndicator color="#DFD3C3" />
-      </View>
+      <View style={{ flex: 1, backgroundColor: '#18230F' }} />
     );
   }
 
   return (
     <WishlistProvider>
-      <NavigationContainer linking={linking}>
-        <MainNavigation />
-      </NavigationContainer>
-      <StatusBar style="auto" />
+      <CartProvider>
+        <NavigationContainer linking={linking}>
+          <MainNavigation />
+        </NavigationContainer>
+        <StatusBar style="auto" />
+      </CartProvider>
     </WishlistProvider>
   );
 }

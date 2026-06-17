@@ -8,7 +8,7 @@ import {
   StyleSheet,
   useWindowDimensions,
   ImageStyle,
-  ActivityIndicator,
+  
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
@@ -20,6 +20,9 @@ import ProductCard from '../components/ui/ProductCard';
 import { useWishlist } from '../contexts/WishlistContext';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { fetchItemById, fetchItems, submitNotifyRequest, type Item } from '../services/api';
+import { useCart } from '../contexts/CartContext';
+import { SkeletonProductDetail } from '../components/ui/Skeleton';
+import { verifyEmail } from '../services/emailVerification';
 
 const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
@@ -62,22 +65,25 @@ function MobileCarousel({ images }: { images: string[] }) {
 // ─── Image Gallery (desktop) ─────────────────────────────────────────────────
 function DesktopGallery({ images }: { images: string[] }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const [containerW, setContainerW] = useState(684);
+  const previews = images.slice(0, 3);
+  const thumbW = previews.length > 0 ? Math.floor((containerW - 4 * (previews.length - 1)) / previews.length) : containerW;
 
   return (
-    <View style={s.desktopLeft}>
+    <View style={s.desktopLeft} onLayout={e => setContainerW(e.nativeEvent.layout.width)}>
       <View style={s.thumbRow}>
-        {images.map((uri, i) => (
+        {previews.map((uri, i) => (
           <TouchableOpacity key={i} onPress={() => setSelectedIdx(i)}>
             <Image
               source={{ uri }}
-              style={[s.thumb, selectedIdx === i && s.thumbActive] as ImageStyle[]}
+              style={[{ width: thumbW, height: 268 }, selectedIdx === i && s.thumbActive] as ImageStyle[]}
               resizeMode="cover"
             />
           </TouchableOpacity>
         ))}
       </View>
       <View style={s.desktopMainImgWrap}>
-        <Image source={{ uri: images[selectedIdx] }} style={s.desktopHero as ImageStyle} resizeMode="cover" />
+        <Image source={{ uri: images[selectedIdx] }} style={{ width: containerW, height: 1036 } as ImageStyle} resizeMode="cover" />
         <TouchableOpacity
           style={[s.arrowBtn, s.arrowLeft, s.arrowDesktop]}
           onPress={() => setSelectedIdx(i => (i - 1 + images.length) % images.length)}
@@ -98,7 +104,7 @@ function DesktopGallery({ images }: { images: string[] }) {
 }
 
 // ─── About Dropdown ───────────────────────────────────────────────────────────
-function AboutDropdown({ productName, specs, bodySize, bodyLine }: { productName: string; specs: string[]; bodySize: number; bodyLine: number }) {
+function AboutDropdown({ productName, specs, bodySize, bodyLine, contentSize, contentLine }: { productName: string; specs: string[]; bodySize: number; bodyLine: number; contentSize: number; contentLine: number }) {
   const [open, setOpen] = useState(false);
   return (
     <View>
@@ -109,7 +115,7 @@ function AboutDropdown({ productName, specs, bodySize, bodyLine }: { productName
       {open && (
         <View style={s.aboutBody}>
           {specs.map(spec => (
-            <Text key={spec} style={[s.spec, { fontSize: bodySize, lineHeight: bodyLine }]}>• {spec}</Text>
+            <Text key={spec} style={[s.spec, { fontSize: contentSize, lineHeight: contentLine }]}>• {spec}</Text>
           ))}
         </View>
       )}
@@ -174,10 +180,12 @@ export default function ProductDetailScreen() {
   const [toastVisible, setToastVisible] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifyEmailError, setNotifyEmailError] = useState('');
+  const [notifyEmailVerifying, setNotifyEmailVerifying] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addItem } = useCart();
   const route = useRoute<any>();
   const productId: string = route.params?.productId;
 
@@ -190,6 +198,16 @@ export default function ProductDetailScreen() {
   }, [productId]);
 
   const handleAddToCart = () => {
+    if (item) {
+      addItem({
+        id: item._id,
+        brand: item.brandName,
+        name: item.itemName,
+        price: `${item.listingPrice} KWD`,
+        imageUri: item.imageUrls?.[0],
+        isSold: false,
+      });
+    }
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2500);
   };
@@ -199,23 +217,44 @@ export default function ProductDetailScreen() {
       setNotifyEmailError('Please enter a valid email address.');
       return;
     }
+
+    setNotifyEmailVerifying(true);
     setNotifyEmailError('');
+
     try {
+      const verification = await verifyEmail(notifyEmail);
+
+      if (!verification.isValid) {
+        setNotifyEmailError(verification.error || 'Email address is not valid.');
+        setNotifyEmailVerifying(false);
+        return;
+      }
+
       await submitNotifyRequest(notifyEmail, { _id: item!._id, itemName: item!.itemName, brandName: item!.brandName });
       setNotifySuccess(true);
       setNotifyEmail('');
     } catch {
       setNotifyEmailError('Something went wrong. Please try again.');
+    } finally {
+      setNotifyEmailVerifying(false);
     }
   };
 
   const bodySize = isDesktop ? 24 : 16;
   const bodyLine = isDesktop ? 30 : 22;
+  const contentSize = isDesktop ? 16 : 16;
+  const contentLine = isDesktop ? 24 : 22;
 
   if (loading) {
     return (
       <PageLayout header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}>
-        <ActivityIndicator color={COLORS.primary} style={{ marginTop: 80 }} />
+        {isDesktop ? (
+          <MaxWidthContainer style={s.desktopContainer}>
+            <SkeletonProductDetail isDesktop screenWidth={width} />
+          </MaxWidthContainer>
+        ) : (
+          <SkeletonProductDetail isDesktop={false} screenWidth={width} />
+        )}
       </PageLayout>
     );
   }
@@ -241,11 +280,11 @@ export default function ProductDetailScreen() {
 
   const notifyBlock = isSold ? (
     <View style={s.notifySection}>
-      <Text style={[s.notifyText, { fontSize: bodySize, lineHeight: bodyLine }]}>
+      <Text style={[s.notifyText, { fontSize: contentSize, lineHeight: contentLine }]}>
         Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:
       </Text>
       {notifySuccess ? (
-        <Text style={[s.notifyText, { color: COLORS.secondary, fontSize: bodySize }]}>You're on the list!</Text>
+        <Text style={[s.notifyText, { color: COLORS.secondary, fontSize: contentSize }]}>You're on the list!</Text>
       ) : (
         <View>
           <View style={[s.emailStrip, !!notifyEmailError && s.emailStripError]}>
@@ -258,8 +297,12 @@ export default function ProductDetailScreen() {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            <TouchableOpacity style={s.signupBtn} onPress={handleNotifySubmit}>
-              <Text style={s.signupBtnText}>SIGN UP</Text>
+            <TouchableOpacity
+              style={[s.signupBtn, notifyEmailVerifying && { opacity: 0.6 }]}
+              onPress={handleNotifySubmit}
+              disabled={notifyEmailVerifying}
+            >
+              <Text style={s.signupBtnText}>{notifyEmailVerifying ? 'VERIFYING...' : 'SIGN UP'}</Text>
             </TouchableOpacity>
           </View>
           {!!notifyEmailError && <Text style={s.emailError}>{notifyEmailError}</Text>}
@@ -275,12 +318,13 @@ export default function ProductDetailScreen() {
         overlay={toastVisible ? <Toast message="Added to cart!" /> : undefined}
         header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
       >
-        <MaxWidthContainer>
+        <MaxWidthContainer style={s.desktopContainer}>
           <View style={s.desktopBody}>
             <DesktopGallery images={item.imageUrls} />
             <View style={s.desktopRight}>
               <View>
                 <Text style={s.productName}>{item.itemName.toUpperCase()}</Text>
+                <Text style={s.productPrice}>{item.listingPrice} KWD</Text>
                 <Text style={s.productBrand}>{item.brandName}</Text>
                 {item.year ? <Text style={s.productYear}>{item.year}</Text> : null}
               </View>
@@ -298,10 +342,10 @@ export default function ProductDetailScreen() {
                   </TouchableOpacity>
                 )}
               </View>
-              <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} />
+              <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} contentSize={contentSize} contentLine={contentLine} />
               {notifyBlock}
               <Text style={[s.sectionHeading, { fontSize: 24 }]}>Delivery &amp; Returns</Text>
-              <Text style={[s.desc, { fontSize: bodySize, lineHeight: bodyLine }]}>
+              <Text style={[s.desc, { fontSize: contentSize, lineHeight: contentLine }]}>
                 {'Try items in the comfort of your own home. If they\'re not quite right, you\'ve got 28 days to request an exchange or return.'}
               </Text>
             </View>
@@ -321,6 +365,7 @@ export default function ProductDetailScreen() {
       <View style={s.mobileContent}>
         <View>
           <Text style={s.productName}>{item.itemName.toUpperCase()}</Text>
+          <Text style={s.productPrice}>{item.listingPrice} KWD</Text>
           <Text style={s.productBrand}>{item.brandName}</Text>
           {item.year ? <Text style={s.productYear}>{item.year}</Text> : null}
         </View>
@@ -339,8 +384,12 @@ export default function ProductDetailScreen() {
             </TouchableOpacity>
           )}
         </View>
-        <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} />
+        <AboutDropdown productName={productName} specs={specs} bodySize={bodySize} bodyLine={bodyLine} contentSize={contentSize} contentLine={contentLine} />
         {notifyBlock}
+        <Text style={[s.sectionHeading, { fontSize: bodySize }]}>Delivery &amp; Returns</Text>
+        <Text style={[s.desc, { fontSize: contentSize, lineHeight: contentLine }]}>
+          {'Try items in the comfort of your own home. If they\'re not quite right, you\'ve got 28 days to request an exchange or return.'}
+        </Text>
       </View>
       <RelatedGrid isDesktop={false} excludeId={item._id} />
     </PageLayout>
@@ -373,17 +422,17 @@ const s = StyleSheet.create({
 
   // Desktop gallery
   desktopLeft: { width: 684 },
-  thumbRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 },
-  thumb: { width: 177, height: 268, opacity: 0.55 },
+  thumbRow: { flexDirection: 'row', gap: 4, marginBottom: 4 },
   thumbActive: { opacity: 1, outlineWidth: 2, outlineColor: COLORS.primary } as any,
   desktopMainImgWrap: { position: 'relative', overflow: 'hidden' },
-  desktopHero: { width: 684, height: 1036 },
 
   // Desktop layout
+  desktopContainer: { paddingHorizontal: SCREEN_PADDING.desktop },
   desktopBody: { flexDirection: 'row', alignItems: 'flex-start' },
-  desktopRight: { flex: 1, paddingHorizontal: 48, paddingVertical: 48, gap: 16 },
+  desktopRight: { flex: 1, paddingLeft: 48, paddingVertical: 48, gap: 16 },
 
   productName: { fontFamily: FONTS.clashMedium, fontSize: 32, color: COLORS.black, lineHeight: 40 },
+  productPrice: { fontFamily: FONTS.clashSemibold, fontSize: 20, color: COLORS.secondary },
   productBrand: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black },
   productYear: { fontFamily: FONTS.clashRegular, fontSize: 16, color: COLORS.black },
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { subscribeNewsletter } from '../../services/api';
+import { verifyEmail } from '../../services/emailVerification';
 import {
   View,
   Text,
@@ -27,19 +28,33 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   const handleSubscribe = async () => {
     if (!isValidEmail(email)) {
       setEmailError('Please enter a valid email address.');
       return;
     }
+
+    setVerifying(true);
     setEmailError('');
+
     try {
+      const verification = await verifyEmail(email);
+
+      if (!verification.isValid) {
+        setEmailError(verification.error || 'Email address is not valid.');
+        setVerifying(false);
+        return;
+      }
+
       await subscribeNewsletter(email);
       setSuccess(true);
       setEmail('');
     } catch {
       setEmailError('Something went wrong. Please try again.');
+    } finally {
+      setVerifying(false);
     }
   };
 
@@ -68,12 +83,13 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
               autoCapitalize="none"
             />
             <TouchableOpacity
-              style={[s.newsletterBtn, compact && { height: 48 }]}
+              style={[s.newsletterBtn, compact && { height: 48 }, verifying && { opacity: 0.6 }]}
               onPress={handleSubscribe}
               activeOpacity={0.85}
+              disabled={verifying}
             >
               <Text style={[s.newsletterBtnText, compact && { fontSize: 13 }]}>
-                SUBSCRIBE
+                {verifying ? 'VERIFYING...' : 'SUBSCRIBE'}
               </Text>
             </TouchableOpacity>
           </View>

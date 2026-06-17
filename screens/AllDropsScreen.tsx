@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, useWindowDimensions, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import { COLORS, FONTS, BREAKPOINT } from '../constants/brand';
 import { fetchDrops, type Drop } from '../services/api';
+import { SkeletonDropCard } from '../components/ui/Skeleton';
 
 export default function AllDropsScreen() {
   const { width } = useWindowDimensions();
@@ -32,7 +33,11 @@ export default function AllDropsScreen() {
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
       {loading ? (
-        <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 48 }} />
+        <View style={[s.dropsStack, isDesktop && { gap: 14 }]}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonDropCard key={i} height={202} />
+          ))}
+        </View>
       ) : (
         <View style={[s.dropsStack, isDesktop && { gap: 14 }]}>
           {drops.map(drop => (

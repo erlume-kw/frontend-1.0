@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, useWindowDimensions, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useWishlist } from '../contexts/WishlistContext';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
@@ -8,6 +9,7 @@ import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { fetchDropById, fetchDropItems, type Drop, type Item } from '../services/api';
+import { SkeletonProductCard, SkeletonBox } from '../components/ui/Skeleton';
 
 function useCardWidth(isDesktop: boolean, viewportWidth: number) {
   const numCols = isDesktop ? 4 : 2;
@@ -40,6 +42,7 @@ export default function DropDetailScreen() {
   }, [dropId]);
 
   const cardWidth = useCardWidth(isDesktop, width);
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   return (
     <PageLayout
@@ -59,7 +62,12 @@ export default function DropDetailScreen() {
         </View>
 
         {loading ? (
-          <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 48 }} />
+          <View style={[s.grid, isDesktop && s.gridDesktop]}>
+            {Array.from({ length: isDesktop ? 4 : 8 }).map((_, i) => {
+              const skeletonH = Math.round(340 * (cardWidth / 255));
+              return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
+            })}
+          </View>
         ) : (
           <View style={[s.grid, isDesktop && s.gridDesktop]}>
             {items.map(item => (
@@ -70,6 +78,8 @@ export default function DropDetailScreen() {
                 price={`${item.listingPrice} KWD`}
                 imageUri={item.imageUrls?.[0]}
                 cardWidth={cardWidth}
+                isWishlisted={isInWishlist(item._id)}
+                onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
                 onPress={() =>
                   (navigation.navigate as Function)('ProductDetail', { productId: item._id })
                 }

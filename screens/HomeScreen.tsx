@@ -7,9 +7,10 @@ import {
   ScrollView,
   StyleSheet,
   useWindowDimensions,
-  ActivityIndicator,
+  
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useWishlist } from '../contexts/WishlistContext';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
@@ -17,6 +18,7 @@ import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { fetchDrops, fetchDropItems, fetchItems, type Drop, type Item } from '../services/api';
+import { SkeletonProductCard } from '../components/ui/Skeleton';
 
 // Update to real drop date/time (UTC)
 const DROP_DATE = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 60 * 1000);
@@ -78,6 +80,7 @@ export default function HomeScreen() {
   const [items, setItems] = useState<Item[]>([]);
   const [activeDrop, setActiveDrop] = useState<Drop | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     (async () => {
@@ -138,7 +141,21 @@ export default function HomeScreen() {
         </View>
 
         {loading ? (
-          <ActivityIndicator color={COLORS.primary} style={{ marginVertical: 32 }} />
+          isDesktop ? (
+            // Desktop: ProductCard defaults to baseW=255 when no cardWidth prop is passed
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.desktopRow}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonProductCard key={i} width={255} height={340} isDesktop />
+              ))}
+            </ScrollView>
+          ) : (
+            <View style={s.mobileGrid}>
+              {Array.from({ length: 6 }).map((_, i) => {
+                const h = Math.round(340 * (cardW / 255));
+                return <SkeletonProductCard key={i} width={cardW} height={h} />;
+              })}
+            </View>
+          )
         ) : isDesktop ? (
           <ScrollView
             horizontal
@@ -152,6 +169,8 @@ export default function HomeScreen() {
                 name={item.itemName}
                 price={`${item.listingPrice} KWD`}
                 imageUri={item.imageUrls?.[0]}
+                isWishlisted={isInWishlist(item._id)}
+                onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
                 onPress={() =>
                   (navigation.navigate as Function)('ProductDetail', { productId: item._id })
                 }

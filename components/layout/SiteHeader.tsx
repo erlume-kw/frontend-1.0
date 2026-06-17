@@ -11,6 +11,7 @@ import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../../constants/brand';
 import { useWishlist } from '../../contexts/WishlistContext';
+import { useCart } from '../../contexts/CartContext';
 import MaxWidthContainer from './MaxWidthContainer';
 
 const ERLUME_LOGO = require('../../assets/images/erlume-logo-green.png');
@@ -32,11 +33,12 @@ function ErlumeLogo({ height }: { height: number }) {
   );
 }
 
-export default function SiteHeader({ onMenuPress, cartCount = 0 }: SiteHeaderProps) {
+export default function SiteHeader({ onMenuPress, cartCount: cartCountProp = 0 }: SiteHeaderProps) {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const navigation = useNavigation();
   const { count: wishlistCount } = useWishlist();
+  const { count: cartCount } = useCart();
 
   const go = (screen: string) => navigation.navigate(screen as never);
 

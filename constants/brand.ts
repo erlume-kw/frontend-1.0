@@ -42,7 +42,7 @@ export const FOOTER_DATA = {
   columns: {
     'Our Drops': ['Drop I', 'Drop II', 'Drop III', 'Drop IV', 'Drop VI'],
     Erlume: ['Cookies', 'Terms & Conditions', 'Privacy Policy'],
-    Sellers: ['Selling Policy', 'Commission Breakdown', 'Pricing Calculator'],
+    Sellers: ['How to Sell', 'Selling Policy', 'Commission Breakdown'],
   },
 } as const;
 

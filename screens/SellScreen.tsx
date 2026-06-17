@@ -17,6 +17,8 @@ import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { openWhatsApp } from '../utils/interactions';
+import { useNavigation } from '@react-navigation/native';
+import SellerBanner from '../components/seller/SellerBanner';
 
 async function pickImage(): Promise<string | null> {
   if (Platform.OS !== 'web') {
@@ -42,6 +44,7 @@ export default function SellScreen() {
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const navigation = useNavigation();
 
   const handleUpload = async () => {
     const uri = await pickImage();
@@ -75,6 +78,11 @@ export default function SellScreen() {
         <Text style={[s.accentText, { fontSize: bodySize, lineHeight: bodyLine }]}>
           starting with how much you're going to make
         </Text>
+        <TouchableOpacity onPress={() => (navigation.navigate as Function)('SellerPolicy')} style={s.policyLink}>
+          <Text style={[s.policyLinkText, { fontSize: isDesktop ? 16 : 13 }]}>
+            Before submitting, review our Selling Policy →
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Upload + CTA block */}
@@ -133,6 +141,11 @@ export default function SellScreen() {
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
+      <SellerBanner items={[
+        { label: 'Send us a photo', desc: 'Upload a photo of your item. We\'ll handle quality checks and professional listing photography.' },
+        { label: 'We handle everything', desc: 'From listing to delivery coordination. You don\'t have to worry about a thing.' },
+        { label: 'Earn instantly', desc: 'Get paid 1–2 days after your item sells. No waiting around for payouts.' },
+      ]} />
       {isDesktop ? (
         <MaxWidthContainer style={s.desktopWrapper}>{content}</MaxWidthContainer>
       ) : (
@@ -228,5 +241,11 @@ const s = StyleSheet.create({
     fontFamily: FONTS.clashMedium,
     color: COLORS.white,
     lineHeight: 30,
+  },
+  policyLink: { marginTop: 4 },
+  policyLinkText: {
+    fontFamily: FONTS.dmMedium,
+    color: COLORS.secondary,
+    textDecorationLine: 'underline',
   },
 });

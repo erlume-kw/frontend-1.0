@@ -128,7 +128,7 @@ export default function PricingEstimatorScreen() {
       <ScrollView>
         <MaxWidthContainer>
           {/* Page Title */}
-          <View style={[s.titleSection, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : 16 }]}>
+          <View style={[s.titleSection, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.tablet }]}>
             <Text style={[s.pageTitle, isDesktop && { fontSize: 56 }]}>PRICING ESTIMATOR</Text>
             <Text style={[s.subtitle, isDesktop && { fontSize: 17 }]}>
               Discover how much your bag could earn
@@ -136,7 +136,7 @@ export default function PricingEstimatorScreen() {
           </View>
 
           {/* Main Layout: Calculator on left, Results on right (or stacked on mobile) */}
-          <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : 16 }]}>
+          <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.tablet }]}>
             {/* Calculator/Form - Left Column */}
             <Animated.View
               style={[

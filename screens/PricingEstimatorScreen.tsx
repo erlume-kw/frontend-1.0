@@ -7,6 +7,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   ScrollView,
+  Modal,
+  FlatList,
 } from 'react-native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
@@ -16,6 +18,36 @@ import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { openWhatsApp } from '../utils/interactions';
 
 type Condition = 'worn' | 'fair' | 'good' | 'excellent' | 'never-worn';
+
+const POPULAR_BRANDS = [
+  'Vintage',
+  'Unknown',
+  'Chanel',
+  'Louis Vuitton',
+  'Gucci',
+  'Hermès',
+  'Prada',
+  'Dior',
+  'Fendi',
+  'Burberry',
+  'Givenchy',
+  'Céline',
+  'Balenciaga',
+  'Valentino',
+  'Versace',
+  'Dolce & Gabbana',
+  'Coach',
+  'Michael Kors',
+  'Mulberry',
+  'Bottega Veneta',
+  'Saint Laurent',
+  'Miu Miu',
+  'Bally',
+  'Salvatore Ferragamo',
+  'Tod\'s',
+  'Longchamp',
+  'Marcella',
+];
 
 const CONDITIONS: { label: string; value: Condition }[] = [
   { label: 'Never Worn', value: 'never-worn' },
@@ -40,12 +72,20 @@ export default function PricingEstimatorScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
+  const [brandDropdownOpen, setBrandDropdownOpen] = useState(false);
+  const [brandCustomInput, setBrandCustomInput] = useState('');
 
   const [brand, setBrand] = useState('');
   const [year, setYear] = useState('');
   const [originalPrice, setOriginalPrice] = useState('');
   const [condition, setCondition] = useState<Condition>('good');
   const [submitted, setSubmitted] = useState(false);
+
+  const handleBrandSelect = (selectedBrand: string) => {
+    setBrand(selectedBrand);
+    setBrandCustomInput('');
+    setBrandDropdownOpen(false);
+  };
 
   const estimatedValue = originalPrice ? parseFloat(originalPrice) * CONDITION_MULTIPLIERS[condition] : 0;
   const commission = estimatedValue * COMMISSION_RATE;
@@ -65,8 +105,6 @@ export default function PricingEstimatorScreen() {
     setSubmitted(false);
   };
 
-  const calculatorWidth = isDesktop ? 500 : '100%';
-
   return (
     <PageLayout
       menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
@@ -82,22 +120,74 @@ export default function PricingEstimatorScreen() {
             </Text>
           </View>
 
-          {/* Calculator */}
-          <View style={[s.calculatorContainer, { width: isDesktop ? calculatorWidth : '100%', alignSelf: 'center' }]}>
-            {!submitted ? (
+          {/* Main Layout: Calculator on left, Results on right (or stacked on mobile) */}
+          <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : 16 }]}>
+            {/* Calculator/Form - Left Column */}
+            <View style={[s.calculatorContainer, isDesktop && s.calculatorDesktop]}>
               <View style={[s.formContainer, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
-                {/* Brand Input */}
+                {/* Brand Dropdown */}
                 <View style={s.formGroup}>
                   <Text style={s.label}>Brand</Text>
-                  <TextInput
-                    style={s.input}
-                    placeholder="e.g., Chanel, Louis Vuitton"
-                    placeholderTextColor={COLORS.muted}
-                    value={brand}
-                    onChangeText={setBrand}
-                    autoCapitalize="words"
-                  />
+                  <TouchableOpacity
+                    style={s.brandDropdownBtn}
+                    onPress={() => setBrandDropdownOpen(true)}
+                  >
+                    <Text style={[s.brandDropdownText, !brand && s.brandDropdownPlaceholder]}>
+                      {brand || 'Select a brand'}
+                    </Text>
+                    <Text style={s.dropdownArrow}>▼</Text>
+                  </TouchableOpacity>
                 </View>
+
+                {/* Brand Dropdown Modal */}
+                <Modal
+                  visible={brandDropdownOpen}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setBrandDropdownOpen(false)}
+                >
+                  <TouchableOpacity
+                    style={s.dropdownOverlay}
+                    activeOpacity={1}
+                    onPress={() => setBrandDropdownOpen(false)}
+                  >
+                    <View style={s.dropdownMenu}>
+                      <FlatList
+                        data={POPULAR_BRANDS}
+                        keyExtractor={(item) => item}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={s.dropdownItem}
+                            onPress={() => handleBrandSelect(item)}
+                          >
+                            <Text style={s.dropdownItemText}>{item}</Text>
+                          </TouchableOpacity>
+                        )}
+                        scrollEnabled
+                        nestedScrollEnabled
+                      />
+                      <View style={s.dropdownDivider} />
+                      <View style={s.brandCustomInputContainer}>
+                        <TextInput
+                          style={s.brandCustomInput}
+                          placeholder="Or type another brand"
+                          placeholderTextColor={COLORS.muted}
+                          value={brandCustomInput}
+                          onChangeText={setBrandCustomInput}
+                          autoCapitalize="words"
+                        />
+                        {brandCustomInput.trim() && (
+                          <TouchableOpacity
+                            style={s.brandCustomBtn}
+                            onPress={() => handleBrandSelect(brandCustomInput.trim())}
+                          >
+                            <Text style={s.brandCustomBtnText}>ADD</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
 
                 {/* Year Input */}
                 <View style={s.formGroup}>
@@ -149,8 +239,11 @@ export default function PricingEstimatorScreen() {
                   <Text style={s.estimateBtnText}>GET ESTIMATE</Text>
                 </TouchableOpacity>
               </View>
-            ) : (
-              <View style={[s.resultContainer, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
+            </View>
+
+            {/* Results - Right Column (only when submitted) */}
+            {submitted && (
+              <View style={[s.resultContainer, isDesktop && s.resultDesktop, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
                 {/* Item Summary */}
                 <View style={s.itemSummary}>
                   <Text style={s.summaryLabel}>{brand} • {year}</Text>
@@ -220,10 +313,24 @@ const s = StyleSheet.create({
     lineHeight: 24,
   },
 
+  mainContainer: {
+    flexDirection: 'column',
+    gap: 24,
+  },
+  mainContainerDesktop: {
+    flexDirection: 'row',
+    gap: 32,
+    alignItems: 'flex-start',
+  },
+
   calculatorContainer: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
+    flex: 1,
+  },
+  calculatorDesktop: {
+    flex: 1,
   },
 
   formContainer: {
@@ -249,6 +356,87 @@ const s = StyleSheet.create({
     fontFamily: FONTS.dmRegular,
     fontSize: 15,
     color: COLORS.black,
+  },
+
+  brandDropdownBtn: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  brandDropdownText: {
+    fontFamily: FONTS.dmRegular,
+    fontSize: 15,
+    color: COLORS.black,
+  },
+  brandDropdownPlaceholder: {
+    color: COLORS.muted,
+  },
+  dropdownArrow: {
+    fontSize: 10,
+    color: COLORS.muted,
+  },
+
+  dropdownOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownMenu: {
+    width: '85%',
+    maxHeight: '60%',
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGrey,
+  },
+  dropdownItemText: {
+    fontFamily: FONTS.dmRegular,
+    fontSize: 14,
+    color: COLORS.black,
+  },
+  dropdownDivider: {
+    height: 1,
+    backgroundColor: COLORS.border,
+  },
+  brandCustomInputContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  brandCustomInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 8,
+    fontFamily: FONTS.dmRegular,
+    fontSize: 13,
+    color: COLORS.black,
+  },
+  brandCustomBtn: {
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  brandCustomBtnText: {
+    fontFamily: FONTS.clashMedium,
+    fontSize: 11,
+    color: COLORS.white,
+    textTransform: 'uppercase',
   },
 
   conditionGrid: {
@@ -299,6 +487,13 @@ const s = StyleSheet.create({
   resultContainer: {
     paddingVertical: 32,
     gap: 24,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  resultDesktop: {
+    flex: 1,
+    paddingVertical: 32,
   },
 
   itemSummary: {

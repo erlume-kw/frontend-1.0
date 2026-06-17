@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   ScrollView,
   Modal,
   FlatList,
+  Animated,
 } from 'react-native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
@@ -81,6 +82,20 @@ export default function PricingEstimatorScreen() {
   const [condition, setCondition] = useState<Condition>('good');
   const [submitted, setSubmitted] = useState(false);
 
+  const calculatorSlideAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (submitted && isDesktop) {
+      Animated.timing(calculatorSlideAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      calculatorSlideAnim.setValue(0);
+    }
+  }, [submitted, isDesktop, calculatorSlideAnim]);
+
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
     setBrandCustomInput('');
@@ -123,7 +138,22 @@ export default function PricingEstimatorScreen() {
           {/* Main Layout: Calculator on left, Results on right (or stacked on mobile) */}
           <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : 16 }]}>
             {/* Calculator/Form - Left Column */}
-            <View style={[s.calculatorContainer, isDesktop && s.calculatorDesktop]}>
+            <Animated.View
+              style={[
+                s.calculatorContainer,
+                isDesktop && s.calculatorDesktop,
+                isDesktop && {
+                  transform: [
+                    {
+                      translateX: calculatorSlideAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, -160],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
               <View style={[s.formContainer, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
                 {/* Brand Dropdown */}
                 <View style={s.formGroup}>
@@ -239,7 +269,7 @@ export default function PricingEstimatorScreen() {
                   <Text style={s.estimateBtnText}>GET ESTIMATE</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </Animated.View>
 
             {/* Results - Right Column (only when submitted) */}
             {submitted && (
@@ -316,21 +346,23 @@ const s = StyleSheet.create({
   mainContainer: {
     flexDirection: 'column',
     gap: 24,
+    alignItems: 'center',
   },
   mainContainerDesktop: {
     flexDirection: 'row',
     gap: 32,
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
 
   calculatorContainer: {
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    flex: 1,
+    width: 450,
   },
   calculatorDesktop: {
-    flex: 1,
+    width: 450,
   },
 
   formContainer: {
@@ -490,9 +522,10 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
+    width: 450,
   },
   resultDesktop: {
-    flex: 1,
+    width: 450,
     paddingVertical: 32,
   },
 

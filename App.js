@@ -25,6 +25,7 @@ const linking = {
       Login: 'login',
       SellerPolicy: 'seller-policy',
       PrivacyPolicy: 'privacy-policy',
+      PricingEstimator: 'pricing-estimator',
     },
   },
 };

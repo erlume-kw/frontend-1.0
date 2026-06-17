@@ -11,6 +11,7 @@ import WishlistScreen from '../../screens/WishlistScreen';
 import LoginScreen from '../../screens/auth/LoginScreen';
 import SellerPolicyScreen from '../../screens/SellerPolicyScreen';
 import PrivacyPolicyScreen from '../../screens/PrivacyPolicyScreen';
+import PricingEstimatorScreen from '../../screens/PricingEstimatorScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ const MainNavigation = () => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SellerPolicy" component={SellerPolicyScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="PricingEstimator" component={PricingEstimatorScreen} />
     </Stack.Navigator>
   );
 };

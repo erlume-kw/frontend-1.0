@@ -15,7 +15,7 @@ const DROP_NAV: Record<string, { dropId: string; dropTitle: string }> = {
   'Drop VI': { dropId: 'drop-4', dropTitle: 'DROP IV' },
 };
 
-const SELLER_LINKS = new Set(['Commission Breakdown']);
+const SELLER_LINKS = new Set(['Commission Breakdown', 'Pricing Estimator']);
 
 const LEGAL_SUBJECTS: Record<string, string> = {
   Cookies: 'Cookies inquiry',
@@ -49,7 +49,8 @@ export function handleFooterLink(label: string, navigation: Nav) {
   if (drop) { navigation.navigate('DropDetail', drop); return; }
   if (label === 'How to Sell') { navigation.navigate('Sell'); return; }
   if (label === 'Selling Policy') { navigation.navigate('SellerPolicy'); return; }
-  if (SELLER_LINKS.has(label)) { navigation.navigate('Sell'); return; }
+  if (label === 'Pricing Estimator') { navigation.navigate('PricingEstimator'); return; }
+  if (label === 'Commission Breakdown') { navigation.navigate('Sell'); return; }
   const legalSubject = LEGAL_SUBJECTS[label];
   if (legalSubject) { openEmail(FOOTER_DATA.contact.email, legalSubject); return; }
   navigation.navigate('AllDrops');

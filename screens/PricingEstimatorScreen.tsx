@@ -586,9 +586,9 @@ const s = StyleSheet.create({
 
   whatsappBtn: {
     height: 60,
-    backgroundColor: 'rgba(37,211,102,0.1)',
+    backgroundColor: `${COLORS.olive}15`,
     borderWidth: 2,
-    borderColor: '#25D366',
+    borderColor: COLORS.olive,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
@@ -596,7 +596,7 @@ const s = StyleSheet.create({
   whatsappBtnText: {
     fontFamily: FONTS.clashMedium,
     fontSize: 13,
-    color: '#25D366',
+    color: COLORS.olive,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },

@@ -82,19 +82,19 @@ export default function PricingEstimatorScreen() {
   const [condition, setCondition] = useState<Condition>('good');
   const [submitted, setSubmitted] = useState(false);
 
-  const calculatorSlideAnim = useRef(new Animated.Value(0)).current;
+  const marginAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (submitted && isDesktop) {
-      Animated.timing(calculatorSlideAnim, {
+      Animated.timing(marginAnim, {
         toValue: 1,
         duration: 400,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }).start();
     } else {
-      calculatorSlideAnim.setValue(0);
+      marginAnim.setValue(0);
     }
-  }, [submitted, isDesktop, calculatorSlideAnim]);
+  }, [submitted, isDesktop, marginAnim]);
 
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
@@ -142,15 +142,12 @@ export default function PricingEstimatorScreen() {
               style={[
                 s.calculatorContainer,
                 isDesktop && s.calculatorDesktop,
+                !submitted && isDesktop && s.calculatorCentered,
                 isDesktop && {
-                  transform: [
-                    {
-                      translateX: calculatorSlideAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -160],
-                      }),
-                    },
-                  ],
+                  marginRight: marginAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 16],
+                  }),
                 },
               ]}
             >
@@ -350,7 +347,7 @@ const s = StyleSheet.create({
   },
   mainContainerDesktop: {
     flexDirection: 'row',
-    gap: 32,
+    gap: 0,
     alignItems: 'flex-start',
     justifyContent: 'center',
   },
@@ -359,10 +356,14 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    width: 450,
   },
   calculatorDesktop: {
     width: 450,
+  },
+  calculatorCentered: {
+    flex: 1,
+    maxWidth: 450,
+    alignItems: 'center',
   },
 
   formContainer: {
@@ -527,6 +528,7 @@ const s = StyleSheet.create({
   resultDesktop: {
     width: 450,
     paddingVertical: 32,
+    marginLeft: 32,
   },
 
   itemSummary: {

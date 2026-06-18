@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   ScrollView,
   Modal,
   FlatList,
-  Animated,
 } from 'react-native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
@@ -82,20 +81,6 @@ export default function PricingEstimatorScreen() {
   const [condition, setCondition] = useState<Condition>('good');
   const [submitted, setSubmitted] = useState(false);
 
-  const slideAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (submitted && isDesktop) {
-      Animated.timing(slideAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-    } else {
-      slideAnim.setValue(0);
-    }
-  }, [submitted, isDesktop, slideAnim]);
-
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
     setBrandCustomInput('');
@@ -138,20 +123,10 @@ export default function PricingEstimatorScreen() {
           {/* Main Layout: Calculator on left, Results on right (or stacked on mobile) */}
           <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.tablet }]}>
             {/* Calculator/Form - Left Column */}
-            <Animated.View
+            <View
               style={[
                 s.calculatorContainer,
                 isDesktop && s.calculatorDesktop,
-                isDesktop && submitted && {
-                  transform: [
-                    {
-                      translateX: slideAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -241],
-                      }),
-                    },
-                  ],
-                },
               ]}
             >
               <View style={[s.formContainer, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
@@ -269,7 +244,7 @@ export default function PricingEstimatorScreen() {
                   <Text style={s.estimateBtnText}>GET ESTIMATE</Text>
                 </TouchableOpacity>
               </View>
-            </Animated.View>
+            </View>
 
             {/* Results - Right Column (only when submitted) */}
             {submitted && (

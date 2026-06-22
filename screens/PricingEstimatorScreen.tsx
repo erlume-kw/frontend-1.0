@@ -121,11 +121,12 @@ export default function PricingEstimatorScreen() {
           </View>
 
           {/* Main Layout: Calculator on left, Results on right (or stacked on mobile) */}
-          <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.tablet }]}>
+          <View style={[s.mainContainer, isDesktop && s.mainContainerDesktop, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.mobile }]}>
             {/* Calculator/Form - Left Column */}
             <View
               style={[
                 s.calculatorContainer,
+                !isDesktop && s.calculatorMobile,
                 isDesktop && s.calculatorDesktop,
               ]}
             >
@@ -151,11 +152,12 @@ export default function PricingEstimatorScreen() {
                   animationType="fade"
                   onRequestClose={() => setBrandDropdownOpen(false)}
                 >
-                  <TouchableOpacity
-                    style={s.dropdownOverlay}
-                    activeOpacity={1}
-                    onPress={() => setBrandDropdownOpen(false)}
-                  >
+                  <View style={s.dropdownOverlay}>
+                    <TouchableOpacity
+                      style={{ flex: 1 }}
+                      activeOpacity={1}
+                      onPress={() => setBrandDropdownOpen(false)}
+                    />
                     <View style={s.dropdownMenu}>
                       <FlatList
                         data={POPULAR_BRANDS}
@@ -191,7 +193,12 @@ export default function PricingEstimatorScreen() {
                         )}
                       </View>
                     </View>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{ flex: 1 }}
+                      activeOpacity={1}
+                      onPress={() => setBrandDropdownOpen(false)}
+                    />
+                  </View>
                 </Modal>
 
                 {/* Year Input */}
@@ -248,7 +255,7 @@ export default function PricingEstimatorScreen() {
 
             {/* Results - Right Column (only when submitted) */}
             {submitted && (
-              <View style={[s.resultContainer, isDesktop && s.resultDesktop, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
+              <View style={[s.resultContainer, !isDesktop && s.resultMobile, isDesktop && s.resultDesktop, { paddingHorizontal: isDesktop ? 32 : 16 }]}>
                 {/* Item Summary */}
                 <View style={s.itemSummary}>
                   <Text style={s.summaryLabel}>{brand} • {year}</Text>
@@ -334,7 +341,9 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    width: 450,
+  },
+  calculatorMobile: {
+    width: '100%',
   },
   calculatorDesktop: {
     width: 450,
@@ -393,6 +402,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+    pointerEvents: 'auto',
   },
   dropdownMenu: {
     width: '85%',
@@ -420,22 +430,24 @@ const s = StyleSheet.create({
   },
   brandCustomInputContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 12,
   },
   brandCustomInput: {
     flex: 1,
+    height: 50,
     borderWidth: 1,
     borderColor: COLORS.border,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     fontFamily: FONTS.dmRegular,
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.black,
   },
   brandCustomBtn: {
+    height: 50,
     backgroundColor: COLORS.secondary,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -497,7 +509,9 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    width: 450,
+  },
+  resultMobile: {
+    width: '100%',
   },
   resultDesktop: {
     width: 450,

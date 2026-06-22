@@ -50,6 +50,10 @@ const LEGAL_CARDS = [
     title: 'Policy Changes',
     body: 'We reserve the right to update our terms at any time. You will be notified of any material changes.',
   },
+  {
+    title: 'Image Rights & Reuse',
+    body: 'By listing items on Erlume, you grant us a perpetual, worldwide license to use, reproduce, and distribute product photography for marketing, promotional, and archival purposes—including long after the item has sold. This allows us to maintain a comprehensive catalog and leverage high-quality imagery across campaigns.',
+  },
 ];
 
 export default function SellerPolicyScreen() {

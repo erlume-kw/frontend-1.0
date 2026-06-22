@@ -258,7 +258,7 @@ export async function validateDiscountCode(code: string, orderTotal?: number): P
 }> {
   const data = await request<{ success: boolean; discountPercentage: number; discountAmount: number; finalTotal: number }>(
     '/api/discount-codes/validate',
-    { method: 'POST', body: JSON.stringify({ code, orderTotal }) },
+    { method: 'POST', body: JSON.stringify({ code, orderTotal: orderTotal?.toString() }) },
   );
   return data;
 }

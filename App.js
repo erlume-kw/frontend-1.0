@@ -5,10 +5,17 @@ import { DMSans_400Regular, DMSans_500Medium, DMSans_600SemiBold } from '@expo-g
 import { Sarina_400Regular } from '@expo-google-fonts/sarina';
 import { View } from 'react-native';
 import MainNavigation from 'components/navigation/MainNavigation';
+import CookiesBanner from 'components/layout/CookiesBanner';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CartProvider } from './contexts/CartContext';
+import { useNavigation } from '@react-navigation/native';
 
 import './global.css';
+
+function CookiesBannerWrapper() {
+  const navigation = useNavigation();
+  return <CookiesBanner navigation={navigation} />;
+}
 
 const linking = {
   prefixes: [],
@@ -26,6 +33,7 @@ const linking = {
       SellerPolicy: 'seller-policy',
       PrivacyPolicy: 'privacy-policy',
       PricingEstimator: 'pricing-estimator',
+      CookiesPolicy: 'cookies-policy',
     },
   },
 };
@@ -53,6 +61,7 @@ export default function App() {
       <CartProvider>
         <NavigationContainer linking={linking}>
           <MainNavigation />
+          <CookiesBannerWrapper />
         </NavigationContainer>
         <StatusBar style="auto" />
       </CartProvider>

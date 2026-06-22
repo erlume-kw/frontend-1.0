@@ -215,12 +215,13 @@ export async function subscribeNewsletter(email: string): Promise<void> {
   });
 }
 
-// ─── Notify similar item (no backend endpoint yet — queued locally) ───────────
+// ─── Notify similar item ──────────────────────────────────────────────────
 
 export async function submitNotifyRequest(email: string, item: Pick<Item, '_id' | 'itemName' | 'brandName'>): Promise<void> {
-  // TODO: wire to POST /api/notify once backend endpoint is added
-  // For now this is a no-op that succeeds silently so the UI flow works
-  console.log('[notify] queued:', email, item._id);
+  await request('/api/notify', {
+    method: 'POST',
+    body: JSON.stringify({ email, itemId: item._id, itemName: item.itemName, brandName: item.brandName }),
+  });
 }
 
 // ─── Wishlist ─────────────────────────────────────────────────────────────────

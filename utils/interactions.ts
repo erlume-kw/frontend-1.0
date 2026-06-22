@@ -50,7 +50,9 @@ export function handleFooterLink(label: string, navigation: Nav) {
   if (label === 'How to Sell') { navigation.navigate('Sell'); return; }
   if (label === 'Selling Policy') { navigation.navigate('SellerPolicy'); return; }
   if (label === 'Pricing Estimator') { navigation.navigate('PricingEstimator'); return; }
+  if (label === 'Cookies Policy') { navigation.navigate('CookiesPolicy'); return; }
   if (label === 'Commission Breakdown') { navigation.navigate('Sell'); return; }
+  if (label === 'Privacy Policy') { navigation.navigate('PrivacyPolicy'); return; }
   const legalSubject = LEGAL_SUBJECTS[label];
   if (legalSubject) { openEmail(FOOTER_DATA.contact.email, legalSubject); return; }
   navigation.navigate('AllDrops');

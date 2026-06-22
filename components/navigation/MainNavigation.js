@@ -12,6 +12,7 @@ import LoginScreen from '../../screens/auth/LoginScreen';
 import SellerPolicyScreen from '../../screens/SellerPolicyScreen';
 import PrivacyPolicyScreen from '../../screens/PrivacyPolicyScreen';
 import PricingEstimatorScreen from '../../screens/PricingEstimatorScreen';
+import CookiesPolicyScreen from '../../screens/CookiesPolicyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,7 @@ const MainNavigation = () => {
       <Stack.Screen name="SellerPolicy" component={SellerPolicyScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="PricingEstimator" component={PricingEstimatorScreen} />
+      <Stack.Screen name="CookiesPolicy" component={CookiesPolicyScreen} />
     </Stack.Navigator>
   );
 };

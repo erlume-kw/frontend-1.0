@@ -9,6 +9,7 @@ import CheckoutScreen from '../../screens/CheckoutScreen';
 import SellScreen from '../../screens/SellScreen';
 import WishlistScreen from '../../screens/WishlistScreen';
 import LoginScreen from '../../screens/auth/LoginScreen';
+import SignInRegisterScreen from '../../screens/auth/SignInRegisterScreen';
 import SellerPolicyScreen from '../../screens/SellerPolicyScreen';
 import PrivacyPolicyScreen from '../../screens/PrivacyPolicyScreen';
 import PricingEstimatorScreen from '../../screens/PricingEstimatorScreen';
@@ -28,6 +29,7 @@ const MainNavigation = () => {
       <Stack.Screen name="Sell" component={SellScreen} />
       <Stack.Screen name="Wishlist" component={WishlistScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignInRegister" component={SignInRegisterScreen} />
       <Stack.Screen name="SellerPolicy" component={SellerPolicyScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="PricingEstimator" component={PricingEstimatorScreen} />

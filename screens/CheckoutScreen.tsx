@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
   Modal,
   useWindowDimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { showOrderPlaced } from '../utils/interactions';
 import { useCart } from '../contexts/CartContext';
-import { validateDiscountCode } from '../services/api';
+import { validateDiscountCode, getAccessToken, getMe } from '../services/api';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
@@ -154,6 +154,14 @@ export default function CheckoutScreen() {
   const isDesktop = width >= BREAKPOINT;
   const [menuOpen, setMenuOpen] = useState(false);
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
+
+  // Auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+
+  // Validation errors
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Contact
   const [email, setEmail] = useState('');
@@ -177,12 +185,64 @@ export default function CheckoutScreen() {
   const [cvv, setCvv] = useState('');
   const [nameOnCard, setNameOnCard] = useState('');
 
+  // Checkout type (guest vs account)
+  const [checkoutType, setCheckoutType] = useState<'guest' | 'account'>('guest');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+
   // Order summary
   const [discountCode, setDiscountCode] = useState('');
   const [discountAmount, setDiscountAmount] = useState(0);
   const [discountError, setDiscountError] = useState('');
   const { items: cartItems, subtotal } = useCart();
   const total = Math.max(0, subtotal - discountAmount);
+
+  // Check auth status on mount and when screen is focused
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        console.log('[CheckoutScreen] Checking auth status...');
+        const token = await getAccessToken();
+        console.log('[CheckoutScreen] Token:', token ? 'EXISTS' : 'NOT FOUND');
+        if (token) {
+          console.log('[CheckoutScreen] User is logged in, fetching user data...');
+          setIsLoggedIn(true);
+          try {
+            const user = await getMe();
+            console.log('[CheckoutScreen] User data:', user);
+            setUserData(user);
+            // Pre-fill address from user data
+            if (user.address) {
+              setFirstName(user.emailAddress?.split('@')[0] || '');
+              setGovernorate(user.address.governorate || '');
+              setArea(user.address.city || '');
+              setBlock(user.address.block || '');
+              setStreet(user.address.street || '');
+              setHouseNumber(user.address.house || '');
+            }
+          } catch (userError) {
+            console.log('[CheckoutScreen] Error fetching user data:', userError);
+            setIsLoggedIn(false);
+            setUserData(null);
+          }
+        } else {
+          console.log('[CheckoutScreen] User is not logged in');
+          setIsLoggedIn(false);
+          setUserData(null);
+        }
+      } catch (error) {
+        console.log('[CheckoutScreen] Auth check error:', error);
+        setIsLoggedIn(false);
+        setUserData(null);
+      }
+    };
+    if (isFocused) {
+      console.log('[CheckoutScreen] Screen is focused, checking auth');
+      checkAuth();
+    } else {
+      console.log('[CheckoutScreen] Screen is not focused');
+    }
+  }, [isFocused]);
 
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return;
@@ -198,6 +258,9 @@ export default function CheckoutScreen() {
 
   const inputStyle = [s.input, isDesktop && s.inputDesktop];
 
+  const ErrorText = ({ field }: { field: string }) =>
+    errors[field] ? <Text style={s.errorText}>{errors[field]}</Text> : null;
+
   const FormSection = ({ title }: { title: string }) => (
     <Text style={[s.sectionTitle, isDesktop && { fontSize: 21 }]}>{title}</Text>
   );
@@ -207,21 +270,140 @@ export default function CheckoutScreen() {
     setArea(''); // reset area when governorate changes
   };
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (isLoggedIn) {
+      // Logged in user validation
+      if (!governorate.trim()) newErrors.governorate = 'Governorate is required';
+      if (!area.trim()) newErrors.area = 'Area is required';
+      if (!block.trim()) newErrors.block = 'Block is required';
+      if (!street.trim()) newErrors.street = 'Street is required';
+      if (!houseNumber.trim()) newErrors.houseNumber = 'House number is required';
+    } else if (checkoutType === 'guest') {
+      // Guest checkout validation
+      if (!guestEmail.trim()) newErrors.guestEmail = 'Email is required';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) newErrors.guestEmail = 'Invalid email';
+      if (!guestPhone.trim()) newErrors.guestPhone = 'Phone number is required';
+    } else {
+      // Account checkout validation
+      if (!email.trim()) newErrors.email = 'Email is required';
+    }
+
+    // Address validation for both guest and account
+    if (!governorate.trim()) newErrors.governorate = 'Governorate is required';
+    if (!area.trim()) newErrors.area = 'Area is required';
+    if (!block.trim()) newErrors.block = 'Block is required';
+    if (!street.trim()) newErrors.street = 'Street is required';
+    if (!houseNumber.trim()) newErrors.houseNumber = 'House number is required';
+
+    // Payment validation
+    if (paymentMethod === 'card') {
+      if (!cardNumber.trim()) newErrors.cardNumber = 'Card number is required';
+      if (!expiryDate.trim()) newErrors.expiryDate = 'Expiry date is required';
+      if (!cvv.trim()) newErrors.cvv = 'CVV is required';
+      if (!nameOnCard.trim()) newErrors.nameOnCard = 'Name on card is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const CheckoutForm = () => (
     <View style={[s.formCol, isDesktop && s.formColDesktop]}>
-      {/* Contact */}
-      <View style={s.section}>
-        <FormSection title="Contact" />
-        <TextInput
-          style={inputStyle}
-          placeholder="Email or phone number"
-          placeholderTextColor={COLORS.muted}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+      {/* Checkout Type Toggle - only show if not logged in */}
+      {!isLoggedIn && (
+        <View style={s.section}>
+          <FormSection title="Checkout" />
+          <View style={s.checkoutTypeToggle}>
+            <TouchableOpacity
+              style={[s.checkoutTypeBtn, checkoutType === 'guest' && s.checkoutTypeBtnActive]}
+              onPress={() => setCheckoutType('guest')}
+            >
+              <Text style={[s.checkoutTypeBtnText, checkoutType === 'guest' && s.checkoutTypeBtnTextActive]}>
+                GUEST CHECKOUT
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[s.checkoutTypeBtn, checkoutType === 'account' && s.checkoutTypeBtnActive]}
+              onPress={() => setCheckoutType('account')}
+            >
+              <Text style={[s.checkoutTypeBtnText, checkoutType === 'account' && s.checkoutTypeBtnTextActive]}>
+                SIGN IN
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
+      {/* Guest Checkout Fields - only show if not logged in */}
+      {!isLoggedIn && checkoutType === 'guest' && (
+        <View style={s.section}>
+          <FormSection title="Contact Information" />
+          <View>
+            <TextInput
+              style={inputStyle}
+              placeholder="Email address"
+              placeholderTextColor={COLORS.muted}
+              value={guestEmail}
+              onChangeText={(val) => {
+                setGuestEmail(val);
+                if (errors.guestEmail) setErrors({ ...errors, guestEmail: '' });
+              }}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <ErrorText field="guestEmail" />
+          </View>
+          <View>
+            <TextInput
+              style={inputStyle}
+              placeholder="Phone number"
+              placeholderTextColor={COLORS.muted}
+              value={guestPhone}
+              onChangeText={(val) => {
+                setGuestPhone(val);
+                if (errors.guestPhone) setErrors({ ...errors, guestPhone: '' });
+              }}
+              keyboardType="phone-pad"
+            />
+            <ErrorText field="guestPhone" />
+          </View>
+        </View>
+      )}
+
+      {/* Account Checkout - Sign In Form - only show if not logged in */}
+      {!isLoggedIn && checkoutType === 'account' && (
+        <View style={s.section}>
+          <FormSection title="Sign In to Your Account" />
+          <TextInput
+            style={inputStyle}
+            placeholder="Email address"
+            placeholderTextColor={COLORS.muted}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <Text style={s.helperText}>
+            Don't have an account? <Text style={s.helperLink} onPress={() => navigation.navigate('SignInRegister' as never)}>Sign up here</Text>
+          </Text>
+        </View>
+      )}
+
+      {/* Regular Contact */}
+      {checkoutType === 'guest' && (
+        <View style={s.section}>
+          <FormSection title="Contact" />
+          <TextInput
+            style={inputStyle}
+            placeholder="Full name"
+            placeholderTextColor={COLORS.muted}
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+        </View>
+      )}
 
       {/* Delivery */}
       <View style={s.section}>
@@ -421,7 +603,14 @@ export default function CheckoutScreen() {
         <Text style={s.totalValue}>{total.toFixed(2)} KWD</Text>
       </View>
 
-      <TouchableOpacity style={s.payBtn} onPress={() => showOrderPlaced(navigation)}>
+      <TouchableOpacity
+        style={s.payBtn}
+        onPress={() => {
+          if (validateForm()) {
+            showOrderPlaced(navigation);
+          }
+        }}
+      >
         <Text style={s.payBtnText}>PAY NOW</Text>
       </TouchableOpacity>
     </View>
@@ -471,6 +660,40 @@ const s = StyleSheet.create({
   subSectionTitle: { fontFamily: FONTS.clashMedium, fontSize: 16, color: COLORS.black, marginTop: 4 },
   secureText: { fontFamily: FONTS.dmRegular, fontSize: 14, color: COLORS.muted },
 
+  checkoutTypeToggle: { flexDirection: 'row', gap: 12 },
+  checkoutTypeBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
+  checkoutTypeBtnActive: {
+    borderColor: COLORS.secondary,
+    backgroundColor: 'rgba(197,112,93,0.08)',
+  },
+  checkoutTypeBtnText: {
+    fontFamily: FONTS.clashMedium,
+    fontSize: 12,
+    color: COLORS.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  checkoutTypeBtnTextActive: {
+    color: COLORS.secondary,
+  },
+  helperText: {
+    fontFamily: FONTS.dmRegular,
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 8,
+  },
+  helperLink: {
+    color: COLORS.secondary,
+    textDecorationLine: 'underline',
+  },
+
   input: {
     height: 52,
     borderWidth: 0,          // override browser default on web
@@ -482,6 +705,12 @@ const s = StyleSheet.create({
   },
   inputDesktop: {},
   inputDisabled: { backgroundColor: '#E8E8E8' },
+  errorText: {
+    fontFamily: FONTS.dmRegular,
+    fontSize: 13,
+    color: COLORS.error,
+    marginTop: 4,
+  },
 
   // Dropdown trigger
   selectField: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

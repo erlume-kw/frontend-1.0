@@ -8,15 +8,17 @@ import {
   StyleSheet,
   useWindowDimensions,
   ImageStyle,
-  
+
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import ProductCard from '../components/ui/ProductCard';
+import SignInPromptModal from '../components/SignInPromptModal';
 import { useWishlist } from '../contexts/WishlistContext';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 import { fetchItemById, fetchItems, submitNotifyRequest, type Item } from '../services/api';
@@ -129,6 +131,16 @@ function RelatedGrid({ isDesktop, excludeId }: { isDesktop: boolean; excludeId: 
   const navigation = useNavigation();
   const { width } = useWindowDimensions();
   const [related, setRelated] = useState<Item[]>([]);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
+  const handleWishlistPress = async (item: Item) => {
+    const token = await AsyncStorage.getItem('erlume_access_token');
+    if (!token) {
+      setShowSignInModal(true);
+      return;
+    }
+    toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] });
+  };
 
   useEffect(() => {
     fetchItems({ itemStatus: 'available', limit: '4' })
@@ -163,7 +175,7 @@ function RelatedGrid({ isDesktop, excludeId }: { isDesktop: boolean; excludeId: 
             imageUri={item.imageUrls?.[0]}
             cardWidth={cardW}
             onPress={() => (navigation.navigate as Function)('ProductDetail', { productId: item._id })}
-            onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+            onWishlistPress={() => handleWishlistPress(item)}
             isWishlisted={isInWishlist(item._id)}
           />
         ))}
@@ -176,8 +188,10 @@ function RelatedGrid({ isDesktop, excludeId }: { isDesktop: boolean; excludeId: 
 export default function ProductDetailScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
+  const navigation = useNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifyEmailError, setNotifyEmailError] = useState('');
   const [notifyEmailVerifying, setNotifyEmailVerifying] = useState(false);
@@ -188,6 +202,15 @@ export default function ProductDetailScreen() {
   const { addItem } = useCart();
   const route = useRoute<any>();
   const productId: string = route.params?.productId;
+
+  const handleWishlistPress = async (prod: Item) => {
+    const token = await AsyncStorage.getItem('erlume_access_token');
+    if (!token) {
+      setShowSignInModal(true);
+      return;
+    }
+    toggleWishlist({ id: prod._id, brand: prod.brandName, sub: prod.itemName, price: `${prod.listingPrice} KWD`, imageUri: prod.imageUrls?.[0] });
+  };
 
   useEffect(() => {
     if (!productId) { setLoading(false); return; }
@@ -233,8 +256,9 @@ export default function ProductDetailScreen() {
       await submitNotifyRequest(notifyEmail, { _id: item!._id, itemName: item!.itemName, brandName: item!.brandName });
       setNotifySuccess(true);
       setNotifyEmail('');
-    } catch {
-      setNotifyEmailError('Something went wrong. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Something went wrong. Please try again.';
+      setNotifyEmailError(errorMessage);
     } finally {
       setNotifyEmailVerifying(false);
     }
@@ -330,7 +354,7 @@ export default function ProductDetailScreen() {
               </View>
               <View style={s.ctaRow}>
                 {!isSold && (
-                  <TouchableOpacity style={s.heartBtn} onPress={() => toggleWishlist(productItem)} hitSlop={12}>
+                  <TouchableOpacity style={s.heartBtn} onPress={() => handleWishlistPress(productItem)} hitSlop={12}>
                     <Text style={[s.wishlistIcon, inWishlist && s.wishlistIconActive]}>{inWishlist ? '♥' : '♡'}</Text>
                   </TouchableOpacity>
                 )}
@@ -392,6 +416,14 @@ export default function ProductDetailScreen() {
         </Text>
       </View>
       <RelatedGrid isDesktop={false} excludeId={item._id} />
+      <SignInPromptModal
+        visible={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onSignIn={() => {
+          setShowSignInModal(false);
+          navigation.navigate('SignInRegister' as never);
+        }}
+      />
     </PageLayout>
   );
 }

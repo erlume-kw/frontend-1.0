@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { ScrollView, useWindowDimensions } from 'react-native';
+import { ScrollView, View, Text, StyleSheet, useWindowDimensions } from 'react-native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
 import CriteriaSection from '../components/seller/CriteriaSection';
+import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
+
+const LAST_UPDATED = 'June 2026';
 
 const PRIVACY_COLLECT = [
   'Full name, email address, phone number, and physical address',
@@ -50,6 +53,8 @@ const PRIVACY_CHANGES = [
 
 export default function PrivacyPolicyScreen() {
   const { width } = useWindowDimensions();
+  const isDesktop = width >= BREAKPOINT;
+  const pad = isDesktop ? SCREEN_PADDING.desktop : 16;
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -59,20 +64,33 @@ export default function PrivacyPolicyScreen() {
     >
       <ScrollView>
         <MaxWidthContainer>
-          <CriteriaSection
-            title="PRIVACY POLICY"
-            subtitle="Your information is handled with care and never sold or shared with third parties."
-            items={[]}
-          />
+          <View style={{ paddingTop: 40, paddingHorizontal: pad, paddingBottom: 32, gap: 8 }}>
+            <Text style={[s.heroTitle, isDesktop && { fontSize: 56 }]}>PRIVACY POLICY</Text>
+            <Text style={s.lastUpdated}>Last Updated: {LAST_UPDATED}</Text>
+            <Text style={[s.heroSub, isDesktop && { fontSize: 17 }]}>
+              Your information is handled with care and never sold or shared with third parties.
+            </Text>
+          </View>
 
-          <CriteriaSection title="We collect" items={PRIVACY_COLLECT} />
+          <CriteriaSection
+            title="We collect"
+            items={PRIVACY_COLLECT}
+          />
           <CriteriaSection title="How we use it" items={PRIVACY_USE} />
           <CriteriaSection title="How we protect it" items={PRIVACY_PROTECT} />
           <CriteriaSection title="How long we keep it" items={PRIVACY_RETENTION} />
           <CriteriaSection title="Cookies and similar technologies" items={PRIVACY_COOKIES} />
           <CriteriaSection title="Changes to this policy" items={PRIVACY_CHANGES} />
+
+          <View style={{ height: 40 }} />
         </MaxWidthContainer>
       </ScrollView>
     </PageLayout>
   );
 }
+
+const s = StyleSheet.create({
+  heroTitle: { fontFamily: FONTS.clashMedium, fontSize: 36, color: COLORS.primary, lineHeight: 40 },
+  lastUpdated: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.muted },
+  heroSub: { fontFamily: FONTS.dmRegular, fontSize: 15, color: COLORS.muted, lineHeight: 24 },
+});

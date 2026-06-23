@@ -8,6 +8,8 @@ import CriteriaSection from '../components/seller/CriteriaSection';
 import LegalCards from '../components/seller/LegalCards';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 
+const LAST_UPDATED = 'June 2026';
+
 const SELLING_CRITERIA = [
   'Clean, free of odors, stains, or visible dirt',
   'Not torn, broken, or damaged beyond repair',
@@ -52,7 +54,7 @@ const LEGAL_CARDS = [
   },
   {
     title: 'Image Rights & Reuse',
-    body: 'By listing items on Erlume, you grant us a perpetual, worldwide license to use, reproduce, and distribute product photography for marketing, promotional, and archival purposes—including long after the item has sold. This allows us to maintain a comprehensive catalog and leverage high-quality imagery across campaigns.',
+    body: 'By listing items, you grant us a perpetual license to use product photography for marketing, promotional, and archival purposes.',
   },
 ];
 
@@ -69,8 +71,9 @@ export default function SellerPolicyScreen() {
       <ScrollView>
         <MaxWidthContainer>
           {/* Hero */}
-          <View style={{ paddingHorizontal: pad, paddingTop: 40, paddingBottom: 32, gap: 12 }}>
+          <View style={{ paddingHorizontal: pad, paddingTop: 40, paddingBottom: 32, gap: 8 }}>
             <Text style={[s.heroTitle, width >= BREAKPOINT && { fontSize: 56 }]}>SELLING POLICY</Text>
+            <Text style={s.lastUpdated}>Last Updated: {LAST_UPDATED}</Text>
             <Text style={[s.heroSub, width >= BREAKPOINT && { fontSize: 17 }]}>
               Everything you need to know before listing with erlume.
             </Text>
@@ -84,9 +87,7 @@ export default function SellerPolicyScreen() {
           />
 
           {/* Legal section */}
-          <View style={{ paddingVertical: 32 }}>
-            <LegalCards title="Legal" cards={LEGAL_CARDS} />
-          </View>
+          <LegalCards title="Legal" cards={LEGAL_CARDS} />
 
           <View style={{ height: 40 }} />
         </MaxWidthContainer>
@@ -97,5 +98,6 @@ export default function SellerPolicyScreen() {
 
 const s = StyleSheet.create({
   heroTitle: { fontFamily: FONTS.clashMedium, fontSize: 36, color: COLORS.primary, lineHeight: 40 },
+  lastUpdated: { fontFamily: FONTS.dmRegular, fontSize: 13, color: COLORS.muted },
   heroSub: { fontFamily: FONTS.dmRegular, fontSize: 15, color: COLORS.muted, lineHeight: 24 },
 });

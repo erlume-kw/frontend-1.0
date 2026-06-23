@@ -51,8 +51,9 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
       await subscribeNewsletter(email);
       setSuccess(true);
       setEmail('');
-    } catch {
-      setEmailError('Something went wrong. Please try again.');
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Something went wrong. Please try again.';
+      setEmailError(errorMessage);
     } finally {
       setVerifying(false);
     }
@@ -104,7 +105,7 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
 function FooterCopyright() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
-  const hPad = isDesktop ? SCREEN_PADDING.desktop : 32;
+  const hPad = isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.mobile;
 
   return (
     <View style={[s.copyright, { paddingHorizontal: hPad }]}>
@@ -133,12 +134,12 @@ function MobileFooter() {
   return (
     <View style={s.footer}>
       {/* Newsletter — top of footer */}
-      <View style={s.mobileInner}>
+      <View style={[s.mobileInner, { padding: SCREEN_PADDING.mobile, paddingTop: 48 }]}>
         <NewsletterSection compact />
       </View>
 
       {/* Nav links accordion */}
-      <View style={s.mobileInner}>
+      <View style={[s.mobileInner, { padding: SCREEN_PADDING.mobile }]}>
         {Object.keys(FOOTER_DATA.columns).map(label => (
           <View key={label}>
             <TouchableOpacity
@@ -182,7 +183,7 @@ function DesktopFooter() {
     <View style={s.footer}>
       {/* Newsletter — top of footer */}
       <MaxWidthContainer>
-        <View style={s.desktopNewsletter}>
+        <View style={[s.desktopNewsletter, { paddingTop: 80 }]}>
           <NewsletterSection />
         </View>
       </MaxWidthContainer>
@@ -304,7 +305,7 @@ const s = StyleSheet.create({
   },
 
   // Mobile
-  mobileInner: { padding: 32 },
+  mobileInner: {},
   accordionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

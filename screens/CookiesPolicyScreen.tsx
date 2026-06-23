@@ -5,64 +5,57 @@ import {
   ScrollView,
   StyleSheet,
   useWindowDimensions,
-  TouchableOpacity,
 } from 'react-native';
 import SiteHeader from '../components/layout/SiteHeader';
 import PageLayout from '../components/layout/PageLayout';
 import SideMenu from '../components/layout/SideMenu';
 import MaxWidthContainer from '../components/layout/MaxWidthContainer';
+import CriteriaSection from '../components/seller/CriteriaSection';
 import { COLORS, FONTS, BREAKPOINT, SCREEN_PADDING } from '../constants/brand';
 
-const SECTIONS = [
-  {
-    title: 'What Are Cookies?',
-    content: `Cookies are small text files that are stored on your device when you visit a website. They allow us to remember information about your visit and improve your browsing experience. Cookies are widely used on the internet and are essential for many website features to function properly.`,
-  },
-  {
-    title: 'Types of Cookies We Use',
-    content: `We use the following types of cookies on our website:
+const LAST_UPDATED = 'June 2026';
 
-• Essential Cookies: These cookies are necessary for the website to function properly. They enable basic functions like page navigation and access to secure areas.
+const COOKIES_WHAT = [
+  'Cookies are small text files that are stored on your device when you visit a website.',
+  'They allow us to remember information about your visit and improve your browsing experience.',
+  'Cookies are widely used on the internet and are essential for many website features to function properly.',
+];
 
-• Performance & Analytics Cookies: We use these to understand how visitors interact with our site. This helps us improve performance and user experience.
+const COOKIES_TYPES = [
+  'Essential Cookies: These cookies are necessary for the website to function properly. They enable basic functions like page navigation and access to secure areas.',
+  'Performance & Analytics Cookies: We use these to understand how visitors interact with our site. This helps us improve performance and user experience.',
+  'Preference Cookies: These cookies remember your preferences and settings, so you don\'t have to re-enter them every time you visit.',
+  'Marketing & Social Media Cookies: We may use these to show you relevant content and to track the effectiveness of our marketing campaigns.',
+];
 
-• Preference Cookies: These cookies remember your preferences and settings, so you don't have to re-enter them every time you visit.
+const COOKIES_CHOICES = [
+  'Accept all cookies by clicking "Accept" in our cookie banner',
+  'Decline non-essential cookies by clicking "Decline"',
+  'Manage your cookie preferences in your browser settings',
+  'Delete cookies from your device at any time',
+];
 
-• Marketing & Social Media Cookies: We may use these to show you relevant content and to track the effectiveness of our marketing campaigns.`,
-  },
-  {
-    title: 'Your Cookie Choices',
-    content: `You have full control over cookies. You can:
+const COOKIES_DURATION = [
+  'Session Cookies: These cookies expire when you close your browser.',
+  'Persistent Cookies: These cookies remain on your device for a set period (typically 1 year) or until you manually delete them.',
+];
 
-• Accept all cookies by clicking "Accept" in our cookie banner
-• Decline non-essential cookies by clicking "Decline"
-• Manage your cookie preferences in your browser settings
-• Delete cookies from your device at any time
+const COOKIES_THIRD_PARTY = [
+  'Some content on our website may be provided by third parties, and they may set their own cookies.',
+  'We do not control these third-party cookies.',
+  'Please review their privacy policies to understand how they use cookies.',
+];
 
-Please note that declining cookies may affect the functionality of certain features on our website.`,
-  },
-  {
-    title: 'Cookie Duration',
-    content: `Different cookies have different lifespans:
-
-• Session Cookies: These cookies expire when you close your browser.
-• Persistent Cookies: These cookies remain on your device for a set period (typically 1 year) or until you manually delete them.
-
-You can view and manage the expiration dates of cookies in your browser settings.`,
-  },
-  {
-    title: 'Third-Party Cookies',
-    content: `Some content on our website may be provided by third parties, and they may set their own cookies. We do not control these third-party cookies. Please review their privacy policies to understand how they use cookies.`,
-  },
-  {
-    title: 'Changes to This Policy',
-    content: `We may update this Cookies Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. We will notify you of any material changes by updating the "Last Updated" date below.`,
-  },
+const COOKIES_CHANGES = [
+  'We reserve the right to update this Cookies Policy from time to time.',
+  'Changes will reflect updates in our practices or for operational, legal, or regulatory reasons.',
+  'Material changes will be notified by updating the "Last Updated" date.',
 ];
 
 export default function CookiesPolicyScreen() {
   const { width } = useWindowDimensions();
   const isDesktop = width >= BREAKPOINT;
+  const pad = isDesktop ? SCREEN_PADDING.desktop : 16;
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -72,22 +65,25 @@ export default function CookiesPolicyScreen() {
     >
       <ScrollView>
         <MaxWidthContainer>
-          {/* Page Title */}
-          <View style={[s.titleSection, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.mobile }]}>
-            <Text style={[s.pageTitle, isDesktop && { fontSize: 56 }]}>COOKIES POLICY</Text>
-            <Text style={s.lastUpdated}>Last Updated: June 2026</Text>
+          {/* Hero/Title */}
+          <View style={{ paddingHorizontal: pad, paddingTop: 40, paddingBottom: 32, gap: 8 }}>
+            <Text style={[s.heroTitle, isDesktop && { fontSize: 56 }]}>COOKIES POLICY</Text>
+            <Text style={s.lastUpdated}>Last Updated: {LAST_UPDATED}</Text>
+            <Text style={[s.heroSub, isDesktop && { fontSize: 17 }]}>
+              Learn about how we use cookies to enhance your experience on our platform.
+            </Text>
           </View>
 
-          {/* Content */}
-          <View style={[s.contentSection, { paddingHorizontal: isDesktop ? SCREEN_PADDING.desktop : SCREEN_PADDING.mobile }]}>
-            {SECTIONS.map((section, index) => (
-              <View key={index} style={s.section}>
-                <Text style={s.sectionTitle}>{section.title}</Text>
-                <Text style={s.sectionContent}>{section.content}</Text>
-              </View>
-            ))}
+          {/* Sections */}
+          <CriteriaSection title="What Are Cookies?" items={COOKIES_WHAT} />
+          <CriteriaSection title="Types of Cookies We Use" items={COOKIES_TYPES} />
+          <CriteriaSection title="Your Cookie Choices" items={COOKIES_CHOICES} />
+          <CriteriaSection title="Cookie Duration" items={COOKIES_DURATION} />
+          <CriteriaSection title="Third-Party Cookies" items={COOKIES_THIRD_PARTY} />
+          <CriteriaSection title="Changes to This Policy" items={COOKIES_CHANGES} />
 
-            {/* CTA */}
+          {/* CTA */}
+          <View style={{ paddingHorizontal: pad, paddingVertical: 32 }}>
             <View style={s.ctaSection}>
               <Text style={s.ctaTitle}>Have Questions?</Text>
               <Text style={s.ctaText}>
@@ -97,7 +93,7 @@ export default function CookiesPolicyScreen() {
             </View>
           </View>
 
-          <View style={{ height: 48 }} />
+          <View style={{ height: 40 }} />
         </MaxWidthContainer>
       </ScrollView>
     </PageLayout>
@@ -105,12 +101,7 @@ export default function CookiesPolicyScreen() {
 }
 
 const s = StyleSheet.create({
-  titleSection: {
-    paddingTop: 40,
-    paddingBottom: 32,
-    gap: 8,
-  },
-  pageTitle: {
+  heroTitle: {
     fontFamily: FONTS.clashMedium,
     fontSize: 36,
     color: COLORS.primary,
@@ -121,22 +112,9 @@ const s = StyleSheet.create({
     fontSize: 13,
     color: COLORS.muted,
   },
-  contentSection: {
-    gap: 32,
-    paddingBottom: 32,
-  },
-  section: {
-    gap: 12,
-  },
-  sectionTitle: {
-    fontFamily: FONTS.clashMedium,
-    fontSize: 18,
-    color: COLORS.primary,
-    lineHeight: 24,
-  },
-  sectionContent: {
+  heroSub: {
     fontFamily: FONTS.dmRegular,
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.muted,
     lineHeight: 24,
   },
@@ -146,7 +124,6 @@ const s = StyleSheet.create({
     borderColor: COLORS.border,
     padding: 24,
     gap: 12,
-    marginTop: 16,
   },
   ctaTitle: {
     fontFamily: FONTS.clashMedium,

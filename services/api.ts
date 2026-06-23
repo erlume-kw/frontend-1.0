@@ -11,13 +11,53 @@ clearTokens().catch(() => {});
 const TOKEN_KEY = 'erlume_access_token';
 const REFRESH_KEY = 'erlume_refresh_token';
 
+// Cookie helper functions
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null; // Not in browser
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    const token = parts.pop()?.split(';').shift() || null;
+    console.log(`[API] getCookie(${name}):`, token ? 'FOUND' : 'NOT FOUND');
+    return token;
+  }
+  console.log(`[API] getCookie(${name}): NOT FOUND (no match)`);
+  return null;
+}
+
+function setCookie(name: string, value: string, days: number = 30): void {
+  if (typeof document === 'undefined') return; // Not in browser
+  const date = new Date();
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+  const expires = `expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax`;
+  console.log(`[API] setCookie(${name}): SET`);
+}
+
+function removeCookie(name: string): void {
+  if (typeof document === 'undefined') return; // Not in browser
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax`;
+  console.log(`[API] removeCookie(${name}): REMOVED`);
+}
+
 export async function getAccessToken(): Promise<string | null> {
+  // Try cookies first (web), fall back to AsyncStorage (mobile)
+  const cookieToken = getCookie(TOKEN_KEY);
+  if (cookieToken) return cookieToken;
   return AsyncStorage.getItem(TOKEN_KEY);
 }
+
 export async function setTokens(access: string, refresh: string): Promise<void> {
+  // Store in both cookies (web) and AsyncStorage (mobile)
+  setCookie(TOKEN_KEY, access, 7); // 7 days
+  setCookie(REFRESH_KEY, refresh, 30); // 30 days
   await AsyncStorage.multiSet([[TOKEN_KEY, access], [REFRESH_KEY, refresh]]);
 }
+
 export async function clearTokens(): Promise<void> {
+  // Clear from both cookies (web) and AsyncStorage (mobile)
+  removeCookie(TOKEN_KEY);
+  removeCookie(REFRESH_KEY);
   await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_KEY]);
 }
 
@@ -44,7 +84,11 @@ async function request<T>(
   }
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
+  if (!res.ok) {
+    const error = new Error(data.error ?? `Request failed: ${res.status}`);
+    (error as any).data = data; // Attach full response data for field-specific errors
+    throw error;
+  }
   return data as T;
 }
 
@@ -140,11 +184,13 @@ export async function register(payload: {
 
 export async function logout(): Promise<void> {
   const refreshToken = await AsyncStorage.getItem(REFRESH_KEY);
-  if (refreshToken) {
+  try {
     await request('/api/auth/logout', {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }).catch(() => {});
+  } catch {
+    // Logout endpoint optional — always clear local tokens
   }
   await clearTokens();
 }

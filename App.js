@@ -9,8 +9,13 @@ import CookiesBanner from 'components/layout/CookiesBanner';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { CartProvider } from './contexts/CartContext';
 import { useNavigation } from '@react-navigation/native';
+import { enforceCanonicalHost } from './constants/config';
 
 import './global.css';
+
+// One origin for cookies, cart storage, and payment redirects (localhost →
+// canonical dev host on web; no-op in production)
+enforceCanonicalHost();
 
 function CookiesBannerWrapper() {
   const navigation = useNavigation();
@@ -27,9 +32,10 @@ const linking = {
       ProductDetail: 'product/:productId',
       Cart: 'cart',
       Checkout: 'checkout',
+      PaymentCallback: 'payment-callback',
       Sell: 'sell',
       Wishlist: 'wishlist',
-      Login: 'login',
+      SignInRegister: 'sign-in',
       SellerPolicy: 'seller-policy',
       PrivacyPolicy: 'privacy-policy',
       PricingEstimator: 'pricing-estimator',

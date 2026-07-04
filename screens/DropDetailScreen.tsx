@@ -36,7 +36,8 @@ export default function DropDetailScreen() {
   useEffect(() => {
     if (!dropId) { setLoading(false); return; }
     Promise.all([fetchDropById(dropId), fetchDropItems(dropId)])
-      .then(([d, i]) => { setDrop(d); setItems(i); })
+      // Only items still on sale appear in the shop — sold/reserved ones drop out
+      .then(([d, i]) => { setDrop(d); setItems(i.filter(item => item.itemStatus === 'available')); })
       .catch(e => console.error('DropDetailScreen fetch error:', e))
       .finally(() => setLoading(false));
   }, [dropId]);

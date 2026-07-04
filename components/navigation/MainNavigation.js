@@ -6,9 +6,9 @@ import DropDetailScreen from '../../screens/DropDetailScreen';
 import ProductDetailScreen from '../../screens/ProductDetailScreen';
 import CartScreen from '../../screens/CartScreen';
 import CheckoutScreen from '../../screens/CheckoutScreen';
+import PaymentCallbackScreen from '../../screens/PaymentCallbackScreen';
 import SellScreen from '../../screens/SellScreen';
 import WishlistScreen from '../../screens/WishlistScreen';
-import LoginScreen from '../../screens/auth/LoginScreen';
 import SignInRegisterScreen from '../../screens/auth/SignInRegisterScreen';
 import SellerPolicyScreen from '../../screens/SellerPolicyScreen';
 import PrivacyPolicyScreen from '../../screens/PrivacyPolicyScreen';
@@ -26,9 +26,9 @@ const MainNavigation = () => {
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
+      <Stack.Screen name="PaymentCallback" component={PaymentCallbackScreen} />
       <Stack.Screen name="Sell" component={SellScreen} />
       <Stack.Screen name="Wishlist" component={WishlistScreen} />
-      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SignInRegister" component={SignInRegisterScreen} />
       <Stack.Screen name="SellerPolicy" component={SellerPolicyScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />

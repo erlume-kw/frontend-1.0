@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+import { API_URL } from '../constants/config';
 
-// Clear any stale tokens on module load so expired sessions don't
-// trigger failed refresh loops on first request
-clearTokens().catch(() => {});
+const BASE_URL = API_URL;
+
+// NOTE: tokens are intentionally NOT cleared on load — a stored token is a
+// signed-in session that must survive page reloads. The default state with no
+// stored token is signed out. Expired tokens are handled by the 401 auto-refresh.
 
 // ─── Token storage ────────────────────────────────────────────────────────────
 
@@ -144,6 +146,14 @@ export interface AuthUser {
   _id: string;
   emailAddress: string;
   roles: string[];
+  phoneNumber?: string;
+  address?: {
+    street?: string;
+    block?: string;
+    city?: string;
+    governorate?: string;
+    house?: string;
+  };
 }
 
 export interface ApiList<T> {
@@ -196,46 +206,63 @@ export async function logout(): Promise<void> {
 }
 
 export async function getMe(): Promise<AuthUser> {
-  const data = await request<ApiSingle<AuthUser>>('/api/auth/me');
-  return data.data;
+  const data = await request<{ success: boolean; user: AuthUser }>('/api/auth/me');
+  return data.user;
 }
 
 // ─── Drops ────────────────────────────────────────────────────────────────────
-// Drops require admin auth. The service silently authenticates with the read-only
-// admin account on first call so the public browsing experience works without
-// requiring the customer to be logged in.
+// Drops require admin auth. A read-only admin token is fetched on demand and
+// kept ONLY in this module variable — it must never touch cookies/AsyncStorage,
+// otherwise every visitor would appear signed in as the admin account.
 
-let _dropTokenReady = false;
+let _dropsToken: string | null = null;
 
-async function ensureDropToken(): Promise<void> {
-  if (_dropTokenReady) return;
+async function getDropsToken(): Promise<string | null> {
+  if (_dropsToken) return _dropsToken;
   try {
-    await login(
-      process.env.EXPO_PUBLIC_DROPS_EMAIL ?? 'admin@erlume.com',
-      process.env.EXPO_PUBLIC_DROPS_PASSWORD ?? 'Erlume965$',
-    );
-    _dropTokenReady = true;
+    const res = await fetch(`${BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        emailAddress: process.env.EXPO_PUBLIC_DROPS_EMAIL ?? '',
+        password: process.env.EXPO_PUBLIC_DROPS_PASSWORD ?? '',
+      }),
+    });
+    const data = await res.json();
+    if (res.ok && data.accessToken) _dropsToken = data.accessToken;
   } catch {
     // silently fail — drops will show empty rather than crash
   }
+  return _dropsToken;
+}
+
+async function dropsRequest<T>(path: string): Promise<T> {
+  const token = await getDropsToken();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (res.status === 401) _dropsToken = null; // stale — refetch on next call
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
+  return data as T;
 }
 
 export async function fetchDrops(status?: string): Promise<Drop[]> {
-  await ensureDropToken();
   const q = status ? `?status=${status}` : '';
-  const data = await request<ApiList<Drop>>(`/api/drops${q}`);
+  const data = await dropsRequest<ApiList<Drop>>(`/api/drops${q}`);
   return data.data;
 }
 
 export async function fetchDropById(id: string): Promise<Drop> {
-  await ensureDropToken();
-  const data = await request<ApiSingle<Drop>>(`/api/drops/${id}`);
+  const data = await dropsRequest<ApiSingle<Drop>>(`/api/drops/${id}`);
   return data.data;
 }
 
 export async function fetchDropItems(dropId: string): Promise<Item[]> {
-  await ensureDropToken();
-  const data = await request<ApiList<Item>>(`/api/drops/${dropId}/items`);
+  const data = await dropsRequest<ApiList<Item>>(`/api/drops/${dropId}/items`);
   return data.data;
 }
 
@@ -313,4 +340,79 @@ export async function validateDiscountCode(code: string, orderTotal?: number): P
 export async function fetchShippingMethods(): Promise<{ _id: string; name: string; description: string; price: number }[]> {
   const data = await request<ApiList<{ _id: string; name: string; description: string; price: number }>>('/api/shipping');
   return data.data;
+}
+
+// ─── Checkout / Payments (MyFatoorah) ─────────────────────────────────────────
+
+export interface GuestInfo {
+  name: string;
+  phoneNumber?: string;
+  emailAddress?: string;
+  shippingAddress: {
+    street: string;
+    city: string;
+    block: string;
+    governorate: string;
+    house: string;
+    flat?: string;
+  };
+}
+
+export interface CreatedOrder {
+  _id: string;
+  order_status: string;
+}
+
+// Step 1 — create the order (backend puts it in pending status and reserves items)
+export async function createOrder(payload: {
+  user_id?: string;
+  guestInfo?: GuestInfo;
+  orderItems: { item_id: string; quantity?: number }[];
+}): Promise<CreatedOrder> {
+  const data = await request<ApiSingle<CreatedOrder>>('/api/orders', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return data.data;
+}
+
+// Signed-in checkout: switch the pending order to a different shipping address
+export async function updateOrderShippingAddress(
+  orderId: string,
+  payload: {
+    name: string;
+    shippingAddress: { street: string; city: string; block: string; governorate: string; house: string; flat?: string };
+  },
+): Promise<void> {
+  await request(`/api/orders/${orderId}/shipping-address`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+}
+
+// Step 2 — get a MyFatoorah embedded session for the order.
+// The backend recomputes the amount server-side; we only receive the sessionId.
+export async function initiatePayment(
+  orderId: string,
+  discountRate?: number,
+): Promise<{ sessionId: string; amount: number }> {
+  return request('/api/payments/initiate', {
+    method: 'POST',
+    body: JSON.stringify({ orderId, discountRate }),
+  });
+}
+
+// Step 3 — after the widget finishes, hand the result to the backend for
+// verification. Embedded methods send encrypted paymentData; hosted methods
+// (KNET) send the paymentId from the redirect. The backend re-verifies with
+// MyFatoorah either way — its answer is the only source of truth.
+export async function confirmPayment(payload: {
+  orderId?: string;
+  encryptedPaymentData?: string;
+  paymentId?: string;
+}): Promise<{ success: boolean; orderId: string | null; message: string }> {
+  return request('/api/payments/callback', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }

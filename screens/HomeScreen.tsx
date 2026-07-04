@@ -90,7 +90,8 @@ export default function HomeScreen() {
         setActiveDrop(drop);
         if (drop) {
           const dropItems = await fetchDropItems(drop._id);
-          setItems(dropItems.slice(0, 6));
+          // Sold/reserved items never appear on the shop surfaces
+          setItems(dropItems.filter(i => i.itemStatus === 'available').slice(0, 6));
         } else {
           const fallback = await fetchItems({ itemStatus: 'available', limit: '6' });
           setItems(fallback);

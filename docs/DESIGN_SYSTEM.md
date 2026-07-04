@@ -30,10 +30,11 @@ All values here take precedence over individual judgment — check here first, t
 
 ### Typefaces
 
-| Role                      | Font Family     | Import Method              |
-|---------------------------|-----------------|----------------------------|
-| Headings & Subheadings    | Clash Display   | Google Fonts / expo-font   |
-| Body, UI, labels, inputs  | DM Sans         | Google Fonts / expo-font   |
+| Role                      | Font Family     | Import Method                          |
+|---------------------------|-----------------|----------------------------------------|
+| Headings & Subheadings    | Clash Display   | `next/font/local` (src/app/fonts.ts)   |
+| Body, UI, labels, inputs  | DM Sans         | `next/font/google` (src/app/fonts.ts)  |
+| Logo script accents       | Sarina          | `next/font/google` (src/app/fonts.ts)  |
 
 ### Type Scale
 
@@ -263,16 +264,65 @@ Max content width: **1280px**, centered.
 
 ---
 
-## 13. Implementation Notes (React Native / NativeWind)
+## 13. Implementation Notes (Next.js / Tailwind CSS)
 
-- Use `tailwind.config.js` custom tokens (see file) for all colors, spacing, and typography
-- Fonts must be loaded via `expo-font` with the exact family names:
-  - `ClashDisplay-Medium`, `ClashDisplay-SemiBold`
-  - `DMSans-Regular`, `DMSans-Medium`, `DMSans-SemiBold`
-- All spacing values in RN are unitless numbers (device-independent pixels), matching the px values above
-- For responsive sizing use the `useWindowDimensions` hook or `Platform.OS`
-- Screen padding should be applied via a `<ScreenWrapper>` component (to be created)
-- NativeWind class naming follows the custom token names defined in `tailwind.config.js`
+The frontend is a Next.js (App Router) application styled exclusively with inline
+Tailwind utility classes. There are no CSS modules, styled-components, or
+StyleSheet objects — the class list on the element IS the style.
+
+### Theme tokens
+
+All colors and font families live in `tailwind.config.ts` and MUST be used via
+their token names — never hardcode hex values in components:
+
+| Tailwind class     | Token            | Hex       |
+|--------------------|------------------|-----------|
+| `bg-primary` / `text-primary`     | brand-primary   | `#18230F` |
+| `bg-secondary` / `text-secondary` | brand-secondary | `#C5705D` |
+| `text-olive` / `bg-olive`         | olive           | `#38452D` |
+| `bg-bgLight`       | bg-light         | `#DFD3C3` |
+| `bg-offWhite`      | off-white        | `#F8EDE3` |
+| `text-muted`       | text-muted       | `#7A7060` |
+| `border-border`    | border           | `#C9BFAD` |
+| `text-error`       | error            | `#B94040` |
+| `bg-lightGrey`     | light-grey       | `#F5F5F5` |
+| `bg-placeholder`   | placeholder      | `#D7DAD5` |
+
+### Typography classes
+
+Fonts are loaded once in `src/app/fonts.ts` (next/font) and exposed as CSS
+variables consumed by the Tailwind `fontFamily` config:
+
+- `font-clash` — Clash Display. Weights: `font-light` (300), default (400),
+  `font-medium` (500), `font-semibold` (600)
+- `font-dm` — DM Sans. Weights: default (400), `font-medium` (500),
+  `font-semibold` (600)
+- `font-sarina` — Sarina (script, logo contexts only)
+
+Exact pixel sizes from the type scale use arbitrary values: `text-[14px]`,
+`leading-[22px]`, `tracking-[1.2px]`.
+
+### Layout conventions
+
+- The single responsive breakpoint is 768px. Components branch with the
+  `useIsDesktop()` hook (`src/lib/useIsDesktop.ts`) when the mobile and desktop
+  trees differ structurally; pure-CSS cases may use the `md:` prefix (also 768px).
+- Screen padding: `px-4` mobile / `px-16` desktop (16px / 64px)
+- Max content width: wrap page content in `<MaxWidthContainer>` (1280px, centered)
+- Page shell: wrap every page in `<PageLayout header={<SiteHeader/>} menu={...}>`
+  — it provides the sticky footer behavior
+- Environment URLs (API, MyFatoorah script, canonical host) live ONLY in
+  `src/lib/config.ts` / `NEXT_PUBLIC_*` env vars
+
+### Component conventions
+
+- Buttons are native `<button>` elements (a global reset in `globals.css`
+  strips default browser styling); zero border-radius everywhere per section 4
+- Modals/overlays are `fixed inset-0 z-[10000]` divs — no portal library
+- Images use plain `<img>` with `object-cover`; dead URLs hide via `onError`
+  so the gray placeholder shows (never the broken-image icon)
+- All pages are client components (`'use client'`) — auth tokens, the cart,
+  and the payment widget live in the browser
 
 ---
 
@@ -293,4 +343,4 @@ Screens implemented so far and the Figma source used:
 
 ---
 
-*Last updated: 2026-05-31. Update this document when adding new screens or discovering design inconsistencies.*
+*Last updated: 2026-07-04 (Next.js + Tailwind refactor). Update this document when adding new screens or discovering design inconsistencies.*

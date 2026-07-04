@@ -1,31 +1,25 @@
+# dependencies
 node_modules/
-.expo/
-dist/
-npm-debug.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
 
+# next.js
+.next/
+out/
 
+# production
+build/
 
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
 
-ios
-android
-
-# Environment variables
+# env files
 .env
 .env.local
 .env.*
 
-# macOS
-.DS_Store
-
-# Temporary files created by Metro to check the health of the file watcher
-.metro-health-check*
-
 # Playwright MCP browser-test artifacts
 .playwright-mcp/
+
+# IDE
+.vscode/

@@ -417,7 +417,7 @@ export default function SignInRegisterPage() {
                     <span className={`font-dm text-[14px] ${regGovernorate ? 'text-black' : 'text-muted'}`}>
                       {regGovernorate || 'Select governorate'}
                     </span>
-                    <span className="text-[12px] text-muted">▼</span>
+                    <span className="font-glyph text-[12px] text-muted">▼</span>
                   </button>
                   {regErrors.governorate && <span className={fieldErrorClass}>{regErrors.governorate}</span>}
                 </div>

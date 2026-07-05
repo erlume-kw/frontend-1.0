@@ -134,7 +134,7 @@ export default function PricingEstimatorPage() {
                   <span className={`font-dm text-[15px] ${brand ? 'text-black' : 'text-muted'}`}>
                     {brand || 'Select a brand'}
                   </span>
-                  <span className="text-[10px] text-muted">▼</span>
+                  <span className="font-glyph text-[10px] text-muted">▼</span>
                 </button>
               </div>
 

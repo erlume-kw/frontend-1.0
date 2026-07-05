@@ -27,3 +27,12 @@
     max-width: 100%;
   }
 }
+
+@layer utilities {
+  /* Symbol glyphs (♡ ♥ ▼ ›) don't exist in DM Sans / Clash Display, so the
+     browser falls back to next/font's metric-overridden fallback font, which
+     renders them vertically distorted. Route them to a real system font. */
+  .font-glyph {
+    font-family: 'Apple Symbols', 'Segoe UI Symbol', system-ui, sans-serif;
+  }
+}

@@ -81,7 +81,7 @@ export default function ProductCard({
         onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
       >
-        <span className="leading-none text-secondary" style={{ fontSize: heartSize }}>
+        <span className="font-glyph leading-none text-secondary" style={{ fontSize: heartSize }}>
           {isWishlisted ? '♥' : '♡'}
         </span>
       </button>

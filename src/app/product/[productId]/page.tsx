@@ -361,7 +361,7 @@ export default function ProductDetailPage() {
           className="flex w-[75px] items-center justify-center bg-lightGrey"
           onClick={() => handleWishlistPress(productItem)}
         >
-          <span className={`text-[28px] ${inWishlist ? 'text-secondary' : 'text-muted'}`}>
+          <span className={`font-glyph text-[28px] leading-none ${inWishlist ? 'text-secondary' : 'text-muted'}`}>
             {inWishlist ? '♥' : '♡'}
           </span>
         </button>

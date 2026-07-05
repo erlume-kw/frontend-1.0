@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useIsDesktop } from '@/lib/useIsDesktop';
+import HeartIcon from './HeartIcon';
 
 interface ProductCardProps {
   brand?: string;
@@ -81,9 +82,7 @@ export default function ProductCard({
         onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
         aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
       >
-        <span className="font-glyph leading-none text-secondary" style={{ fontSize: heartSize }}>
-          {isWishlisted ? '♥' : '♡'}
-        </span>
+        <HeartIcon size={heartSize} color="#C5705D" filled={isWishlisted} />
       </button>
     </div>
   );

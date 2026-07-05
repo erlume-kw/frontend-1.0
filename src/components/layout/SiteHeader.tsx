@@ -6,6 +6,7 @@ import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import MaxWidthContainer from './MaxWidthContainer';
+import HeartIcon from '../ui/HeartIcon';
 import LogoutConfirmModal from '../LogoutConfirmModal';
 import { logout as apiLogout, getAccessToken } from '@/services/api';
 
@@ -149,7 +150,7 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
 
       <div className="flex flex-row items-center gap-4">
         <button onClick={() => go('/wishlist')} className="relative p-1">
-          <span className="font-glyph text-[22px] leading-none text-primary">♡</span>
+          <HeartIcon size={22} color="#18230F" />
           {wishlistCount > 0 && (
             <span className="absolute -right-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
               <span className="font-dm font-medium text-[9px] leading-3 text-white">{wishlistCount}</span>

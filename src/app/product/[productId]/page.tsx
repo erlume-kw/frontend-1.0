@@ -7,6 +7,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import ProductCard from '@/components/ui/ProductCard';
+import HeartIcon from '@/components/ui/HeartIcon';
 import SignInPromptModal from '@/components/SignInPromptModal';
 import { SkeletonProductDetail } from '@/components/ui/Skeleton';
 import { useWishlist, type WishlistItem } from '@/contexts/WishlistContext';
@@ -361,9 +362,7 @@ export default function ProductDetailPage() {
           className="flex w-[75px] items-center justify-center bg-lightGrey"
           onClick={() => handleWishlistPress(productItem)}
         >
-          <span className={`font-glyph text-[28px] leading-none ${inWishlist ? 'text-secondary' : 'text-muted'}`}>
-            {inWishlist ? '♥' : '♡'}
-          </span>
+          <HeartIcon size={28} color={inWishlist ? '#C5705D' : '#7A7060'} filled={inWishlist} />
         </button>
       )}
       {isSold ? (

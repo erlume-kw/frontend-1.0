@@ -215,16 +215,15 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <span className="font-dm text-[13px] leading-[19px] text-muted">{addressLine}</span>
+                    <button className="mt-2 self-start" onClick={startEditingAddress}>
+                      <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-secondary">
+                        EDIT ADDRESS
+                      </span>
+                    </button>
                   </div>
                   {addressSaved && (
                     <span className="font-dm text-[13px] text-olive">Address updated.</span>
                   )}
-                  <button
-                    className="flex h-12 items-center justify-center border border-border bg-white"
-                    onClick={startEditingAddress}
-                  >
-                    <span className="font-clash font-medium text-[13px] tracking-[1px] text-black">EDIT ADDRESS</span>
-                  </button>
                 </>
               ) : (
                 <>
@@ -294,10 +293,8 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Change password */}
+            {/* Change password — just a button, no section heading */}
             <div className="mb-8 flex flex-col gap-[14px]">
-              <span className={sectionTitle}>Password</span>
-
               {!editingPassword ? (
                 <>
                   {passwordSaved && (

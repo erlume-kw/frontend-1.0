@@ -177,7 +177,7 @@ export default function ProfilePage() {
             <span className="font-dm text-[14px] text-muted">Loading…</span>
           </div>
         ) : (
-          <div className={`mx-auto w-full max-w-[641px] ${isDesktop ? 'py-12' : 'p-[21px]'}`}>
+          <div className={`w-full ${isDesktop ? 'py-12' : 'p-[21px]'}`}>
             <h1 className={`mb-7 font-clash font-medium text-black ${isDesktop ? 'text-[40px]' : 'text-[28px]'}`}>
               PROFILE
             </h1>
@@ -301,7 +301,7 @@ export default function ProfilePage() {
                     <span className="font-dm text-[13px] text-olive">Password changed.</span>
                   )}
                   <button
-                    className="flex h-12 items-center justify-center border border-border bg-white"
+                    className="flex h-12 items-center justify-center self-start border border-border bg-white px-6"
                     onClick={() => { setEditingPassword(true); setPasswordError(''); setPasswordSaved(false); }}
                   >
                     <span className="font-clash font-medium text-[13px] tracking-[1px] text-black">CHANGE PASSWORD</span>

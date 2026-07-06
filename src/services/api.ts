@@ -222,6 +222,25 @@ export async function getMe(): Promise<AuthUser> {
   return data.user;
 }
 
+// Profile: update own saved address
+export async function updateMyAddress(
+  userId: string,
+  address: { street: string; block: string; city: string; governorate: string; house: string },
+): Promise<void> {
+  await request(`/api/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ address }),
+  });
+}
+
+// Profile: authenticated password change (requires the current password)
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await request('/api/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 // ─── Drops ────────────────────────────────────────────────────────────────────
 // Drops require admin auth. A read-only admin token is fetched on demand and
 // kept ONLY in this module variable — it must never touch cookies/localStorage,

@@ -19,41 +19,8 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
-
-// ─── Kuwait geographic data ────────────────────────────────────────────────────
-const KUWAIT_AREAS: Record<string, string[]> = {
-  'Al Asimah (Capital)': [
-    'Sharq', 'Dasman', 'Mirqab', 'Qibla', 'Salhiya',
-    'Dasma', 'Bneid Al-Gar', 'Mansouriya', 'Faiha', 'Shamiya', 'Rawda',
-    'Adailiya', 'Nuzha', 'Qadsiya', "Da'iya", 'Abdullah Al-Salem', 'Surra',
-    'Yarmouk', 'Jaber Al-Ahmad', 'Sulaibikhat', 'Doha',
-    'Shuwaikh Industrial', 'Shuwaikh Port',
-  ],
-  'Hawalli': [
-    'Hawalli', 'Salmiya', 'Rumaithiya', 'Jabriya', 'Bayan', 'Mishref',
-    'Maidan Hawalli', 'Salwa', "Bida'a", 'Mubarak Al-Abdullah',
-    'Shuhada', 'Heteen', 'Zahra', 'Salam', 'Siddeeq',
-  ],
-  'Farwaniya': [
-    'Farwaniya', 'Jleeb Al-Shuyoukh', 'Khaitan', 'Ardiya', 'Andalous',
-    'Ferdous', 'Sabah Al-Nasser', 'Rehab', 'Rabiya', 'Al-Rai', 'Al-Riggai',
-    'Al-Dajeej', 'Al-Shadadiya', 'Al-Omariya', 'Abdullah Al-Mubarak', 'Ishbiliya',
-  ],
-  'Mubarak Al-Kabeer': [
-    'Mubarak Al-Kabeer', 'Sabah Al-Salem', 'Adan', 'Qusour', 'Qurain',
-    'Fintas', 'Masila', 'Abu Fiteira', 'Funaitees', 'Subhan',
-  ],
-  'Al Ahmadi': [
-    'Ahmadi', 'Fahaheel', 'Mangaf', 'Mahboula', 'Abu Halifa', 'Fintas',
-    'Egaila', 'Hadiya', 'Dhaher', 'Riqqa', 'Sabah Al-Ahmad', 'Al-Khiran',
-    'Wafra', 'Jaber Al-Ali', 'Fahad Al-Ahmad',
-  ],
-  'Al Jahra': [
-    'Jahra', 'Saad Al-Abdullah', 'Tima', 'Oyoun', 'Qasr', 'Naseem',
-    'Waha', 'Naeem', 'Nuwaiseeb', 'Jahra Industrial Area', 'Kabad', 'Sulaibiya',
-  ],
-};
-const GOVERNORATES = Object.keys(KUWAIT_AREAS);
+import SelectField from '@/components/ui/SelectField';
+import { KUWAIT_AREAS, GOVERNORATES } from '@/lib/kuwait';
 
 // Payment slot phases — the MyFatoorah embedded widget carries the actual
 // payment methods (KNET / cards / Apple Pay / Google Pay); there is no PAY NOW.
@@ -62,66 +29,8 @@ type PaymentPhase = 'idle' | 'initiating' | 'paying' | 'verifying' | 'success' |
 const inputClass =
   'h-[52px] w-full border-0 bg-lightGrey px-[11px] font-dm text-[14px] text-black outline-none placeholder:text-muted';
 
-// ─── Dropdown — floats above all content ──────────────────────────────────────
-function SelectField({
-  value,
-  placeholder,
-  options,
-  onSelect,
-  disabled = false,
-}: {
-  value: string;
-  placeholder: string;
-  options: string[];
-  onSelect: (v: string) => void;
-  disabled?: boolean;
-}) {
-  const [open, setOpen] = useState(false);
 
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        className={`flex h-[52px] w-full flex-row items-center justify-between px-[11px] ${disabled ? 'bg-[#E8E8E8]' : 'bg-lightGrey'}`}
-        onClick={() => !disabled && setOpen(o => !o)}
-      >
-        <span className={`flex-1 truncate text-left font-dm text-[14px] ${value ? 'text-black' : 'text-muted'}`}>
-          {value || placeholder}
-        </span>
-        <span className={`font-clash text-[18px] text-muted ${open ? '-rotate-90' : 'rotate-90'}`}>›</span>
-      </button>
-
-      {open && (
-        <>
-          {/* Tap outside to close */}
-          <button
-            type="button"
-            className="fixed inset-0 z-[500] cursor-default"
-            onClick={() => setOpen(false)}
-            aria-label="Close dropdown"
-          />
-          <div className="absolute left-0 right-0 top-full z-[501] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.12)]">
-            <div className="max-h-[200px] overflow-y-auto">
-              {options.map(opt => (
-                <button
-                  type="button"
-                  key={opt}
-                  className={`block w-full border-b border-lightGrey px-[11px] py-3 text-left ${value === opt ? 'bg-[#EFF5FF]' : ''}`}
-                  onClick={() => { onSelect(opt); setOpen(false); }}
-                >
-                  <span className={`font-dm text-[14px] ${value === opt ? 'font-medium text-primary' : 'text-black'}`}>
-                    {opt}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
+// ─── Kuwait geographic data ────────────────────────────────────────────────────
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const isDesktop = useIsDesktop();

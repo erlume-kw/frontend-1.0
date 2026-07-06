@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import LogoutConfirmModal from '../LogoutConfirmModal';
-import { getAccessToken, clearTokens } from '@/services/api';
+import { getAccessToken } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
 
 interface SideMenuProps {
@@ -22,8 +21,6 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
   const router = useRouter();
   const { count: cartCount } = useCart();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -42,67 +39,45 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
     router.push(href);
   };
 
-  const handleConfirmLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await clearTokens();
-      setIsLoggedIn(false);
-      setShowLogoutConfirm(false);
-      onClose();
-      router.push('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-      setLoggingOut(false);
-    }
-  };
-
   if (!visible) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-[9000]">
-        <button className="absolute inset-0 bg-black/30" onClick={onClose} aria-label="Close menu" />
+    <div className="fixed inset-0 z-[9000]">
+      <button className="absolute inset-0 bg-black/30" onClick={onClose} aria-label="Close menu" />
 
-        <div className="relative z-10 w-full bg-primary pb-10 pt-[26px]">
-          <button
-            className="ml-[15px] flex h-11 w-11 items-center justify-center"
-            onClick={onClose}
-            aria-label="Close menu"
-          >
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+      <div className="relative z-10 w-full bg-primary pb-10 pt-[26px]">
+        <button
+          className="ml-[15px] flex h-11 w-11 items-center justify-center"
+          onClick={onClose}
+          aria-label="Close menu"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        <div className="flex flex-col items-center gap-[34px] pt-10">
+          {NAV_LINKS.map(({ label, href }) => (
+            <button key={label} onClick={() => handleNav(href)}>
+              <span className="font-clash font-medium text-[20px] leading-[25px] text-white">{label}</span>
+            </button>
+          ))}
+          <button onClick={() => handleNav('/cart')}>
+            <span className="font-clash font-medium text-[20px] leading-[25px] text-white">cart ({cartCount})</span>
           </button>
-
-          <div className="flex flex-col items-center gap-[34px] pt-10">
-            {NAV_LINKS.map(({ label, href }) => (
-              <button key={label} onClick={() => handleNav(href)}>
-                <span className="font-clash font-medium text-[20px] leading-[25px] text-white">{label}</span>
-              </button>
-            ))}
-            <button onClick={() => handleNav('/cart')}>
-              <span className="font-clash font-medium text-[20px] leading-[25px] text-white">cart ({cartCount})</span>
-            </button>
-          </div>
-
-          {isLoggedIn ? (
-            <button className="mx-auto mt-12 block" onClick={() => setShowLogoutConfirm(true)}>
-              <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">log out</span>
-            </button>
-          ) : (
-            <button className="mx-auto mt-12 block" onClick={() => handleNav('/sign-in')}>
-              <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">sign in</span>
-            </button>
-          )}
         </div>
+
+        {isLoggedIn ? (
+          <button className="mx-auto mt-12 block" onClick={() => handleNav('/profile')}>
+            <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">profile</span>
+          </button>
+        ) : (
+          <button className="mx-auto mt-12 block" onClick={() => handleNav('/sign-in')}>
+            <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">sign in</span>
+          </button>
+        )}
       </div>
-      <LogoutConfirmModal
-        visible={showLogoutConfirm}
-        onCancel={() => setShowLogoutConfirm(false)}
-        onConfirm={handleConfirmLogout}
-        isLoading={loggingOut}
-      />
-    </>
+    </div>
   );
 }

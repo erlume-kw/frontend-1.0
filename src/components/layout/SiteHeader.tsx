@@ -7,8 +7,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import MaxWidthContainer from './MaxWidthContainer';
 import HeartIcon from '../ui/HeartIcon';
-import LogoutConfirmModal from '../LogoutConfirmModal';
-import { logout as apiLogout, getAccessToken } from '@/services/api';
+import { getAccessToken } from '@/services/api';
 
 const LOGO_ASPECT = 300 / 65;
 
@@ -45,8 +44,6 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
   const { count: wishlistCount } = useWishlist();
   const { count: cartCount } = useCart();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [loggingOut, setLoggingOut] = useState(false);
 
   const checkAuthStatus = useCallback(async () => {
     try {
@@ -61,21 +58,6 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
   useEffect(() => {
     checkAuthStatus();
   }, [pathname, checkAuthStatus]);
-
-  const handleConfirmLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await apiLogout();
-      setIsLoggedIn(false);
-      setShowLogoutConfirm(false);
-      setLoggingOut(false);
-      router.push('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-      setLoggingOut(false);
-      setIsLoggedIn(false);
-    }
-  };
 
   const go = (href: string) => router.push(href);
 
@@ -104,7 +86,7 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
               </nav>
             </div>
 
-            {/* Right: Wishlist, Cart, Login/Logout */}
+            {/* Right: Wishlist, Cart, Profile/Sign-in */}
             <div className="flex w-[280px] flex-row items-center justify-end gap-8">
               <button onClick={() => go('/wishlist')}>
                 <span className="font-clash text-[16px] text-olive">
@@ -115,8 +97,8 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
                 <span className="font-clash text-[16px] text-olive">cart ({cartCount})</span>
               </button>
               {isLoggedIn ? (
-                <button onClick={() => setShowLogoutConfirm(true)}>
-                  <span className="font-clash text-[16px] text-olive">logout</span>
+                <button onClick={() => go('/profile')}>
+                  <span className="font-clash text-[16px] text-olive">profile</span>
                 </button>
               ) : (
                 <button onClick={() => go('/sign-in')}>
@@ -126,12 +108,6 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
             </div>
           </div>
         </MaxWidthContainer>
-        <LogoutConfirmModal
-          visible={showLogoutConfirm}
-          onCancel={() => setShowLogoutConfirm(false)}
-          onConfirm={handleConfirmLogout}
-          isLoading={loggingOut}
-        />
       </div>
     );
   }
@@ -165,12 +141,6 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
           <ShoppingBagIcon />
         </button>
       </div>
-      <LogoutConfirmModal
-        visible={showLogoutConfirm}
-        onCancel={() => setShowLogoutConfirm(false)}
-        onConfirm={handleConfirmLogout}
-        isLoading={loggingOut}
-      />
     </div>
   );
 }

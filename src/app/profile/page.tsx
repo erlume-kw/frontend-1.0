@@ -8,6 +8,7 @@ import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import LogoutConfirmModal from '@/components/LogoutConfirmModal';
 import SelectField from '@/components/ui/SelectField';
+import { SkeletonBox } from '@/components/ui/Skeleton';
 import { KUWAIT_AREAS, GOVERNORATES } from '@/lib/kuwait';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import {
@@ -173,8 +174,38 @@ export default function ProfilePage() {
     >
       <MaxWidthContainer className={isDesktop ? 'px-16' : ''}>
         {loading ? (
-          <div className="flex min-h-[300px] items-center justify-center">
-            <span className="font-dm text-[14px] text-muted">Loading…</span>
+          <div className={`w-full ${isDesktop ? 'py-12' : 'p-[21px]'}`}>
+            {/* Title */}
+            <SkeletonBox width={isDesktop ? 240 : 170} height={isDesktop ? 48 : 34} className="mb-7" />
+
+            {/* Account section */}
+            <div className="mb-8 flex flex-col gap-[14px]">
+              <SkeletonBox width={110} height={isDesktop ? 24 : 21} />
+              <div className="flex flex-col gap-4 border border-border bg-white p-4">
+                <div className="flex flex-col gap-2">
+                  <SkeletonBox width={60} height={12} />
+                  <SkeletonBox width="55%" height={16} />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <SkeletonBox width={110} height={12} />
+                  <SkeletonBox width="40%" height={16} />
+                </div>
+              </div>
+            </div>
+
+            {/* Saved address section */}
+            <div className="mb-8 flex flex-col gap-[14px]">
+              <SkeletonBox width={150} height={isDesktop ? 24 : 21} />
+              <div className="flex flex-col gap-[10px] border border-border bg-white p-4">
+                <SkeletonBox width={130} height={12} />
+                <SkeletonBox width="70%" height={14} />
+                <SkeletonBox width={100} height={12} className="mt-1" />
+              </div>
+            </div>
+
+            {/* Change password + logout */}
+            <SkeletonBox width={190} height={48} className="mb-8" />
+            <SkeletonBox height={48} />
           </div>
         ) : (
           <div className={`w-full ${isDesktop ? 'py-12' : 'p-[21px]'}`}>

@@ -23,6 +23,27 @@ import {
 const inputClass =
   'h-[52px] w-full border-0 bg-lightGrey px-[11px] font-dm text-[14px] text-black outline-none placeholder:text-muted';
 
+// A skeleton bar that occupies the same line box as real text (font-size × 1.5,
+// the app-wide default line-height), so the placeholder sits exactly where the
+// text will land. `bar` controls the visible bar thickness inside that line box.
+function SkeletonLine({
+  font,
+  width,
+  bar,
+  className = '',
+}: {
+  font: number;
+  width: number | string;
+  bar: number;
+  className?: string;
+}) {
+  return (
+    <div className={`flex items-center ${className}`} style={{ height: Math.round(font * 1.5) }}>
+      <SkeletonBox width={width} height={bar} />
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const isDesktop = useIsDesktop();
   const router = useRouter();
@@ -174,37 +195,47 @@ export default function ProfilePage() {
     >
       <MaxWidthContainer className={isDesktop ? 'px-16' : ''}>
         {loading ? (
+          // Mirrors the loaded layout exactly — same wrappers, gaps and margins,
+          // with each text placeholder reserving its real line-box height so
+          // nothing shifts when the content arrives.
           <div className={`w-full ${isDesktop ? 'py-12' : 'p-[21px]'}`}>
             {/* Title */}
-            <SkeletonBox width={isDesktop ? 240 : 170} height={isDesktop ? 48 : 34} className="mb-7" />
+            <SkeletonLine font={isDesktop ? 40 : 28} width={isDesktop ? 240 : 170} bar={isDesktop ? 34 : 26} className="mb-7" />
 
             {/* Account section */}
             <div className="mb-8 flex flex-col gap-[14px]">
-              <SkeletonBox width={110} height={isDesktop ? 24 : 21} />
-              <div className="flex flex-col gap-4 border border-border bg-white p-4">
-                <div className="flex flex-col gap-2">
-                  <SkeletonBox width={60} height={12} />
-                  <SkeletonBox width="55%" height={16} />
+              <SkeletonLine font={isDesktop ? 21 : 18} width={110} bar={20} />
+              <div className="flex flex-col gap-3 border border-border bg-white p-4">
+                <div className="flex flex-col gap-[2px]">
+                  <SkeletonLine font={12} width={60} bar={10} />
+                  <SkeletonLine font={14} width="55%" bar={12} />
                 </div>
-                <div className="flex flex-col gap-2">
-                  <SkeletonBox width={110} height={12} />
-                  <SkeletonBox width="40%" height={16} />
+                <div className="flex flex-col gap-[2px]">
+                  <SkeletonLine font={12} width={110} bar={10} />
+                  <SkeletonLine font={14} width="40%" bar={12} />
                 </div>
               </div>
             </div>
 
             {/* Saved address section */}
             <div className="mb-8 flex flex-col gap-[14px]">
-              <SkeletonBox width={150} height={isDesktop ? 24 : 21} />
-              <div className="flex flex-col gap-[10px] border border-border bg-white p-4">
-                <SkeletonBox width={130} height={12} />
-                <SkeletonBox width="70%" height={14} />
-                <SkeletonBox width={100} height={12} className="mt-1" />
+              <SkeletonLine font={isDesktop ? 21 : 18} width={150} bar={20} />
+              <div className="flex flex-col gap-[6px] border border-border bg-white p-4">
+                <div className="flex flex-row items-center justify-between">
+                  <SkeletonLine font={12} width={130} bar={10} />
+                  <SkeletonBox width={64} height={22} />
+                </div>
+                <SkeletonLine font={13} width="70%" bar={11} />
+                <SkeletonLine font={12} width={100} bar={10} className="mt-2" />
               </div>
             </div>
 
-            {/* Change password + logout */}
-            <SkeletonBox width={190} height={48} className="mb-8" />
+            {/* Change password */}
+            <div className="mb-8 flex flex-col gap-[14px]">
+              <SkeletonBox width={190} height={48} />
+            </div>
+
+            {/* Logout */}
             <SkeletonBox height={48} />
           </div>
         ) : (

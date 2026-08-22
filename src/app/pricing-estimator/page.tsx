@@ -1,14 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { openWhatsApp } from '@/lib/interactions';
-
-type Condition = 'worn' | 'fair' | 'good' | 'excellent' | 'never-worn';
+import {
+  identifyBagPhotos,
+  estimateBagPrice,
+  type BagCondition,
+  type EstimateBagPriceResult,
+} from '@/services/api';
 
 const POPULAR_BRANDS = [
   'Vintage',
@@ -40,24 +44,14 @@ const POPULAR_BRANDS = [
   'Marcella',
 ];
 
-const CONDITIONS: { label: string; value: Condition }[] = [
-  { label: 'Never Worn', value: 'never-worn' },
-  { label: 'Excellent', value: 'excellent' },
-  { label: 'Good', value: 'good' },
-  { label: 'Fair', value: 'fair' },
-  { label: 'Worn', value: 'worn' },
+// Same three tiers as the pricing formula (src/config/pricingEstimatorConfig.ts, backend).
+const CONDITIONS: { label: string; value: BagCondition }[] = [
+  { label: 'Like New', value: 'like-new' },
+  { label: 'Gently Used', value: 'gently-used' },
+  { label: 'Fair or Worn', value: 'fair-worn' },
 ];
 
-// Condition multipliers (0-1 scale)
-const CONDITION_MULTIPLIERS: Record<Condition, number> = {
-  'never-worn': 0.7,
-  excellent: 0.6,
-  good: 0.5,
-  fair: 0.35,
-  worn: 0.2,
-};
-
-const COMMISSION_RATE = 0.2;
+const MAX_PHOTOS = 3;
 
 const labelClass = 'font-clash font-medium text-[13px] uppercase tracking-[1px] text-primary';
 const inputClass =
@@ -70,9 +64,23 @@ export default function PricingEstimatorPage() {
   const [brandCustomInput, setBrandCustomInput] = useState('');
 
   const [brand, setBrand] = useState('');
+  const [model, setModel] = useState('');
   const [year, setYear] = useState('');
   const [originalPrice, setOriginalPrice] = useState('');
-  const [condition, setCondition] = useState<Condition>('good');
+  const [condition, setCondition] = useState<BagCondition>('gently-used');
+
+  // AI photo identification — optional; auto-fills brand/model above
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+  const [identifiedDetails, setIdentifiedDetails] = useState<{ size?: string; material?: string; color?: string }>({});
+  const [identifying, setIdentifying] = useState(false);
+  const [identifyNotice, setIdentifyNotice] = useState('');
+  const [identifyError, setIdentifyError] = useState('');
+
+  const [estimating, setEstimating] = useState(false);
+  const [estimateError, setEstimateError] = useState('');
+  const [result, setResult] = useState<EstimateBagPriceResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const handleBrandSelect = (selectedBrand: string) => {
@@ -81,21 +89,78 @@ export default function PricingEstimatorPage() {
     setBrandDropdownOpen(false);
   };
 
-  const estimatedValue = originalPrice ? parseFloat(originalPrice) * CONDITION_MULTIPLIERS[condition] : 0;
-  const commission = estimatedValue * COMMISSION_RATE;
-  const earnings = estimatedValue - commission;
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, MAX_PHOTOS);
+    if (!files.length) return;
+    photoPreviews.forEach(url => URL.revokeObjectURL(url));
+    setPhotos(files);
+    setPhotoPreviews(files.map(f => URL.createObjectURL(f)));
+    setIdentifyNotice('');
+    setIdentifyError('');
+  };
 
-  const handleSubmit = () => {
-    if (brand.trim() && year.trim() && originalPrice.trim()) {
+  const handleIdentify = async () => {
+    if (!photos.length) return;
+    setIdentifying(true);
+    setIdentifyError('');
+    setIdentifyNotice('');
+    try {
+      const identified = await identifyBagPhotos(photos, {
+        brand: brand.trim() || undefined,
+        model: model.trim() || undefined,
+      });
+      if (identified.brand) handleBrandSelect(identified.brand);
+      if (identified.model) setModel(identified.model);
+      setIdentifiedDetails({ size: identified.size, material: identified.material, color: identified.color });
+      if (identified.confidence === 'low') {
+        setIdentifyNotice("We're not fully sure about this one — please double check the brand and model below.");
+      }
+    } catch (err: any) {
+      setIdentifyError(err?.message || 'Could not identify the bag from these photos. Please fill in the details manually.');
+    } finally {
+      setIdentifying(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!(brand.trim() && originalPrice.trim())) return;
+    setEstimating(true);
+    setEstimateError('');
+    try {
+      const estimated = await estimateBagPrice({
+        brand: brand.trim(),
+        model: model.trim() || undefined,
+        size: identifiedDetails.size || undefined,
+        material: identifiedDetails.material || undefined,
+        color: identifiedDetails.color || undefined,
+        condition,
+        originalPrice: parseFloat(originalPrice),
+        yearPurchased: year.trim() ? parseInt(year, 10) : undefined,
+        pickupFee: 0,
+      });
+      setResult(estimated);
       setSubmitted(true);
+    } catch (err: any) {
+      setEstimateError(err?.message || 'Could not calculate an estimate. Please try again.');
+    } finally {
+      setEstimating(false);
     }
   };
 
   const handleReset = () => {
+    photoPreviews.forEach(url => URL.revokeObjectURL(url));
     setBrand('');
+    setModel('');
     setYear('');
     setOriginalPrice('');
-    setCondition('good');
+    setCondition('gently-used');
+    setPhotos([]);
+    setPhotoPreviews([]);
+    setIdentifiedDetails({});
+    setIdentifyNotice('');
+    setIdentifyError('');
+    setEstimateError('');
+    setResult(null);
     setSubmitted(false);
   };
 
@@ -180,9 +245,64 @@ export default function PricingEstimatorPage() {
                 </div>
               )}
 
+              {/* Model (optional) */}
+              <div className="flex flex-col gap-2">
+                <span className={labelClass}>Model (optional)</span>
+                <input
+                  className={inputClass}
+                  placeholder="e.g., Classic Flap"
+                  value={model}
+                  onChange={e => setModel(e.target.value)}
+                />
+              </div>
+
+              {/* Photos (optional) — AI auto-fill */}
+              <div className="flex flex-col gap-2">
+                <span className={labelClass}>Photos (optional) — let AI auto-fill brand &amp; model</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  className="hidden"
+                  onChange={handlePhotoChange}
+                />
+                <div className="flex flex-row items-center gap-2">
+                  <button
+                    className="flex h-11 items-center justify-center border border-border px-4"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-primary">
+                      {photos.length ? 'CHANGE PHOTOS' : 'ADD PHOTOS'}
+                    </span>
+                  </button>
+                  {photos.length > 0 && (
+                    <button
+                      className={`flex h-11 items-center justify-center bg-secondary px-4 ${identifying ? 'opacity-60' : ''}`}
+                      onClick={handleIdentify}
+                      disabled={identifying}
+                    >
+                      <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-white">
+                        {identifying ? 'IDENTIFYING…' : 'AUTO-FILL'}
+                      </span>
+                    </button>
+                  )}
+                </div>
+                {photoPreviews.length > 0 && (
+                  <div className="flex flex-row gap-2">
+                    {photoPreviews.map((src, i) => (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={src} alt="" className="h-[76px] w-[76px] border border-border object-cover" />
+                    ))}
+                  </div>
+                )}
+                {!!identifyNotice && <span className="font-dm text-[12px] text-muted">{identifyNotice}</span>}
+                {!!identifyError && <span className="font-dm text-[12px] text-error">{identifyError}</span>}
+              </div>
+
               {/* Year Input */}
               <div className="flex flex-col gap-2">
-                <span className={labelClass}>Year Purchased</span>
+                <span className={labelClass}>Year Purchased (optional)</span>
                 <input
                   className={inputClass}
                   placeholder="e.g., 2020"
@@ -229,22 +349,28 @@ export default function PricingEstimatorPage() {
                 </div>
               </div>
 
+              {!!estimateError && <span className="font-dm text-[13px] text-error">{estimateError}</span>}
+
               {/* Submit Button */}
-              <button className="mt-2 flex h-[60px] items-center justify-center bg-secondary" onClick={handleSubmit}>
+              <button
+                className={`mt-2 flex h-[60px] items-center justify-center bg-secondary ${estimating ? 'opacity-60' : ''}`}
+                onClick={handleSubmit}
+                disabled={estimating}
+              >
                 <span className="font-clash font-medium text-[14px] uppercase tracking-[1.2px] text-white">
-                  GET ESTIMATE
+                  {estimating ? 'CALCULATING…' : 'GET ESTIMATE'}
                 </span>
               </button>
             </div>
           </div>
 
           {/* Results - Right Column (only when submitted) */}
-          {submitted && (
+          {submitted && result && (
             <div className={`flex flex-col gap-6 border border-border bg-white py-8 ${isDesktop ? 'w-[450px] px-8' : 'w-full px-4'}`}>
               {/* Item Summary */}
               <div className="flex flex-col gap-1">
                 <span className="font-clash font-medium text-[14px] uppercase text-primary">
-                  {brand} • {year}
+                  {brand}{year ? ` • ${year}` : ''}
                 </span>
                 <span className="font-dm text-[13px] text-muted">
                   Original price: {originalPrice} KWD • {CONDITIONS.find(c => c.value === condition)?.label}
@@ -254,28 +380,37 @@ export default function PricingEstimatorPage() {
               {/* Divider */}
               <div className="h-px bg-border" />
 
-              {/* Breakdown */}
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-row items-center justify-between">
-                  <span className="font-dm text-[13px] text-muted">Estimated Value</span>
-                  <span className="font-dm font-semibold text-[14px] text-black">{estimatedValue.toFixed(2)} KWD</span>
-                </div>
+              {result.accept ? (
+                <>
+                  {/* Breakdown */}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-row items-center justify-between">
+                      <span className="font-dm text-[13px] text-muted">Estimated Listing Price</span>
+                      <span className="font-dm font-semibold text-[14px] text-black">{result.listingPrice.toFixed(2)} KWD</span>
+                    </div>
 
-                <div className="flex flex-row items-center justify-between">
-                  <span className="font-dm text-[13px] text-muted">Erlume Commission (20%)</span>
-                  <span className="font-dm font-semibold text-[14px] text-black">-{commission.toFixed(2)} KWD</span>
-                </div>
+                    <div className="flex flex-row items-center justify-between">
+                      <span className="font-dm text-[13px] text-muted">Erlume Commission</span>
+                      <span className="font-dm font-semibold text-[14px] text-black">-{result.erlumeCut.toFixed(2)} KWD</span>
+                    </div>
 
-                <div className="flex flex-row items-center justify-between border-t border-border pt-3">
-                  <span className="font-clash font-medium text-[14px] text-primary">You Earn</span>
-                  <span className="font-clash font-medium text-[18px] text-secondary">{earnings.toFixed(2)} KWD</span>
-                </div>
-              </div>
+                    <div className="flex flex-row items-center justify-between border-t border-border pt-3">
+                      <span className="font-clash font-medium text-[14px] text-primary">You Earn</span>
+                      <span className="font-clash font-medium text-[18px] text-secondary">{result.sellerPayout.toFixed(2)} KWD</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <span className="font-dm text-[14px] leading-[22px] text-muted">
+                  Based on these details, this item may be below our minimum listing threshold. Message us directly
+                  on WhatsApp and we&apos;ll take a closer look.
+                </span>
+              )}
 
               {/* WhatsApp CTA */}
               <button
                 className="mt-2 flex h-[60px] items-center justify-center border-2 border-olive bg-[#38452D15]"
-                onClick={() => openWhatsApp(`Hi! I'm interested in selling my ${brand} bag from ${year}.`)}
+                onClick={() => openWhatsApp(`Hi! I'm interested in selling my ${brand} bag${year ? ` from ${year}` : ''}.`)}
               >
                 <span className="font-clash font-medium text-[13px] uppercase tracking-[1px] text-olive">
                   START CHAT ON WHATSAPP

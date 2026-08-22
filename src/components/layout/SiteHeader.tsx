@@ -13,6 +13,8 @@ const LOGO_ASPECT = 300 / 65;
 
 interface SiteHeaderProps {
   onMenuPress?: () => void;
+  /** Return false to block navigation (e.g. checkout leave confirmation). */
+  onNavigate?: (href: string) => boolean;
 }
 
 function ErlumeLogo({ height }: { height: number }) {
@@ -37,7 +39,7 @@ function ShoppingBagIcon({ size = 22, color = '#18230F' }: { size?: number; colo
   );
 }
 
-export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
+export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps) {
   const isDesktop = useIsDesktop();
   const router = useRouter();
   const pathname = usePathname();
@@ -59,7 +61,10 @@ export default function SiteHeader({ onMenuPress }: SiteHeaderProps) {
     checkAuthStatus();
   }, [pathname, checkAuthStatus]);
 
-  const go = (href: string) => router.push(href);
+  const go = (href: string) => {
+    if (onNavigate && onNavigate(href) === false) return;
+    router.push(href);
+  };
 
   if (isDesktop) {
     return (

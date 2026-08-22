@@ -14,7 +14,14 @@
   button {
     @apply cursor-pointer text-left;
     background: none;
-    border: none;
+    /* Only zero the width, not the shorthand — `border: none` also sets
+       border-style: none, which then forces ANY border-width utility
+       (border, border-2, ...) applied later to compute as 0 regardless of
+       its value, silently killing every intentionally-bordered button
+       site-wide. Leaving border-style alone lets it fall back to the
+       Tailwind preflight's `border-style: solid`, so border utilities work
+       as expected while buttons with no border utility stay invisible. */
+    border-width: 0;
     padding: 0;
     font: inherit;
     color: inherit;

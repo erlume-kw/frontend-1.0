@@ -7,7 +7,10 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
-import { login, register } from '@/services/api';
+import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
+import SelectField from '@/components/ui/SelectField';
+import { login, register, requestEmailOtp } from '@/services/api';
+import VerifyEmailModal from '@/components/VerifyEmailModal';
 
 function Toast({ message }: { message: string }) {
   return (
@@ -29,7 +32,7 @@ export default function SignInRegisterPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'signin' | 'register'>('signin');
-  const [govDropdownOpen, setGovDropdownOpen] = useState(false);
+  const { areas, governorates } = useKuwaitAreas();
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -40,7 +43,6 @@ export default function SignInRegisterPage() {
 
   // Register State
   const [regEmail, setRegEmail] = useState('');
-  const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regPasswordConfirm, setRegPasswordConfirm] = useState('');
   const [regCountryCode, setRegCountryCode] = useState('+965');
@@ -56,14 +58,14 @@ export default function SignInRegisterPage() {
   // Field-specific errors
   const [regErrors, setRegErrors] = useState<Record<string, string>>({});
 
-  const KUWAIT_GOVERNORATES = [
-    'Al Asimah (Capital)',
-    'Hawalli',
-    'Farwaniya',
-    'Mubarak Al-Kabeer',
-    'Al Ahmadi',
-    'Al Jahra',
-  ];
+  // Email OTP verification (runs before the account is created)
+  const [showOtpModal, setShowOtpModal] = useState(false);
+
+  const handleGovernorateSelect = (gov: string) => {
+    setRegGovernorate(gov);
+    setRegCity(''); // city depends on governorate — reset when it changes
+    if (regErrors.governorate) setRegErrors({ ...regErrors, governorate: '' });
+  };
 
   const handleSignIn = async () => {
     setSignInError('');
@@ -88,58 +90,10 @@ export default function SignInRegisterPage() {
     }
   };
 
-  const handleRegister = async () => {
-    const newErrors: Record<string, string> = {};
-
-    // Validate email
-    if (!regEmail.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) {
-      newErrors.email = 'Invalid email format';
-    }
-
-    // Validate username
-    if (!regUsername.trim()) {
-      newErrors.username = 'Username is required';
-    } else if (regUsername.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
-    }
-
-    // Validate password
-    if (!regPassword.trim()) {
-      newErrors.password = 'Password is required';
-    } else if (regPassword.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-
-    // Validate password confirmation
-    if (!regPasswordConfirm.trim()) {
-      newErrors.passwordConfirm = 'Please confirm your password';
-    } else if (regPassword !== regPasswordConfirm) {
-      newErrors.passwordConfirm = 'Passwords do not match';
-    }
-
-    // Validate phone
-    if (!regPhone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (regPhone.length < 8) {
-      newErrors.phone = 'Phone number must be at least 8 digits';
-    }
-
-    // Validate address
-    if (!regStreet.trim()) newErrors.street = 'Street is required';
-    if (!regBlock.trim()) newErrors.block = 'Block is required';
-    if (!regHouse.trim()) newErrors.house = 'House number is required';
-    if (!regCity.trim()) newErrors.city = 'City is required';
-    if (!regGovernorate) newErrors.governorate = 'Governorate is required';
-
-    if (Object.keys(newErrors).length > 0) {
-      setRegErrors(newErrors);
-      return;
-    }
-
-    setRegErrors({});
-    setLoading(true);
+  // Creates the account — called only after the email is verified (or was
+  // already verified in a past flow)
+  const completeRegister = async () => {
+    setShowOtpModal(false);
     try {
       await register({
         emailAddress: regEmail,
@@ -182,6 +136,65 @@ export default function SignInRegisterPage() {
         setRegErrors({ submit: error?.message || 'Registration failed. Please try again.' });
       }
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    const newErrors: Record<string, string> = {};
+
+    // Validate email
+    if (!regEmail.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail)) {
+      newErrors.email = 'Invalid email format';
+    }
+
+    // Validate password
+    if (!regPassword.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (regPassword.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+
+    // Validate password confirmation
+    if (!regPasswordConfirm.trim()) {
+      newErrors.passwordConfirm = 'Please confirm your password';
+    } else if (regPassword !== regPasswordConfirm) {
+      newErrors.passwordConfirm = 'Passwords do not match';
+    }
+
+    // Validate phone
+    if (!regPhone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (regPhone.length < 8) {
+      newErrors.phone = 'Phone number must be at least 8 digits';
+    }
+
+    // Validate address
+    if (!regStreet.trim()) newErrors.street = 'Street is required';
+    if (!regBlock.trim()) newErrors.block = 'Block is required';
+    if (!regHouse.trim()) newErrors.house = 'House number is required';
+    if (!regCity.trim()) newErrors.city = 'City is required';
+    if (!regGovernorate) newErrors.governorate = 'Governorate is required';
+
+    if (Object.keys(newErrors).length > 0) {
+      setRegErrors(newErrors);
+      return;
+    }
+
+    setRegErrors({});
+    setLoading(true);
+    try {
+      // Emails that verified once (any flow) skip the OTP entirely
+      const { alreadyVerified } = await requestEmailOtp(regEmail.trim());
+      if (alreadyVerified) {
+        await completeRegister();
+        return;
+      }
+      setShowOtpModal(true);
+    } catch (error: any) {
+      setRegErrors({ email: error?.message || 'Could not send the verification code. Please try again.' });
       setLoading(false);
     }
   };
@@ -269,22 +282,6 @@ export default function SignInRegisterPage() {
                     disabled={loading}
                   />
                   {regErrors.email && <span className={fieldErrorClass}>{regErrors.email}</span>}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <span className={labelClass}>Username</span>
-                  <input
-                    className={`${inputClass} ${regErrors.username ? inputErrorClass : ''}`}
-                    placeholder="Choose a username"
-                    value={regUsername}
-                    onChange={e => {
-                      setRegUsername(e.target.value);
-                      if (regErrors.username) setRegErrors({ ...regErrors, username: '' });
-                    }}
-                    autoCapitalize="none"
-                    disabled={loading}
-                  />
-                  {regErrors.username && <span className={fieldErrorClass}>{regErrors.username}</span>}
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -393,60 +390,33 @@ export default function SignInRegisterPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <span className={labelClass}>City</span>
-                  <input
-                    className={`${inputClass} ${regErrors.city ? inputErrorClass : ''}`}
-                    placeholder="City"
-                    value={regCity}
-                    onChange={e => {
-                      setRegCity(e.target.value);
-                      if (regErrors.city) setRegErrors({ ...regErrors, city: '' });
-                    }}
-                    disabled={loading}
-                  />
-                  {regErrors.city && <span className={fieldErrorClass}>{regErrors.city}</span>}
-                </div>
-
+                {/* Governorate first, then City (dependent on governorate) */}
                 <div className="flex flex-col gap-2">
                   <span className={labelClass}>Governorate</span>
-                  <button
-                    className={`flex h-[50px] w-full flex-row items-center justify-between border border-border px-3 pr-3 ${regErrors.governorate ? inputErrorClass : ''}`}
-                    onClick={() => setGovDropdownOpen(true)}
-                  >
-                    <span className={`font-dm text-[14px] ${regGovernorate ? 'text-black' : 'text-muted'}`}>
-                      {regGovernorate || 'Select governorate'}
-                    </span>
-                    <span className="font-glyph text-[12px] text-muted">▼</span>
-                  </button>
+                  <SelectField
+                    value={regGovernorate}
+                    placeholder="Select governorate"
+                    options={governorates}
+                    onSelect={handleGovernorateSelect}
+                    disabled={loading}
+                  />
                   {regErrors.governorate && <span className={fieldErrorClass}>{regErrors.governorate}</span>}
                 </div>
 
-                {govDropdownOpen && (
-                  <div
-                    className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50"
-                    onClick={() => setGovDropdownOpen(false)}
-                  >
-                    <div className="max-h-[300px] w-[80%] max-w-[300px] overflow-y-auto border border-border bg-white">
-                      {KUWAIT_GOVERNORATES.map(gov => (
-                        <button
-                          key={gov}
-                          className={`block w-full border-b border-border px-4 py-3 text-left ${regGovernorate === gov ? 'bg-[rgba(197,112,93,0.1)]' : ''}`}
-                          onClick={e => {
-                            e.stopPropagation();
-                            setRegGovernorate(gov);
-                            if (regErrors.governorate) setRegErrors({ ...regErrors, governorate: '' });
-                            setGovDropdownOpen(false);
-                          }}
-                        >
-                          <span className={`font-dm text-[14px] ${regGovernorate === gov ? 'font-semibold text-secondary' : 'text-black'}`}>
-                            {gov}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <div className="flex flex-col gap-2">
+                  <span className={labelClass}>City</span>
+                  <SelectField
+                    value={regCity}
+                    placeholder={regGovernorate ? 'Select city' : 'Select governorate first'}
+                    options={regGovernorate ? (areas[regGovernorate] ?? []) : []}
+                    onSelect={city => {
+                      setRegCity(city);
+                      if (regErrors.city) setRegErrors({ ...regErrors, city: '' });
+                    }}
+                    disabled={loading || !regGovernorate}
+                  />
+                  {regErrors.city && <span className={fieldErrorClass}>{regErrors.city}</span>}
+                </div>
 
                 {regErrors.submit && <span className="mt-2 font-dm text-[13px] text-error">{regErrors.submit}</span>}
 
@@ -474,6 +444,12 @@ export default function SignInRegisterPage() {
           <div className="h-12" />
         </div>
       </MaxWidthContainer>
+      <VerifyEmailModal
+        visible={showOtpModal}
+        email={regEmail.trim()}
+        onClose={() => { setShowOtpModal(false); setLoading(false); }}
+        onVerified={completeRegister}
+      />
     </PageLayout>
   );
 }

@@ -9,7 +9,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import LogoutConfirmModal from '@/components/LogoutConfirmModal';
 import SelectField from '@/components/ui/SelectField';
 import { SkeletonBox } from '@/components/ui/Skeleton';
-import { KUWAIT_AREAS, GOVERNORATES } from '@/lib/kuwait';
+import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import {
   getAccessToken,
@@ -46,6 +46,7 @@ function SkeletonLine({
 
 export default function ProfilePage() {
   const isDesktop = useIsDesktop();
+  const { areas, governorates } = useKuwaitAreas();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -294,7 +295,7 @@ export default function ProfilePage() {
                       <SelectField
                         value={governorate}
                         placeholder="Governorate"
-                        options={GOVERNORATES}
+                        options={governorates}
                         onSelect={g => { setGovernorate(g); setArea(''); }}
                       />
                       <ErrorText field="governorate" />
@@ -303,7 +304,7 @@ export default function ProfilePage() {
                       <SelectField
                         value={area}
                         placeholder={governorate ? 'Area' : 'Select governorate first'}
-                        options={governorate ? KUWAIT_AREAS[governorate] ?? [] : []}
+                        options={governorate ? areas[governorate] ?? [] : []}
                         onSelect={setArea}
                         disabled={!governorate}
                       />

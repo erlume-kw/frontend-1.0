@@ -8,6 +8,8 @@ import { useCart } from '@/contexts/CartContext';
 interface SideMenuProps {
   visible: boolean;
   onClose: () => void;
+  /** Return false to block navigation (e.g. checkout leave confirmation). */
+  onNavigate?: (href: string) => boolean;
 }
 
 const NAV_LINKS = [
@@ -17,7 +19,7 @@ const NAV_LINKS = [
   { label: 'wishlist', href: '/wishlist' },
 ];
 
-export default function SideMenu({ visible, onClose }: SideMenuProps) {
+export default function SideMenu({ visible, onClose, onNavigate }: SideMenuProps) {
   const router = useRouter();
   const { count: cartCount } = useCart();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -35,6 +37,10 @@ export default function SideMenu({ visible, onClose }: SideMenuProps) {
   }, [visible]);
 
   const handleNav = (href: string) => {
+    if (onNavigate && onNavigate(href) === false) {
+      onClose();
+      return;
+    }
     onClose();
     router.push(href);
   };

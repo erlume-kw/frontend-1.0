@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import {
@@ -8,19 +8,22 @@ import {
   getAccessToken,
   getMe,
   createOrder,
+  cancelOrder,
   initiatePayment,
   confirmPayment,
   updateOrderShippingAddress,
   AuthUser,
 } from '@/services/api';
 import MyFatoorahEmbed, { MFWidgetResult } from '@/components/checkout/MyFatoorahEmbed';
+import CheckoutSessionModal from '@/components/CheckoutSessionModal';
+import LeaveCheckoutModal from '@/components/LeaveCheckoutModal';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import SelectField from '@/components/ui/SelectField';
-import { KUWAIT_AREAS, GOVERNORATES } from '@/lib/kuwait';
+import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
 
 // Payment slot phases — the MyFatoorah embedded widget carries the actual
 // payment methods (KNET / cards / Apple Pay / Google Pay); there is no PAY NOW.
@@ -29,16 +32,58 @@ type PaymentPhase = 'idle' | 'initiating' | 'paying' | 'verifying' | 'success' |
 const inputClass =
   'h-[52px] w-full border-0 bg-lightGrey px-[11px] font-dm text-[14px] text-black outline-none placeholder:text-muted';
 
+// ─── Pending-order persistence ─────────────────────────────────────────────────
+// Refreshing the checkout page must NOT mint a new order. We remember the pending
+// orderId (scoped to the exact set of cart items) in sessionStorage and reuse it,
+// so the same order/reservation survives reloads within the session. If the stored
+// order is no longer payable (paid, cancelled, or released by the 5-min sweep) the
+// backend answers 409/404 on initiate and we transparently create a fresh one.
+const PENDING_ORDER_KEY = 'erlume_pending_order';
 
-// ─── Kuwait geographic data ────────────────────────────────────────────────────
+function readStoredOrder(signature: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.sessionStorage.getItem(PENDING_ORDER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { orderId?: string; sig?: string };
+    if (parsed.orderId && parsed.sig === signature) return parsed.orderId;
+    // Cart changed since the order was created — that order is stale.
+    window.sessionStorage.removeItem(PENDING_ORDER_KEY);
+  } catch { /* corrupted storage — ignore */ }
+  return null;
+}
+
+function storeOrder(orderId: string, signature: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(PENDING_ORDER_KEY, JSON.stringify({ orderId, sig: signature }));
+  } catch { /* quota / private mode — reuse simply won't persist */ }
+}
+
+function clearStoredOrder(): void {
+  if (typeof window === 'undefined') return;
+  try { window.sessionStorage.removeItem(PENDING_ORDER_KEY); } catch { /* noop */ }
+}
+
+
+// ─── Session keepalive constants ───────────────────────────────────────────────
+const SESSION_MS = 5 * 60 * 1000; // 5 minutes in paying state → show prompt
+const EXTENSION_S = 60;            // 1-minute countdown window in the prompt
+
+function hasActiveReservation(orderId: string | null, phase: PaymentPhase): boolean {
+  return !!orderId && (phase === 'paying' || phase === 'failed' || phase === 'initiating');
+}
+
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
+  const { areas, governorates } = useKuwaitAreas();
 
   // Auth state — default is signed OUT; only a stored user session flips it
   const [authChecked, setAuthChecked] = useState(false);
+  const [authLoadError, setAuthLoadError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState<AuthUser | null>(null);
 
@@ -75,15 +120,59 @@ export default function CheckoutPage() {
   const [payError, setPayError] = useState('');
   const autoStartedRef = useRef(false);
 
+  // Session keepalive — refs for stable access inside timers
+  const orderIdRef = useRef<string | null>(null);
+  const phaseRef = useRef<PaymentPhase>('idle');
+  const pendingNavUrlRef = useRef<string | null>(null);
+  const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const extCountRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cancelCheckoutRef = useRef<(targetUrl?: string) => void>(() => {});
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [extSeconds, setExtSeconds] = useState(EXTENSION_S);
+  const [isExtending, setIsExtending] = useState(false);
+
   // Order summary
   const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState(''); // only a validated code is sent to payment
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [discountRate, setDiscountRate] = useState(0); // percentage, passed to backend
   const [discountError, setDiscountError] = useState('');
   const { items: cartItems, subtotal, clear: clearCart } = useCart();
   const total = Math.max(0, subtotal - discountAmount);
 
   const activeCartItems = cartItems.filter(i => !i.isSold);
+
+  // Stable fingerprint of the current cart — a stored order is only reusable while
+  // the exact set of items is unchanged.
+  const cartSignature = useMemo(
+    () => activeCartItems.map(i => i.id).sort().join(','),
+    [activeCartItems],
+  );
+
+  // Keep refs in sync so timers always see the latest values
+  useEffect(() => { orderIdRef.current = orderId; }, [orderId]);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+
+  // ─── Leave confirmation ───────────────────────────────────────────────────────
+  // Do NOT patch history.pushState — that breaks Next.js App Router / RSC fetches.
+  // Header, side menu, and the Back button call requestLeave instead.
+  const requestLeave = useCallback((href?: string | null) => {
+    if (!hasActiveReservation(orderIdRef.current, phaseRef.current)) return true;
+    pendingNavUrlRef.current = href ?? null;
+    setShowLeaveDialog(true);
+    return false;
+  }, []);
+
+  // Warn on tab close / refresh while a reservation is live (browser-native dialog).
+  useEffect(() => {
+    if (!hasActiveReservation(orderId, phase)) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [orderId, phase]);
 
   // ─── Auth check ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -97,8 +186,20 @@ export default function CheckoutPage() {
         }
         const user = await getMe();
         if (!cancelled) { setIsLoggedIn(true); setUserData(user); setAuthChecked(true); }
-      } catch {
-        if (!cancelled) { setIsLoggedIn(false); setUserData(null); setAuthChecked(true); }
+      } catch (e: any) {
+        if (!cancelled) {
+          const status = e?.status as number | undefined;
+          if (status !== undefined && status >= 500) {
+            // Genuine backend fault (5xx) — surface it so the user can retry
+            // rather than silently appearing as a guest.
+            setAuthLoadError('Unable to load your account. Please refresh the page.');
+          } else {
+            // No status (network error / fetch failed), 4xx auth errors — fall
+            // back to guest checkout so the user can still complete their order.
+            setIsLoggedIn(false); setUserData(null);
+          }
+          setAuthChecked(true);
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -112,23 +213,45 @@ export default function CheckoutPage() {
   const startPayment = useCallback(async (payload: Parameters<typeof createOrder>[0]) => {
     setPayError('');
     setPhase('initiating');
+    // Reuse an order already tied to this session/cart (in-memory, then sessionStorage)
+    // so a page refresh never creates a second order for the same items.
+    let currentOrderId = orderId ?? readStoredOrder(cartSignature);
     try {
-      // Reuse the pending order on retry — never create a new order per attempt
-      let currentOrderId = orderId;
-      if (!currentOrderId) {
-        const order = await createOrder(payload);
-        currentOrderId = order._id;
+      if (currentOrderId) {
         setOrderId(currentOrderId);
+        try {
+          const session = await initiatePayment(currentOrderId, appliedDiscountCode || undefined);
+          setSessionId(session.sessionId);
+          setPhase('paying');
+          storeOrder(currentOrderId, cartSignature);
+          return;
+        } catch (e: any) {
+          // 409 = order no longer awaiting payment, 404 = swept/deleted, 5xx = bad
+          // server state on the stored order — fall through and create a fresh order.
+          // Any other error (network, 4xx client errors) is a real failure.
+          const status = e?.status as number | undefined;
+          const isRecoverable = status === 409 || status === 404 || (status !== undefined && status >= 500);
+          if (!isRecoverable) throw e;
+          clearStoredOrder();
+          currentOrderId = null;
+          setOrderId(null);
+        }
       }
-      const session = await initiatePayment(currentOrderId, discountRate || undefined);
+
+      // No reusable order — create one and remember it for subsequent refreshes.
+      const order = await createOrder(payload);
+      currentOrderId = order._id;
+      setOrderId(currentOrderId);
+      storeOrder(currentOrderId, cartSignature);
+      const session = await initiatePayment(currentOrderId, appliedDiscountCode || undefined);
       setSessionId(session.sessionId);
       setPhase('paying');
     } catch (e: any) {
       setPayError(e.message ?? 'Could not start payment. Please try again.');
-      setPhase(orderId ? 'failed' : 'idle');
+      setPhase(currentOrderId ? 'failed' : 'idle');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, discountRate]);
+  }, [orderId, appliedDiscountCode, cartSignature]);
 
   // Signed-in: the order is initiated automatically on arrival (profile address
   // by default) and the widget appears with no button press.
@@ -161,6 +284,7 @@ export default function CheckoutPage() {
       });
       if (verdict.success) {
         clearCart();
+        clearStoredOrder();
         setPhase('success');
       } else {
         setPayError(verdict.message || 'Payment was not successful.');
@@ -178,12 +302,99 @@ export default function CheckoutPage() {
     setPayError('');
     setPhase('initiating');
     try {
-      const session = await initiatePayment(orderId, discountRate || undefined);
+      const session = await initiatePayment(orderId, appliedDiscountCode || undefined);
       setSessionId(session.sessionId);
       setPhase('paying');
     } catch (e: any) {
+      // The pending order expired/was swept — drop it and let the flow rebuild one.
+      if (e?.status === 409 || e?.status === 404) { clearStoredOrder(); setOrderId(null); }
       setPayError(e.message ?? 'Could not restart payment.');
       setPhase('failed');
+    }
+  };
+
+  // ─── Session keepalive ────────────────────────────────────────────────────────
+  // Cancels the current order, clears stored state, and navigates away.
+  // Only called on explicit leave / session timeout — never on unmount.
+  const handleCancelCheckout = useCallback((targetUrl = '/') => {
+    if (sessionTimerRef.current) { clearTimeout(sessionTimerRef.current); sessionTimerRef.current = null; }
+    if (extCountRef.current) { clearInterval(extCountRef.current); extCountRef.current = null; }
+    setShowSessionModal(false);
+    setShowLeaveDialog(false);
+    const oid = orderIdRef.current;
+    phaseRef.current = 'idle';
+    orderIdRef.current = null;
+    if (oid) {
+      cancelOrder(oid).catch(() => {}); // fire-and-forget; backend sweep is the fallback
+      clearStoredOrder();
+    }
+    setOrderId(null);
+    setSessionId(null);
+    setPhase('idle');
+    router.push(targetUrl);
+  }, [router]);
+
+  const handleConfirmLeave = useCallback(() => {
+    const target = pendingNavUrlRef.current ?? '/';
+    pendingNavUrlRef.current = null;
+    handleCancelCheckout(target);
+  }, [handleCancelCheckout]);
+
+  useEffect(() => { cancelCheckoutRef.current = handleCancelCheckout; }, [handleCancelCheckout]);
+
+  // Starts (or restarts) the 5-minute session timer.
+  const startSessionTimer = useCallback(() => {
+    if (sessionTimerRef.current) clearTimeout(sessionTimerRef.current);
+    if (extCountRef.current) { clearInterval(extCountRef.current); extCountRef.current = null; }
+    setShowSessionModal(false);
+
+    sessionTimerRef.current = setTimeout(() => {
+      sessionTimerRef.current = null;
+      setShowSessionModal(true);
+      setExtSeconds(EXTENSION_S);
+
+      extCountRef.current = setInterval(() => {
+        setExtSeconds(s => {
+          if (s <= 1) {
+            clearInterval(extCountRef.current!);
+            extCountRef.current = null;
+            setTimeout(() => cancelCheckoutRef.current(), 0);
+            return 0;
+          }
+          return s - 1;
+        });
+      }, 1000);
+    }, SESSION_MS);
+  }, []);
+
+  useEffect(() => {
+    if (phase === 'paying') {
+      startSessionTimer();
+    } else {
+      if (sessionTimerRef.current) { clearTimeout(sessionTimerRef.current); sessionTimerRef.current = null; }
+      if (extCountRef.current) { clearInterval(extCountRef.current); extCountRef.current = null; }
+      setShowSessionModal(false);
+    }
+    return () => {
+      if (sessionTimerRef.current) { clearTimeout(sessionTimerRef.current); sessionTimerRef.current = null; }
+      if (extCountRef.current) { clearInterval(extCountRef.current); extCountRef.current = null; }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  const handleExtendSession = async () => {
+    if (!orderId) { handleCancelCheckout(); return; }
+    setIsExtending(true);
+    try {
+      const session = await initiatePayment(orderId, appliedDiscountCode || undefined);
+      setSessionId(session.sessionId);
+      setIsExtending(false);
+      startSessionTimer();
+    } catch (e: any) {
+      setIsExtending(false);
+      const s = e?.status as number | undefined;
+      if (s === 409 || s === 404 || (s !== undefined && s >= 500)) clearStoredOrder();
+      handleCancelCheckout();
     }
   };
 
@@ -289,12 +500,12 @@ export default function CheckoutPage() {
     try {
       const result = await validateDiscountCode(discountCode.trim(), subtotal);
       setDiscountAmount(result.discountAmount);
-      setDiscountRate(result.discountPercentage);
+      setAppliedDiscountCode(discountCode.trim());
       setDiscountError('');
     } catch (e: any) {
       setDiscountError(e.message ?? 'Invalid discount code');
       setDiscountAmount(0);
-      setDiscountRate(0);
+      setAppliedDiscountCode('');
     }
   };
 
@@ -332,7 +543,7 @@ export default function CheckoutPage() {
         <SelectField
           value={governorate}
           placeholder="Governorate"
-          options={GOVERNORATES}
+          options={governorates}
           onSelect={handleGovernorateSelect}
         />
         <ErrorText field="governorate" />
@@ -343,7 +554,7 @@ export default function CheckoutPage() {
         <SelectField
           value={area}
           placeholder={governorate ? 'Area' : 'Select governorate first'}
-          options={governorate ? KUWAIT_AREAS[governorate] : []}
+          options={governorate ? (areas[governorate] ?? []) : []}
           onSelect={setArea}
           disabled={!governorate}
         />
@@ -461,6 +672,20 @@ export default function CheckoutPage() {
   // ─── Form column ─────────────────────────────────────────────────────────────
   const CheckoutForm = () => (
     <div className={isDesktop ? 'max-w-[641px] flex-1 py-[38px]' : 'p-[21px]'}>
+      {/* Back button — always visible; triggers the leave dialog when an order is active */}
+      <button
+        className="mb-6 flex flex-row items-center gap-2"
+        onClick={() => {
+          if (hasActiveReservation(orderId, phase)) {
+            requestLeave('/cart');
+          } else {
+            router.back();
+          }
+        }}
+      >
+        <span className="font-clash font-medium text-[13px] uppercase tracking-[1px] text-muted">← Back</span>
+      </button>
+
       {isLoggedIn ? (
         <>
           <div className="mb-7 flex flex-col gap-[14px]">
@@ -478,7 +703,7 @@ export default function CheckoutPage() {
             <FormSection title="Guest checkout" />
             <span className="font-dm text-[14px] text-muted">
               Have an account?{' '}
-              <button onClick={() => router.push('/sign-in')}>
+              <button onClick={() => { if (requestLeave('/sign-in')) router.push('/sign-in'); }}>
                 <span className="text-secondary underline">Sign in</span>
               </button>
             </span>
@@ -602,7 +827,12 @@ export default function CheckoutPage() {
           className={`${inputClass} flex-1 ${isDesktop ? 'bg-white' : ''}`}
           placeholder="Discount code"
           value={discountCode}
-          onChange={e => { setDiscountCode(e.target.value); setDiscountError(''); }}
+          onChange={e => {
+            setDiscountCode(e.target.value);
+            setDiscountError('');
+            // editing invalidates a previously applied code until re-applied
+            if (appliedDiscountCode) { setAppliedDiscountCode(''); setDiscountAmount(0); }
+          }}
         />
         <button className="flex h-[52px] items-center justify-center bg-lightGrey px-4" onClick={handleApplyDiscount}>
           <span className="font-dm font-medium text-[14px] text-black">Apply</span>
@@ -657,15 +887,37 @@ export default function CheckoutPage() {
 
   return (
     <PageLayout
-      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} />}
-      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
+      menu={<SideMenu visible={menuOpen} onClose={() => setMenuOpen(false)} onNavigate={requestLeave} />}
+      header={<SiteHeader onMenuPress={() => setMenuOpen(true)} onNavigate={requestLeave} />}
     >
+      <LeaveCheckoutModal
+        visible={showLeaveDialog}
+        onStay={() => { setShowLeaveDialog(false); pendingNavUrlRef.current = null; }}
+        onLeave={handleConfirmLeave}
+      />
+      <CheckoutSessionModal
+        visible={showSessionModal}
+        secondsLeft={extSeconds}
+        extending={isExtending}
+        onExtend={handleExtendSession}
+        onLeave={() => handleCancelCheckout()}
+      />
       <MaxWidthContainer className={isDesktop ? 'px-16' : ''}>
         {phase === 'success' ? (
           SuccessPanel()
         ) : !authChecked ? (
           <div className="flex flex-col items-center py-20">
             <span className="font-dm text-[14px] text-muted">Loading…</span>
+          </div>
+        ) : authLoadError ? (
+          <div className="flex flex-col items-center gap-4 py-20">
+            <span className="font-dm text-[14px] text-error">{authLoadError}</span>
+            <button
+              className="flex h-[52px] items-center justify-center bg-secondary px-8"
+              onClick={() => window.location.reload()}
+            >
+              <span className="font-clash font-medium text-[14px] uppercase tracking-[1.2px] text-white">Refresh</span>
+            </button>
           </div>
         ) : isDesktop ? (
           <div className="flex flex-row items-start gap-10">

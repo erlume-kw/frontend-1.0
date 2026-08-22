@@ -101,6 +101,7 @@ async function request<T>(
   if (!res.ok) {
     const error = new Error(data.error ?? `Request failed: ${res.status}`);
     (error as any).data = data; // Attach full response data for field-specific errors
+    (error as any).status = res.status; // Attach HTTP status for callers that branch on it
     throw error;
   }
   return data as T;
@@ -310,6 +311,102 @@ export async function fetchItemById(id: string): Promise<Item> {
   return data.data;
 }
 
+// ─── Email verification (OTP) ─────────────────────────────────────────────────
+
+// Returns alreadyVerified: true when the email completed OTP verification in
+// the past — the caller can skip the code step entirely.
+export async function requestEmailOtp(email: string): Promise<{ alreadyVerified: boolean }> {
+  const data = await request<{ success: boolean; alreadyVerified?: boolean }>(
+    '/api/email-verification/request',
+    { method: 'POST', body: JSON.stringify({ email }) },
+  );
+  return { alreadyVerified: !!data.alreadyVerified };
+}
+
+export async function confirmEmailOtp(email: string, otp: string): Promise<void> {
+  await request('/api/email-verification/confirm', {
+    method: 'POST',
+    body: JSON.stringify({ email, otp }),
+  });
+}
+
+// Cheap, pollable check — does not send anything or touch the send rate limit.
+// Used to detect that the user verified via the emailed link in another tab.
+export async function checkEmailVerified(email: string): Promise<boolean> {
+  const data = await request<{ success: boolean; verified: boolean }>(
+    `/api/email-verification/status?email=${encodeURIComponent(email)}`,
+  );
+  return !!data.verified;
+}
+
+// ─── Pricing estimator ──────────────────────────────────────────────────────
+// Same Pricing 3.0 logic as erlume's internal AI pricing tool. Photos are
+// optional — if provided, AI auto-fills brand/model/condition hints; the
+// customer can still edit everything before getting an estimate.
+
+export interface BagIdentification {
+  brand: string;
+  model: string;
+  size: string;
+  material: string;
+  color: string;
+  confidence: 'high' | 'medium' | 'low';
+  notes: string;
+  brandTier: 'ultra' | 'premium' | 'accessible' | 'highstreet';
+}
+
+// Multipart upload — bypasses the JSON-only request() helper, same pattern
+// as the drops token fetch below.
+export async function identifyBagPhotos(
+  photos: File[],
+  hints?: { brand?: string; model?: string },
+): Promise<BagIdentification> {
+  const formData = new FormData();
+  photos.forEach(photo => formData.append('photos', photo));
+  if (hints?.brand) formData.append('brand', hints.brand);
+  if (hints?.model) formData.append('model', hints.model);
+
+  const res = await fetch(`${BASE_URL}/api/pricing-estimator/identify`, {
+    method: 'POST',
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
+  return data as BagIdentification;
+}
+
+export type BagCondition = 'like-new' | 'gently-used' | 'fair-worn';
+export type PickupMethod = 'dropoff' | 'own-driver' | 'third-party';
+
+export interface EstimateBagPriceInput {
+  brand: string;
+  condition: BagCondition;
+  originalPrice: number;
+  yearPurchased?: number;
+  pickupFee: number;
+  model?: string;
+  size?: string;
+  material?: string;
+  color?: string;
+}
+
+export interface EstimateBagPriceResult {
+  listingPrice: number;
+  sellerPayout: number;
+  erlumeCut: number;
+  pickupFee: number;
+  accept: boolean;
+  usingComps: boolean;
+}
+
+export async function estimateBagPrice(input: EstimateBagPriceInput): Promise<EstimateBagPriceResult> {
+  const data = await request<{ success: boolean } & EstimateBagPriceResult>('/api/pricing-estimator/estimate', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+  return data;
+}
+
 // ─── Newsletter ───────────────────────────────────────────────────────────────
 
 export async function subscribeNewsletter(email: string): Promise<void> {
@@ -317,6 +414,10 @@ export async function subscribeNewsletter(email: string): Promise<void> {
     method: 'POST',
     body: JSON.stringify({ email }),
   });
+}
+
+export async function unsubscribeNewsletter(email: string): Promise<void> {
+  await request(`/api/newsletter/${encodeURIComponent(email)}`, { method: 'DELETE' });
 }
 
 // ─── Notify similar item ──────────────────────────────────────────────────
@@ -361,11 +462,32 @@ export async function validateDiscountCode(code: string, orderTotal?: number): P
   discountAmount: number;
   finalTotal: number;
 }> {
-  const data = await request<{ success: boolean; discountPercentage: number; discountAmount: number; finalTotal: number }>(
+  const data = await request<{ success: boolean; discountPercentage: number | string; discountAmount?: number | string; finalTotal?: number | string }>(
     '/api/discount-codes/validate',
     { method: 'POST', body: JSON.stringify({ code, orderTotal: orderTotal?.toString() }) },
   );
-  return data;
+  // Backend returns the amounts as fixed-decimal strings — coerce so callers can
+  // safely do arithmetic and .toFixed() on them.
+  return {
+    discountPercentage: Number(data.discountPercentage) || 0,
+    discountAmount: Number(data.discountAmount ?? 0) || 0,
+    finalTotal: Number(data.finalTotal ?? 0) || 0,
+  };
+}
+
+// ─── Kuwait geographic data (governorate → cities) ────────────────────────────
+// Reuses the backend enum endpoint so the app never hardcodes the list. Returns
+// the same shape as the static src/lib/kuwait.ts fallback: { [governorate]: string[] }.
+export async function fetchGovernorateCities(): Promise<Record<string, string[]>> {
+  const res = await request<{
+    success: boolean;
+    data: Record<string, { governorate: string; cityValues: string[] }>;
+  }>('/api/enums/kuwaitGovernorateCities');
+  const map: Record<string, string[]> = {};
+  for (const [gov, entry] of Object.entries(res.data ?? {})) {
+    map[gov] = entry?.cityValues ?? [];
+  }
+  return map;
 }
 
 export async function fetchShippingMethods(): Promise<{ _id: string; name: string; description: string; price: number }[]> {
@@ -407,6 +529,30 @@ export async function createOrder(payload: {
   return data.data;
 }
 
+// Explicitly cancel a pending order — releases the reserved item immediately.
+// Tolerates empty / non-JSON responses; callers still swallow errors as a fallback.
+export async function cancelOrder(orderId: string): Promise<void> {
+  const token = await getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}/api/orders/${orderId}/cancel`, {
+    method: 'POST',
+    headers,
+  });
+
+  if (res.ok || res.status === 404 || res.status === 409) return;
+
+  let message = `Request failed: ${res.status}`;
+  try {
+    const data = await res.json();
+    if (data?.error) message = data.error;
+  } catch { /* non-JSON body */ }
+  const error = new Error(message);
+  (error as any).status = res.status;
+  throw error;
+}
+
 // Signed-in checkout: switch the pending order to a different shipping address
 export async function updateOrderShippingAddress(
   orderId: string,
@@ -422,14 +568,16 @@ export async function updateOrderShippingAddress(
 }
 
 // Step 2 — get a MyFatoorah embedded session for the order.
-// The backend recomputes the amount server-side; we only receive the sessionId.
+// The backend recomputes the amount server-side and re-validates the discount
+// CODE against the DB (the client never dictates the discount rate); we only
+// receive the sessionId and the server-computed amount.
 export async function initiatePayment(
   orderId: string,
-  discountRate?: number,
+  discountCode?: string,
 ): Promise<{ sessionId: string; amount: number }> {
   return request('/api/payments/initiate', {
     method: 'POST',
-    body: JSON.stringify({ orderId, discountRate }),
+    body: JSON.stringify({ orderId, discountCode: discountCode || undefined }),
   });
 }
 

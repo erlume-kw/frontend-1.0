@@ -14,8 +14,8 @@ import { useWishlist, type WishlistItem } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWindowWidth } from '@/lib/useWindowWidth';
-import { fetchItemById, fetchItems, submitNotifyRequest, getAccessToken, type Item } from '@/services/api';
-import { verifyEmail } from '@/services/emailVerification';
+import { fetchItemById, fetchItems, requestEmailOtp, submitNotifyRequest, getAccessToken, type Item } from '@/services/api';
+import VerifyEmailModal from '@/components/VerifyEmailModal';
 
 const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
 
@@ -243,6 +243,7 @@ export default function ProductDetailPage() {
   const [notifyEmailError, setNotifyEmailError] = useState('');
   const [notifyEmailVerifying, setNotifyEmailVerifying] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -280,6 +281,19 @@ export default function ProductDetailPage() {
     setTimeout(() => setToastVisible(false), 2500);
   };
 
+  const completeNotifySignup = async () => {
+    setShowOtpModal(false);
+    try {
+      await submitNotifyRequest(notifyEmail.trim(), { _id: item!._id, itemName: item!.itemName, brandName: item!.brandName });
+      setNotifySuccess(true);
+      setNotifyEmail('');
+    } catch (error: any) {
+      setNotifyEmailError(error?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setNotifyEmailVerifying(false);
+    }
+  };
+
   const handleNotifySubmit = async () => {
     if (!isValidEmail(notifyEmail)) {
       setNotifyEmailError('Please enter a valid email address.');
@@ -290,21 +304,15 @@ export default function ProductDetailPage() {
     setNotifyEmailError('');
 
     try {
-      const verification = await verifyEmail(notifyEmail);
-
-      if (!verification.isValid) {
-        setNotifyEmailError(verification.error || 'Email address is not valid.');
-        setNotifyEmailVerifying(false);
+      // Emails that verified once (any flow) skip the OTP entirely
+      const { alreadyVerified } = await requestEmailOtp(notifyEmail.trim());
+      if (alreadyVerified) {
+        await completeNotifySignup();
         return;
       }
-
-      await submitNotifyRequest(notifyEmail, { _id: item!._id, itemName: item!.itemName, brandName: item!.brandName });
-      setNotifySuccess(true);
-      setNotifyEmail('');
+      setShowOtpModal(true);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Something went wrong. Please try again.';
-      setNotifyEmailError(errorMessage);
-    } finally {
+      setNotifyEmailError(error?.message || 'Something went wrong. Please try again.');
       setNotifyEmailVerifying(false);
     }
   };
@@ -409,6 +417,12 @@ export default function ProductDetailPage() {
           {!!notifyEmailError && <span className="mt-[6px] block font-dm text-[13px] text-error">{notifyEmailError}</span>}
         </div>
       )}
+      <VerifyEmailModal
+        visible={showOtpModal}
+        email={notifyEmail.trim()}
+        onClose={() => { setShowOtpModal(false); setNotifyEmailVerifying(false); }}
+        onVerified={completeNotifySignup}
+      />
     </div>
   ) : null;
 

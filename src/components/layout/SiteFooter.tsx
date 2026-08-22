@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { subscribeNewsletter } from '@/services/api';
-import { verifyEmail } from '@/services/emailVerification';
+import { requestEmailOtp, subscribeNewsletter } from '@/services/api';
+import VerifyEmailModal from '@/components/VerifyEmailModal';
 import { FOOTER_DATA, SOCIAL_ICONS } from '@/lib/brand';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import MaxWidthContainer from './MaxWidthContainer';
@@ -23,6 +23,20 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
   const [emailError, setEmailError] = useState('');
   const [success, setSuccess] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [otpModalVisible, setOtpModalVisible] = useState(false);
+
+  const completeSubscribe = async () => {
+    setOtpModalVisible(false);
+    try {
+      await subscribeNewsletter(email);
+      setSuccess(true);
+      setEmail('');
+    } catch (error: any) {
+      setEmailError(error?.message || 'Something went wrong. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
+  };
 
   const handleSubscribe = async () => {
     if (!isValidEmail(email)) {
@@ -34,21 +48,15 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
     setEmailError('');
 
     try {
-      const verification = await verifyEmail(email);
-
-      if (!verification.isValid) {
-        setEmailError(verification.error || 'Email address is not valid.');
-        setVerifying(false);
+      // Emails that verified once (any flow) skip the OTP entirely
+      const { alreadyVerified } = await requestEmailOtp(email.trim());
+      if (alreadyVerified) {
+        await completeSubscribe();
         return;
       }
-
-      await subscribeNewsletter(email);
-      setSuccess(true);
-      setEmail('');
+      setOtpModalVisible(true);
     } catch (error: any) {
-      const errorMessage = error?.message || 'Something went wrong. Please try again.';
-      setEmailError(errorMessage);
-    } finally {
+      setEmailError(error?.message || 'Something went wrong. Please try again.');
       setVerifying(false);
     }
   };
@@ -91,6 +99,12 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
           {!!emailError && <span className="mt-[6px] font-dm text-[13px] text-error">{emailError}</span>}
         </div>
       )}
+      <VerifyEmailModal
+        visible={otpModalVisible}
+        email={email.trim()}
+        onClose={() => { setOtpModalVisible(false); setVerifying(false); }}
+        onVerified={completeSubscribe}
+      />
     </div>
   );
 }
@@ -147,9 +161,9 @@ function MobileFooter() {
               <span className={`font-clash text-[22px] text-white ${open === label ? 'rotate-90' : ''}`}>›</span>
             </button>
             {open === label && (
-              <div className="pb-2 pl-2">
+              <div className="flex flex-col pb-2 pl-2">
                 {FOOTER_DATA.columns[label as keyof typeof FOOTER_DATA.columns].map((item: string) => (
-                  <button key={item} onClick={() => handleFooterLink(item, router.push)}>
+                  <button key={item} className="text-left" onClick={() => handleFooterLink(item, router.push)}>
                     <span className={footerLinkClass}>{item}</span>
                   </button>
                 ))}
@@ -158,13 +172,15 @@ function MobileFooter() {
           </div>
         ))}
 
-        <span className="mb-1 block font-clash font-semibold text-[16px] leading-[25px] text-white">Contact us at</span>
-        <button onClick={() => openPhone(FOOTER_DATA.contact.phone)}>
-          <span className={footerLinkClass}>{FOOTER_DATA.contact.phone}</span>
-        </button>
-        <button onClick={() => openEmail(FOOTER_DATA.contact.email)}>
-          <span className={footerLinkClass}>{FOOTER_DATA.contact.email}</span>
-        </button>
+        <div className="flex flex-col">
+          <span className="mb-1 block font-clash font-semibold text-[16px] leading-[25px] text-white">Contact us at</span>
+          <button className="text-left" onClick={() => openPhone(FOOTER_DATA.contact.phone)}>
+            <span className={footerLinkClass}>{FOOTER_DATA.contact.phone}</span>
+          </button>
+          <button className="text-left" onClick={() => openEmail(FOOTER_DATA.contact.email)}>
+            <span className={footerLinkClass}>{FOOTER_DATA.contact.email}</span>
+          </button>
+        </div>
       </div>
 
       <FooterCopyright />

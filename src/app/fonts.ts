@@ -8,10 +8,10 @@ import localFont from 'next/font/local';
 //   ClashDisplay-SemiBold → font-clash font-semibold (600)
 export const clashDisplay = localFont({
   src: [
-    { path: './fonts/ClashDisplay-Light.ttf', weight: '300', style: 'normal' },
-    { path: './fonts/ClashDisplay-Regular.ttf', weight: '400', style: 'normal' },
-    { path: './fonts/ClashDisplay-Medium.ttf', weight: '500', style: 'normal' },
-    { path: './fonts/ClashDisplay-SemiBold.ttf', weight: '600', style: 'normal' },
+    { path: '../assets/fonts/ClashDisplay-Light.ttf', weight: '300', style: 'normal' },
+    { path: '../assets/fonts/ClashDisplay-Regular.ttf', weight: '400', style: 'normal' },
+    { path: '../assets/fonts/ClashDisplay-Medium.ttf', weight: '500', style: 'normal' },
+    { path: '../assets/fonts/ClashDisplay-SemiBold.ttf', weight: '600', style: 'normal' },
   ],
   variable: '--font-clash',
   display: 'swap',

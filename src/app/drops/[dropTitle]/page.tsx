@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -36,6 +36,13 @@ export default function DropDetailPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const refreshItems = useCallback(() => {
+    if (!dropId) return;
+    fetchDropItems(dropId)
+      .then(i => setItems(i.filter(item => item.itemStatus === 'available')))
+      .catch(e => console.error('DropDetailPage refetch error:', e));
+  }, [dropId]);
+
   useEffect(() => {
     if (!dropId) { setLoading(false); return; }
     Promise.all([fetchDropById(dropId), fetchDropItems(dropId)])
@@ -44,6 +51,17 @@ export default function DropDetailPage() {
       .catch(e => console.error('DropDetailPage fetch error:', e))
       .finally(() => setLoading(false));
   }, [dropId]);
+
+  // Re-fetch available items whenever the user navigates back to this tab so
+  // the grid reflects the latest inventory (e.g. after removing from cart or
+  // after another buyer purchases an item).
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshItems();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [refreshItems]);
 
   const cardWidth = useCardWidth(isDesktop, width);
   const { toggleWishlist, isInWishlist } = useWishlist();

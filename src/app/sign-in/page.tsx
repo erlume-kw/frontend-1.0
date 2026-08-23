@@ -9,6 +9,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
 import SelectField from '@/components/ui/SelectField';
+import PasswordInput from '@/components/ui/PasswordInput';
 import { login, register, requestEmailOtp } from '@/services/api';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
 
@@ -228,12 +229,10 @@ export default function SignInRegisterPage() {
 
                 <div className="flex flex-col gap-2">
                   <span className={labelClass}>Password</span>
-                  <input
-                    className={inputClass}
+                  <PasswordInput
                     placeholder="••••••••"
                     value={signInPassword}
                     onChange={e => setSignInPassword(e.target.value)}
-                    type="password"
                     disabled={loading}
                   />
                 </div>
@@ -286,15 +285,14 @@ export default function SignInRegisterPage() {
 
                 <div className="flex flex-col gap-2">
                   <span className={labelClass}>Password</span>
-                  <input
-                    className={`${inputClass} ${regErrors.password ? inputErrorClass : ''}`}
+                  <PasswordInput
                     placeholder="••••••••"
                     value={regPassword}
                     onChange={e => {
                       setRegPassword(e.target.value);
                       if (regErrors.password) setRegErrors({ ...regErrors, password: '' });
                     }}
-                    type="password"
+                    error={!!regErrors.password}
                     disabled={loading}
                   />
                   {regErrors.password && <span className={fieldErrorClass}>{regErrors.password}</span>}
@@ -302,15 +300,14 @@ export default function SignInRegisterPage() {
 
                 <div className="flex flex-col gap-2">
                   <span className={labelClass}>Confirm Password</span>
-                  <input
-                    className={`${inputClass} ${regErrors.passwordConfirm ? inputErrorClass : ''}`}
+                  <PasswordInput
                     placeholder="••••••••"
                     value={regPasswordConfirm}
                     onChange={e => {
                       setRegPasswordConfirm(e.target.value);
                       if (regErrors.passwordConfirm) setRegErrors({ ...regErrors, passwordConfirm: '' });
                     }}
-                    type="password"
+                    error={!!regErrors.passwordConfirm}
                     disabled={loading}
                   />
                   {regErrors.passwordConfirm && <span className={fieldErrorClass}>{regErrors.passwordConfirm}</span>}

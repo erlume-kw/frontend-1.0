@@ -234,11 +234,30 @@ export async function updateMyAddress(
   });
 }
 
+// Profile: update email (must already be OTP-verified via /api/email-verification)
+export async function updateMyEmail(userId: string, emailAddress: string): Promise<AuthUser> {
+  const data = await request<{ success: boolean; data: { user: AuthUser } }>(`/api/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ emailAddress }),
+  });
+  return data.data.user;
+}
+
+// Profile: update phone number
+export async function updateMyPhone(userId: string, phoneNumber: string): Promise<AuthUser> {
+  const data = await request<{ success: boolean; data: { user: AuthUser } }>(`/api/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ phoneNumber }),
+  });
+  return data.data.user;
+}
+
 // Profile: authenticated password change (requires the current password)
 export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const refreshToken = storage.get(REFRESH_KEY) ?? getCookie(REFRESH_KEY);
   await request('/api/auth/change-password', {
     method: 'POST',
-    body: JSON.stringify({ currentPassword, newPassword }),
+    body: JSON.stringify({ currentPassword, newPassword, refreshToken }),
   });
 }
 

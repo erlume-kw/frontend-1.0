@@ -7,7 +7,9 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import LogoutConfirmModal from '@/components/LogoutConfirmModal';
+import VerifyEmailModal from '@/components/VerifyEmailModal';
 import SelectField from '@/components/ui/SelectField';
+import PasswordInput from '@/components/ui/PasswordInput';
 import { SkeletonBox } from '@/components/ui/Skeleton';
 import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
 import { useIsDesktop } from '@/lib/useIsDesktop';
@@ -16,6 +18,9 @@ import {
   getMe,
   logout as apiLogout,
   updateMyAddress,
+  updateMyEmail,
+  updateMyPhone,
+  requestEmailOtp,
   changePassword,
   type AuthUser,
 } from '@/services/api';
@@ -64,6 +69,22 @@ export default function ProfilePage() {
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressError, setAddressError] = useState('');
   const [addressSaved, setAddressSaved] = useState(false);
+
+  // Email editing (requires OTP verification before save)
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [emailSaved, setEmailSaved] = useState(false);
+  const [showEmailVerifyModal, setShowEmailVerifyModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+
+  // Phone editing
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [phoneSaving, setPhoneSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [phoneSaved, setPhoneSaved] = useState(false);
 
   // Change password
   const [editingPassword, setEditingPassword] = useState(false);
@@ -133,6 +154,85 @@ export default function ProfilePage() {
       setAddressError(e.message ?? 'Could not save the address.');
     } finally {
       setAddressSaving(false);
+    }
+  };
+
+  const completeEmailChange = async (email: string) => {
+    if (!user) return;
+    setShowEmailVerifyModal(false);
+    setEmailSaving(true);
+    setEmailError('');
+    try {
+      const updated = await updateMyEmail(user._id, email);
+      setUser(updated);
+      setEditingEmail(false);
+      setNewEmail('');
+      setPendingEmail('');
+      setEmailSaved(true);
+    } catch (e: any) {
+      setEmailError(e.message ?? 'Could not update email.');
+    } finally {
+      setEmailSaving(false);
+    }
+  };
+
+  const handleRequestEmailChange = async () => {
+    setEmailError('');
+    const trimmed = newEmail.trim();
+    if (!trimmed) {
+      setEmailError('Email is required.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError('Invalid email format.');
+      return;
+    }
+    if (trimmed.toLowerCase() === user?.emailAddress.toLowerCase()) {
+      setEditingEmail(false);
+      setNewEmail('');
+      return;
+    }
+
+    setEmailSaving(true);
+    try {
+      const { alreadyVerified } = await requestEmailOtp(trimmed);
+      setPendingEmail(trimmed);
+      if (alreadyVerified) {
+        await completeEmailChange(trimmed);
+      } else {
+        setShowEmailVerifyModal(true);
+      }
+    } catch (e: any) {
+      setEmailError(e.message ?? 'Could not send verification email.');
+    } finally {
+      setEmailSaving(false);
+    }
+  };
+
+  const handleSavePhone = async () => {
+    setPhoneError('');
+    const trimmed = newPhone.trim();
+    if (!trimmed) {
+      setPhoneError('Phone number is required.');
+      return;
+    }
+    if (!/^[+]?[\s\-]?[0-9]{7,15}$/.test(trimmed)) {
+      setPhoneError('Invalid phone number format.');
+      return;
+    }
+    if (!user) return;
+
+    setPhoneSaving(true);
+    try {
+      const updated = await updateMyPhone(user._id, trimmed);
+      setUser(updated);
+      setEditingPhone(false);
+      setNewPhone('');
+      setPhoneSaved(true);
+    } catch (e: any) {
+      setPhoneError(e.message ?? 'Could not update phone number.');
+    } finally {
+      setPhoneSaving(false);
     }
   };
 
@@ -248,14 +348,123 @@ export default function ProfilePage() {
             {/* Account details */}
             <div className="mb-8 flex flex-col gap-[14px]">
               <span className={sectionTitle}>Account</span>
-              <div className="flex flex-col gap-3 border border-border bg-white p-4">
-                <div className="flex flex-col gap-[2px]">
+              <div className="flex flex-col gap-4 border border-border bg-white p-4">
+                {/* Email */}
+                <div className="flex flex-col gap-[6px]">
                   <span className="font-dm font-medium text-[12px] uppercase tracking-[0.8px] text-muted">Email</span>
-                  <span className="break-all font-dm text-[14px] text-black">{user?.emailAddress}</span>
+                  {!editingEmail ? (
+                    <>
+                      <span className="break-all font-dm text-[14px] text-black">{user?.emailAddress}</span>
+                      <button
+                        className="self-start"
+                        onClick={() => {
+                          setEditingEmail(true);
+                          setNewEmail(user?.emailAddress ?? '');
+                          setEmailError('');
+                          setEmailSaved(false);
+                        }}
+                      >
+                        <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-secondary">
+                          EDIT EMAIL
+                        </span>
+                      </button>
+                      {emailSaved && (
+                        <span className="font-dm text-[13px] text-olive">Email updated.</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        className={inputClass}
+                        placeholder="your@email.com"
+                        value={newEmail}
+                        onChange={e => setNewEmail(e.target.value)}
+                        type="email"
+                        autoCapitalize="none"
+                        disabled={emailSaving}
+                      />
+                      {!!emailError && <span className="font-dm text-[13px] text-error">{emailError}</span>}
+                      <button
+                        className={`flex h-12 items-center justify-center border border-secondary bg-secondary ${emailSaving ? 'opacity-60' : ''}`}
+                        onClick={handleRequestEmailChange}
+                        disabled={emailSaving}
+                      >
+                        <span className="font-clash font-medium text-[13px] tracking-[1px] text-white">
+                          {emailSaving ? 'SENDING…' : 'VERIFY & SAVE'}
+                        </span>
+                      </button>
+                      <button
+                        className="flex items-center justify-center py-[6px]"
+                        onClick={() => {
+                          setEditingEmail(false);
+                          setNewEmail('');
+                          setEmailError('');
+                          setPendingEmail('');
+                        }}
+                        disabled={emailSaving}
+                      >
+                        <span className="font-dm text-[13px] text-secondary underline">Cancel</span>
+                      </button>
+                    </>
+                  )}
                 </div>
-                <div className="flex flex-col gap-[2px]">
+
+                {/* Phone */}
+                <div className="flex flex-col gap-[6px] border-t border-border pt-4">
                   <span className="font-dm font-medium text-[12px] uppercase tracking-[0.8px] text-muted">Phone number</span>
-                  <span className="font-dm text-[14px] text-black">{user?.phoneNumber ?? '—'}</span>
+                  {!editingPhone ? (
+                    <>
+                      <span className="font-dm text-[14px] text-black">{user?.phoneNumber ?? '—'}</span>
+                      <button
+                        className="self-start"
+                        onClick={() => {
+                          setEditingPhone(true);
+                          setNewPhone(user?.phoneNumber ?? '');
+                          setPhoneError('');
+                          setPhoneSaved(false);
+                        }}
+                      >
+                        <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-secondary">
+                          EDIT PHONE
+                        </span>
+                      </button>
+                      {phoneSaved && (
+                        <span className="font-dm text-[13px] text-olive">Phone number updated.</span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        className={inputClass}
+                        placeholder="+965 XXXX XXXX"
+                        value={newPhone}
+                        onChange={e => setNewPhone(e.target.value)}
+                        type="tel"
+                        disabled={phoneSaving}
+                      />
+                      {!!phoneError && <span className="font-dm text-[13px] text-error">{phoneError}</span>}
+                      <button
+                        className={`flex h-12 items-center justify-center border border-secondary bg-secondary ${phoneSaving ? 'opacity-60' : ''}`}
+                        onClick={handleSavePhone}
+                        disabled={phoneSaving}
+                      >
+                        <span className="font-clash font-medium text-[13px] tracking-[1px] text-white">
+                          {phoneSaving ? 'SAVING…' : 'SAVE PHONE'}
+                        </span>
+                      </button>
+                      <button
+                        className="flex items-center justify-center py-[6px]"
+                        onClick={() => {
+                          setEditingPhone(false);
+                          setNewPhone('');
+                          setPhoneError('');
+                        }}
+                        disabled={phoneSaving}
+                      >
+                        <span className="font-dm text-[13px] text-secondary underline">Cancel</span>
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -372,24 +581,21 @@ export default function ProfilePage() {
                 </>
               ) : (
                 <>
-                  <input
-                    className={inputClass}
+                  <PasswordInput
+                    variant="filled"
                     placeholder="Current password"
-                    type="password"
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
                   />
-                  <input
-                    className={inputClass}
+                  <PasswordInput
+                    variant="filled"
                     placeholder="New password"
-                    type="password"
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                   />
-                  <input
-                    className={inputClass}
+                  <PasswordInput
+                    variant="filled"
                     placeholder="Confirm new password"
-                    type="password"
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                   />
@@ -437,6 +643,13 @@ export default function ProfilePage() {
         onCancel={() => setShowLogoutConfirm(false)}
         onConfirm={handleConfirmLogout}
         isLoading={loggingOut}
+      />
+
+      <VerifyEmailModal
+        visible={showEmailVerifyModal}
+        email={pendingEmail}
+        onClose={() => { setShowEmailVerifyModal(false); setPendingEmail(''); }}
+        onVerified={() => completeEmailChange(pendingEmail)}
       />
     </PageLayout>
   );

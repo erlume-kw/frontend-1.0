@@ -89,30 +89,43 @@ export default function DropDetailPage() {
           ) : null}
         </div>
 
-        <div
-          className={`flex flex-row flex-wrap justify-start ${
-            isDesktop ? 'gap-x-4 gap-y-8 px-0' : 'gap-2 px-4'
-          }`}
-        >
-          {loading
-            ? Array.from({ length: isDesktop ? 4 : 8 }).map((_, i) => {
-                const skeletonH = Math.round(340 * (cardWidth / 255));
-                return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
-              })
-            : items.map(item => (
-                <ProductCard
-                  key={item._id}
-                  brand={item.brandName}
-                  name={item.itemName}
-                  price={`${item.listingPrice} KWD`}
-                  imageUri={item.imageUrls?.[0]}
-                  cardWidth={cardWidth}
-                  isWishlisted={isInWishlist(item._id)}
-                  onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
-                  onPress={() => router.push(`/product/${item._id}`)}
-                />
-              ))}
-        </div>
+        {/* A drop's items are only visible while it is live. Upcoming and ended
+            drops show a status message instead of the grid. */}
+        {!loading && drop && drop.status !== 'active' ? (
+          <div
+            className="py-20 text-center font-clash font-medium text-primary"
+            style={{ fontSize: isDesktop ? 22 : 18 }}
+          >
+            {drop.status === 'upcoming'
+              ? 'This drop isn’t live yet — check back soon.'
+              : 'This drop has ended.'}
+          </div>
+        ) : (
+          <div
+            className={`flex flex-row flex-wrap justify-start ${
+              isDesktop ? 'gap-x-4 gap-y-8 px-0' : 'gap-2 px-4'
+            }`}
+          >
+            {loading
+              ? Array.from({ length: isDesktop ? 4 : 8 }).map((_, i) => {
+                  const skeletonH = Math.round(340 * (cardWidth / 255));
+                  return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
+                })
+              : items.map(item => (
+                  <ProductCard
+                    key={item._id}
+                    brand={item.brandName}
+                    name={item.itemName}
+                    price={`${item.listingPrice} KWD`}
+                    imageUri={item.imageUrls?.[0]}
+                    cardWidth={cardWidth}
+                    isWishlisted={isInWishlist(item._id)}
+                    onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+                    onPress={() => router.push(`/product/${item._id}`)}
+                  />
+                ))}
+          </div>
+        )}
       </MaxWidthContainer>
     </PageLayout>
   );

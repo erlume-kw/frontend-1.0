@@ -66,6 +66,7 @@ export async function setTokens(access: string, refresh: string): Promise<void> 
   setCookie(REFRESH_KEY, refresh, 30); // 30 days
   storage.set(TOKEN_KEY, access);
   storage.set(REFRESH_KEY, refresh);
+  sessionExpiredHandled = false; // a fresh sign-in re-arms the expiry handler
 }
 
 export async function clearTokens(): Promise<void> {
@@ -73,6 +74,24 @@ export async function clearTokens(): Promise<void> {
   removeCookie(REFRESH_KEY);
   storage.remove(TOKEN_KEY);
   storage.remove(REFRESH_KEY);
+}
+
+// ─── Session-expiry handling ──────────────────────────────────────────────────
+// Fired when a request that carried a token gets a 401 that refresh can't
+// recover — i.e. the session is dead (refresh token expired/revoked, or the
+// account was hard-deleted in the backoffice). We clear the local tokens and
+// broadcast an event so a top-level watcher can redirect to sign-in. Guarded so
+// a burst of concurrent failing requests only triggers one logout.
+export const SESSION_EXPIRED_EVENT = 'erlume:session-expired';
+let sessionExpiredHandled = false;
+
+async function handleSessionExpired(): Promise<void> {
+  if (sessionExpiredHandled) return;
+  sessionExpiredHandled = true;
+  await clearTokens();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
+  }
 }
 
 // ─── Core fetch wrapper ───────────────────────────────────────────────────────
@@ -91,10 +110,14 @@ async function request<T>(
 
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
 
-  // Auto-refresh on 401
-  if (res.status === 401 && retry) {
-    const refreshed = await tryRefresh();
-    if (refreshed) return request<T>(path, options, false);
+  // On 401: try a token refresh once, then retry. If we still can't recover and
+  // the request actually carried a token, the session is dead → log out.
+  if (res.status === 401) {
+    if (retry) {
+      const refreshed = await tryRefresh();
+      if (refreshed) return request<T>(path, options, false);
+    }
+    if (token) await handleSessionExpired();
   }
 
   const data = await res.json();
@@ -262,9 +285,12 @@ export async function changePassword(currentPassword: string, newPassword: strin
 }
 
 // ─── Drops ────────────────────────────────────────────────────────────────────
-// Drops require admin auth. A read-only admin token is fetched on demand and
-// kept ONLY in this module variable — it must never touch cookies/localStorage,
-// otherwise every visitor would appear signed in as the admin account.
+// The /api/drops namespace is admin-only on the backend, so the storefront
+// fetches a read-only admin token on demand and keeps it ONLY in this module
+// variable — it must never touch cookies/localStorage, otherwise every visitor
+// would appear signed in as the admin account. Non-active drops are hidden on
+// the client (see the drops pages), and item-level endpoints enforce visibility
+// server-side for anonymous/non-admin callers.
 
 let _dropsToken: string | null = null;
 

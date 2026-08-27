@@ -5,6 +5,7 @@ import { WishlistProvider } from '@/contexts/WishlistContext';
 import { CartProvider } from '@/contexts/CartContext';
 import CookiesBanner from '@/components/layout/CookiesBanner';
 import ClientOnly from '@/components/ClientOnly';
+import AuthWatcher from '@/components/AuthWatcher';
 import { enforceCanonicalHost } from '@/lib/config';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -16,6 +17,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ClientOnly>
+      <AuthWatcher />
       <WishlistProvider>
         <CartProvider>
           {children}

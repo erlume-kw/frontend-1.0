@@ -13,7 +13,7 @@ interface SideMenuProps {
 }
 
 const NAV_LINKS = [
-  { label: 'new', href: '/' },
+  { label: 'new', href: '/new' },
   { label: 'drops', href: '/drops' },
   { label: 'sell', href: '/sell' },
   { label: 'wishlist', href: '/wishlist' },

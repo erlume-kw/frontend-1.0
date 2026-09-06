@@ -17,6 +17,7 @@ import {
 import MyFatoorahEmbed, { MFWidgetResult } from '@/components/checkout/MyFatoorahEmbed';
 import CheckoutSessionModal from '@/components/CheckoutSessionModal';
 import LeaveCheckoutModal from '@/components/LeaveCheckoutModal';
+import ErrorModal from '@/components/ErrorModal';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
@@ -765,8 +766,6 @@ export default function CheckoutPage() {
   // ─── Payment slot — lives under the order summary in all flows ──────────────
   const PaymentSlot = () => (
     <div className="mt-1 flex flex-col gap-3">
-      {!!payError && <span className="mb-2 font-dm text-[13px] text-error">{payError}</span>}
-
       {phase === 'idle' && !isLoggedIn && (
         <button className="flex h-[60px] items-center justify-center bg-secondary" onClick={handleChoosePaymentMethod}>
           <span className="font-clash font-semibold text-[15px] uppercase tracking-[1.2px] text-white">
@@ -901,6 +900,11 @@ export default function CheckoutPage() {
         extending={isExtending}
         onExtend={handleExtendSession}
         onLeave={() => handleCancelCheckout()}
+      />
+      <ErrorModal
+        visible={!!payError}
+        message={payError}
+        onClose={() => setPayError('')}
       />
       <MaxWidthContainer className={isDesktop ? 'px-16' : ''}>
         {phase === 'success' ? (

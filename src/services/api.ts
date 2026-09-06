@@ -155,7 +155,7 @@ export interface Drop {
   name: string;
   description: string;
   releaseDate: string;
-  status: 'upcoming' | 'active' | 'ended';
+  status: 'upcoming' | 'active' | 'ended' | 'hidden';
   bannerImageUrl?: string;
 }
 
@@ -196,6 +196,14 @@ export interface ApiList<T> {
   success: boolean;
   data: T[];
   count?: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    totalCount: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 }
 
 export interface ApiSingle<T> {
@@ -343,12 +351,34 @@ export async function fetchDropItems(dropId: string): Promise<Item[]> {
   return data.data;
 }
 
+export interface ItemsPage {
+  items: Item[];
+  totalCount: number;
+}
+
+/** Paginated, status-filtered slice of a drop's items — for the drop detail
+ *  page's "Load more" grid. `limit` is the full count wanted so far (1..N),
+ *  not a page size — see usePaginatedItems. */
+export async function fetchDropItemsPage(dropId: string, itemStatus: string, limit: number): Promise<ItemsPage> {
+  const q = new URLSearchParams({ itemStatus, page: '1', limit: String(limit) }).toString();
+  const data = await dropsRequest<ApiList<Item>>(`/api/drops/${dropId}/items?${q}`);
+  return { items: data.data, totalCount: data.pagination?.totalCount ?? data.data.length };
+}
+
 // ─── Items ────────────────────────────────────────────────────────────────────
 
 export async function fetchItems(params?: Record<string, string>): Promise<Item[]> {
   const q = params ? '?' + new URLSearchParams(params).toString() : '';
   const data = await request<ApiList<Item>>(`/api/items${q}`);
   return data.data;
+}
+
+/** Paginated slice of the general catalog — for the "new arrivals" grid's
+ *  "Load more". `limit` is the full count wanted so far, not a page size. */
+export async function fetchItemsPage(params: Record<string, string> | undefined, limit: number): Promise<ItemsPage> {
+  const q = new URLSearchParams({ ...(params ?? {}), page: '1', limit: String(limit) }).toString();
+  const data = await request<ApiList<Item>>(`/api/items?${q}`);
+  return { items: data.data, totalCount: data.pagination?.totalCount ?? data.data.length };
 }
 
 export async function fetchItemById(id: string): Promise<Item> {

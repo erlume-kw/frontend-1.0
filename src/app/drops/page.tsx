@@ -18,7 +18,8 @@ export default function AllDropsPage() {
 
   useEffect(() => {
     fetchDrops()
-      .then(setDrops)
+      // Hidden drops never appear on the storefront, here or on their own page.
+      .then(data => setDrops(data.filter(drop => drop.status !== 'hidden')))
       .catch(e => console.error('AllDropsPage fetch error:', e))
       .finally(() => setLoading(false));
   }, []);

@@ -79,7 +79,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             {/* Center: Navigation */}
             <div className="flex flex-1 items-center justify-center">
               <nav className="flex flex-row items-center gap-12">
-                <button onClick={() => go('/')}>
+                <button onClick={() => go('/new')}>
                   <span className="font-clash text-[16px] text-olive">new</span>
                 </button>
                 <button onClick={() => go('/drops')}>

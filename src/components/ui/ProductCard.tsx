@@ -19,6 +19,8 @@ interface ProductCardProps {
    * Card height and image area are scaled proportionally (Figma ratio 255:340).
    */
   cardWidth?: number;
+  /** Preview-only (e.g. an upcoming drop's items): dimmed, not clickable, no wishlist action. */
+  disabled?: boolean;
 }
 
 export default function ProductCard({
@@ -30,6 +32,7 @@ export default function ProductCard({
   onWishlistPress,
   isWishlisted = false,
   cardWidth,
+  disabled = false,
 }: ProductCardProps) {
   const isDesktop = useIsDesktop();
 
@@ -43,13 +46,14 @@ export default function ProductCard({
 
   return (
     <div
-      className="relative cursor-pointer overflow-hidden bg-white"
+      className={`relative overflow-hidden bg-white ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
       style={{ width: baseW, height: cardH }}
-      onClick={onPress}
-      role="button"
+      onClick={disabled ? undefined : onPress}
+      role={disabled ? undefined : 'button'}
+      aria-disabled={disabled || undefined}
     >
       {/* Image / placeholder area */}
-      <div className="w-full bg-[#F2F2F2]" style={{ height: imgH }}>
+      <div className="relative w-full bg-[#F2F2F2]" style={{ height: imgH }}>
         {imageUri ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -60,10 +64,12 @@ export default function ProductCard({
             onError={e => { e.currentTarget.style.display = 'none'; }}
           />
         ) : null}
+        {/* Same scrim treatment as an upcoming drop's banner on the drops page */}
+        {disabled ? <div className="absolute inset-0 bg-black/40" /> : null}
       </div>
 
       {/* Info area — left-aligned */}
-      <div className="flex flex-1 flex-col items-start justify-center gap-[3px] py-2">
+      <div className={`flex flex-1 flex-col items-start justify-center gap-[3px] py-2 ${disabled ? 'opacity-60' : ''}`}>
         <span className="w-full truncate font-clash font-medium text-primary" style={{ fontSize: textSize }}>
           {brand}
         </span>
@@ -75,15 +81,17 @@ export default function ProductCard({
         </span>
       </div>
 
-      {/* Wishlist heart — top-right of image area */}
-      <button
-        className="absolute flex items-center justify-center p-2 -m-2"
-        style={{ top: Math.round(10 * scale), right: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}
-        onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
-        aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-      >
-        <HeartIcon size={heartSize} color="#C5705D" filled={isWishlisted} />
-      </button>
+      {/* Wishlist heart — top-right of image area. Hidden for preview-only cards. */}
+      {disabled ? null : (
+        <button
+          className="absolute flex items-center justify-center p-2 -m-2"
+          style={{ top: Math.round(10 * scale), right: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}
+          onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+        >
+          <HeartIcon size={heartSize} color="#C5705D" filled={isWishlisted} />
+        </button>
+      )}
     </div>
   );
 }

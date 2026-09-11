@@ -12,8 +12,8 @@ const LAST_UPDATED = 'September 2026';
 
 const RETURN_CARDS = [
   {
-    title: '3 Days to Return',
-    body: 'Tell us within 3 days of receiving your item if you would like to return it. Items must come back in the condition they were sent, with all packaging and inclusions.',
+    title: '28 Days to Return',
+    body: 'Tell us within 28 days of receiving your item if you would like to return it. Items must come back in the condition they were sent, with all packaging and inclusions.',
   },
   {
     title: 'Not as Described',
@@ -62,7 +62,7 @@ export default function ReturnsPage() {
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
           <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
-            You have 3 days from delivery to change your mind.
+            You have 28 days from delivery to change your mind.
           </span>
         </div>
 

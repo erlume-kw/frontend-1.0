@@ -17,7 +17,7 @@ const BUYER_CARDS = [
   },
   {
     title: 'Returns',
-    body: 'Returns are accepted within 3 days of delivery. See our Returns & Refunds policy for the full details.',
+    body: 'Returns are accepted within 28 days of delivery. See our Returns & Refunds policy for the full details.',
   },
   {
     title: 'Condition Grading',

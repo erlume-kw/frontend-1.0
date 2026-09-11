@@ -432,8 +432,12 @@ export default function ProductDetailPage() {
         Delivery &amp; Returns
       </span>
       <span className="block text-justify font-dm text-black" style={{ fontSize: contentSize, lineHeight: `${contentLine}px` }}>
-        Try items in the comfort of your own home. If they&apos;re not quite right, you&apos;ve got 28 days to request an
-        exchange or return.
+        Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 28 days from delivery to
+        request a return &mdash; see our{' '}
+        <a href="/returns" target="_blank" rel="noreferrer" className="underline">
+          Returns Policy
+        </a>
+        .
       </span>
     </>
   );
@@ -455,8 +459,12 @@ export default function ProductDetailPage() {
               {notifyBlock}
               <span className="mb-1 mt-2 block font-clash font-medium text-[24px] text-black">Delivery &amp; Returns</span>
               <span className="block text-justify font-dm text-black" style={{ fontSize: contentSize, lineHeight: `${contentLine}px` }}>
-                Try items in the comfort of your own home. If they&apos;re not quite right, you&apos;ve got 28 days to
-                request an exchange or return.
+                Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 28 days from
+                delivery to request a return &mdash; see our{' '}
+                <a href="/returns" target="_blank" rel="noreferrer" className="underline">
+                  Returns Policy
+                </a>
+                .
               </span>
             </div>
           </div>

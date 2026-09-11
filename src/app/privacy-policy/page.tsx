@@ -8,7 +8,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import CriteriaSection from '@/components/seller/CriteriaSection';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 
-const LAST_UPDATED = 'June 2026';
+const LAST_UPDATED = 'September 2026';
 
 const PRIVACY_COLLECT = [
   'Full name, email address, phone number, and physical address',
@@ -46,6 +46,34 @@ const PRIVACY_COOKIES = [
   'Customise your experience and remember your preferences',
 ];
 
+const PRIVACY_PAYMENTS = [
+  'Card details are handled by our payment provider and are never stored by erlume',
+  'We receive only the result of a payment, not your card number',
+];
+
+const PRIVACY_TRANSFERS = [
+  'Some services we rely on process data outside Kuwait: payment, email delivery, image hosting and invoicing',
+  'By using erlume you consent to your information being processed by these providers',
+];
+
+const PRIVACY_EMAIL = [
+  'Transactional email (orders, verification, returns) is separate from marketing email',
+  'Newsletter subscribers can unsubscribe from any marketing email in one click',
+  'We will always send you transactional email about an order you placed',
+];
+
+const PRIVACY_RIGHTS = [
+  'You may request deletion of your account and associated data at any time',
+  'We may retain order and invoice records where required for accounting',
+  'You can ask us what information we hold about you',
+];
+
+const PRIVACY_SHARING = [
+  'We share data only with the services needed to fulfil your order: payment, delivery and invoicing',
+  'We do not sell your data to anyone',
+  'Your contact details are never shared between buyers and sellers',
+];
+
 const PRIVACY_CHANGES = [
   'We reserve the right to update this Privacy Policy at any time',
   'Changes will be posted on this page with an updated effective date',
@@ -77,6 +105,11 @@ export default function PrivacyPolicyPage() {
         <CriteriaSection title="How we protect it" items={PRIVACY_PROTECT} />
         <CriteriaSection title="How long we keep it" items={PRIVACY_RETENTION} />
         <CriteriaSection title="Cookies and similar technologies" items={PRIVACY_COOKIES} />
+        <CriteriaSection title="Payment data" items={PRIVACY_PAYMENTS} />
+        <CriteriaSection title="Who we share it with" items={PRIVACY_SHARING} />
+        <CriteriaSection title="Processing outside Kuwait" items={PRIVACY_TRANSFERS} />
+        <CriteriaSection title="Email you receive" items={PRIVACY_EMAIL} />
+        <CriteriaSection title="Your rights" items={PRIVACY_RIGHTS} />
         <CriteriaSection title="Changes to this policy" items={PRIVACY_CHANGES} />
 
         <div className="h-10" />

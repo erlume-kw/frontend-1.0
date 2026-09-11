@@ -49,6 +49,8 @@ export function handleFooterLink(label: string, push: (href: string) => void) {
   if (label === 'Cookies' || label === 'Cookies Policy') { push('/cookies-policy'); return; }
   if (label === 'Commission Breakdown') { push('/sell'); return; }
   if (label === 'Privacy Policy') { push('/privacy-policy'); return; }
+  if (label === 'Terms & Conditions') { push('/terms'); return; }
+  if (label === 'Returns & Refunds' || label === 'Returns') { push('/returns'); return; }
   const legalSubject = LEGAL_SUBJECTS[label];
   if (legalSubject) { openEmail(FOOTER_DATA.contact.email, legalSubject); return; }
   push('/drops');

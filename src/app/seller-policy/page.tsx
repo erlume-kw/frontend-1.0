@@ -16,7 +16,7 @@ const SELLING_CRITERIA = [
   'Not torn, broken, or damaged beyond repair',
   'No fake or imitation items accepted',
   'Must fit within one of our accepted categories (bags, accessories, luxury)',
-  'No missing parts — straps, buckles, or zippers must be intact',
+  'No missing parts: straps, buckles, or zippers must be intact',
   'Bags and wallets must open and close properly',
   'Material type must be disclosed (leather, fabric, metal)',
   'No broken clasps, missing stones, or structural damage',
@@ -26,8 +26,48 @@ const SELLING_CRITERIA = [
 
 const LEGAL_CARDS = [
   {
+    title: 'Commission & Fees',
+    body: 'We take 25% of the item’s assessed value, with a minimum of 10 KWD, deducted from the sale proceeds. Your quote states the exact amount in KWD. Fees are non-refundable once a sale is completed.',
+  },
+  {
+    title: 'Your Quote',
+    body: 'You receive a written quote before handing anything over, showing the estimated listing price, our commission, and your payout. Nothing proceeds without your acceptance.',
+  },
+  {
+    title: 'Payout',
+    body: 'Your share is transferred once the buyer’s payment has cleared and the return window has passed.',
+  },
+  {
+    title: 'How We Price',
+    body: 'Prices are set by our valuation method (brand tier, age, condition and comparable sold prices) rather than negotiated per item.',
+  },
+  {
+    title: 'Logistics & Handling',
+    body: 'A 2.5% uplift is added to the buyer-facing price to cover payment and handling. This is not deducted from your payout.',
+  },
+  {
+    title: 'Price Reductions',
+    body: 'While an item stays unsold, its price reduces in stages after the first month, from 15% at two months up to 75% by five. We tell you before each step, and you can stop it or take the item back at any time.',
+  },
+  {
+    title: 'How Long We List For',
+    body: 'Your item stays listed for its drop and continues afterwards while we work to sell it, which can be longer than a month. You can ask for it back at any time, and if it has not sold by the end of the reduction schedule we return it to you.',
+  },
+  {
+    title: 'Care While With Us',
+    body: 'We take reasonable care of your item while it is with us for cleaning, photography and storage. If it is lost or damaged in our possession, we compensate you at the payout value on your accepted quote.',
+  },
+  {
+    title: 'Minimum Value',
+    body: 'We accept items with an estimated listing price of 100 KWD or above.',
+  },
+  {
+    title: 'Collection',
+    body: 'Dropping your item off to us is always free. We can also arrange collection for a small fee, which depends on how it is collected and is confirmed in your quote before you commit.',
+  },
+  {
     title: 'Ownership',
-    body: 'You guarantee you are the legal owner of every item you list and have the right to sell it on this platform.',
+    body: 'You guarantee that every item you list is yours to sell, free of any claim by anyone else, and genuine. You remain the owner until it sells; we hold your item, we never buy it.',
   },
   {
     title: 'Authenticity',
@@ -38,12 +78,16 @@ const LEGAL_CARDS = [
     body: 'No illegal, hazardous, recalled, or legally restricted items. We reserve the right to remove listings without notice.',
   },
   {
-    title: 'Commission & Fees',
-    body: 'You agree to our commission structure. Fees are non-refundable once a sale is completed.',
+    title: 'Uncollected Items',
+    body: 'If we cannot reach you to return an item, we will contact you at your registered details. Items uncollected six months after they become due may be donated.',
   },
   {
     title: 'Your Anonymity',
     body: 'Your identity is kept completely anonymous. Your information is never shared with buyers or any third parties.',
+  },
+  {
+    title: 'Image Rights & Reuse',
+    body: 'By listing items, you grant us a perpetual license to use product photography for marketing, promotional, and archival purposes.',
   },
   {
     title: 'Marketing Rights',
@@ -52,10 +96,6 @@ const LEGAL_CARDS = [
   {
     title: 'Policy Changes',
     body: 'We reserve the right to update our terms at any time. You will be notified of any material changes.',
-  },
-  {
-    title: 'Image Rights & Reuse',
-    body: 'By listing items, you grant us a perpetual license to use product photography for marketing, promotional, and archival purposes.',
   },
 ];
 
@@ -83,7 +123,7 @@ export default function SellerPolicyPage() {
         {/* Selling Criteria section */}
         <CriteriaSection
           title="Selling Criteria"
-          subtitle="Items that fail our review are not returned. Please review carefully before submitting."
+          subtitle="Items that don't meet these criteria won't be listed, and we'll arrange to return them to you. Please review before submitting."
           items={SELLING_CRITERIA}
         />
 

@@ -26,11 +26,11 @@ export default function LegalCards({ title, cards }: LegalCardsProps) {
       <h2 className={`mb-7 font-clash font-medium text-primary ${isDesktop ? 'text-[48px]' : 'text-[32px]'}`}>
         {title}
       </h2>
-      <div className={`flex ${isDesktop ? 'flex-row flex-wrap justify-between gap-4' : 'flex-col gap-3'}`}>
+      <div className={`grid ${isDesktop ? 'grid-cols-4 gap-4' : 'grid-cols-1 gap-3'}`}>
         {cards.map((card, i) => (
           <div
             key={i}
-            className={`flex flex-col gap-[10px] p-5 ${isDesktop ? 'w-[23.5%]' : ''}`}
+            className="flex flex-col gap-[10px] p-5"
             style={{ backgroundColor: getCardBgColor(i) }}
           >
             <span className="font-clash font-semibold text-[16px] text-primary">{card.title}</span>

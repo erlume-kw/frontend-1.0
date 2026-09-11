@@ -84,7 +84,7 @@ export default function CookiesPolicyPage() {
             </span>
             <span className="font-dm text-[14px] leading-[22px] text-muted">
               If you have any questions about our use of cookies, please contact us at{' '}
-              <span className="text-secondary underline">erlumekw@gmail.com</span>
+              <span className="text-secondary underline">info@erlume.com.kw</span>
             </span>
           </div>
         </div>

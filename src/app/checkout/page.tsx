@@ -766,6 +766,24 @@ export default function CheckoutPage() {
   // ─── Payment slot — lives under the order summary in all flows ──────────────
   const PaymentSlot = () => (
     <div className="mt-1 flex flex-col gap-3">
+      {/* Placing the order IS the acceptance, so it has to be stated before the
+          buyer commits. Opens in a new tab so an in-progress checkout is not
+          lost by navigating away. The order records termsAcceptedAt and
+          termsVersion server-side. */}
+      {(phase === 'idle' || phase === 'initiating' || phase === 'paying') && (
+        <span className="font-dm text-[13px] leading-[21px] text-muted">
+          By placing this order you agree to our{' '}
+          <a href="/terms" target="_blank" rel="noreferrer" className="text-secondary underline">
+            Terms
+          </a>{' '}
+          and{' '}
+          <a href="/returns" target="_blank" rel="noreferrer" className="text-secondary underline">
+            Returns Policy
+          </a>
+          .
+        </span>
+      )}
+
       {phase === 'idle' && !isLoggedIn && (
         <button className="flex h-[60px] items-center justify-center bg-secondary" onClick={handleChoosePaymentMethod}>
           <span className="font-clash font-semibold text-[15px] uppercase tracking-[1.2px] text-white">

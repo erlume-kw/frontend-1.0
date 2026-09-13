@@ -293,43 +293,14 @@ export async function changePassword(currentPassword: string, newPassword: strin
 }
 
 // ─── Drops ────────────────────────────────────────────────────────────────────
-// The /api/drops namespace is admin-only on the backend, so the storefront
-// fetches a read-only admin token on demand and keeps it ONLY in this module
-// variable — it must never touch cookies/localStorage, otherwise every visitor
-// would appear signed in as the admin account. Non-active drops are hidden on
-// the client (see the drops pages), and item-level endpoints enforce visibility
-// server-side for anonymous/non-admin callers.
-
-let _dropsToken: string | null = null;
-
-async function getDropsToken(): Promise<string | null> {
-  if (_dropsToken) return _dropsToken;
-  try {
-    const res = await fetch(`${BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        emailAddress: process.env.NEXT_PUBLIC_DROPS_EMAIL ?? '',
-        password: process.env.NEXT_PUBLIC_DROPS_PASSWORD ?? '',
-      }),
-    });
-    const data = await res.json();
-    if (res.ok && data.accessToken) _dropsToken = data.accessToken;
-  } catch {
-    // silently fail — drops will show empty rather than crash
-  }
-  return _dropsToken;
-}
-
+// The /api/drops READ endpoints are public: the backend serves active drops (and
+// their items) to anonymous callers and hides upcoming/hidden/ended drops
+// server-side (see dropController visibility guards). No token is needed or sent
+// — the storefront must never hold an admin credential.
 async function dropsRequest<T>(path: string): Promise<T> {
-  const token = await getDropsToken();
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: { 'Content-Type': 'application/json' },
   });
-  if (res.status === 401) _dropsToken = null; // stale — refetch on next call
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
   return data as T;

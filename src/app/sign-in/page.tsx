@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
@@ -61,6 +61,11 @@ export default function SignInRegisterPage() {
 
   // Email OTP verification (runs before the account is created)
   const [showOtpModal, setShowOtpModal] = useState(false);
+  // One-shot lock so a single signup can only hit the register API once. The
+  // verify modal can fire onVerified twice (manual confirm + the background
+  // poll that watches for the email-link verification), which would otherwise
+  // create the account then report a false "already in use" failure.
+  const registeringRef = useRef(false);
 
   const handleGovernorateSelect = (gov: string) => {
     setRegGovernorate(gov);
@@ -94,6 +99,8 @@ export default function SignInRegisterPage() {
   // Creates the account — called only after the email is verified (or was
   // already verified in a past flow)
   const completeRegister = async () => {
+    if (registeringRef.current) return; // a duplicate onVerified — ignore
+    registeringRef.current = true;
     setShowOtpModal(false);
     try {
       await register({
@@ -115,6 +122,7 @@ export default function SignInRegisterPage() {
         setMode('signin');
       }, 2500);
     } catch (error: any) {
+      registeringRef.current = false; // failed — allow the user to retry
       // Check if error has details array from validation middleware
       if (error?.data?.details && Array.isArray(error.data.details)) {
         const fieldErrors: Record<string, string> = {};
@@ -186,6 +194,7 @@ export default function SignInRegisterPage() {
 
     setRegErrors({});
     setLoading(true);
+    registeringRef.current = false; // fresh attempt — clear any prior lock
     try {
       // Emails that verified once (any flow) skip the OTP entirely
       const { alreadyVerified } = await requestEmailOtp(regEmail.trim());

@@ -527,11 +527,12 @@ export async function validateDiscountCode(code: string, orderTotal?: number): P
 export async function fetchGovernorateCities(): Promise<Record<string, string[]>> {
   const res = await request<{
     success: boolean;
-    data: Record<string, { governorate: string; cityValues: string[] }>;
+    // Backend shape: each governorate maps to { governorate, cities: [{label, value}] }.
+    data: Record<string, { governorate: string; cities: { label: string; value: string }[] }>;
   }>('/api/enums/kuwaitGovernorateCities');
   const map: Record<string, string[]> = {};
   for (const [gov, entry] of Object.entries(res.data ?? {})) {
-    map[gov] = entry?.cityValues ?? [];
+    map[gov] = (entry?.cities ?? []).map((c) => c.value);
   }
   return map;
 }

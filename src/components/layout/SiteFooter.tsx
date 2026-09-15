@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { requestEmailOtp, subscribeNewsletter } from '@/services/api';
+import { requestEmailOtp, subscribeNewsletter, fetchDrops, type Drop } from '@/services/api';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
 import { FOOTER_DATA, SOCIAL_ICONS } from '@/lib/brand';
 import { useIsDesktop } from '@/lib/useIsDesktop';
@@ -137,8 +137,11 @@ function FooterCopyright() {
 
 const footerLinkClass = 'font-clash text-[16px] leading-[25px] text-white mb-1 text-left block';
 
+// Live drops replace the old static "Our Drops" list — routes match the /drops page.
+const dropHref = (d: Drop) => `/drops/${encodeURIComponent(d.name)}?dropId=${d._id}`;
+
 // ─── Mobile footer ────────────────────────────────────────────────────────────
-function MobileFooter() {
+function MobileFooter({ drops }: { drops: Drop[] }) {
   const [open, setOpen] = useState<string | null>(null);
   const router = useRouter();
 
@@ -162,11 +165,17 @@ function MobileFooter() {
             </button>
             {open === label && (
               <div className="flex flex-col pb-2 pl-2">
-                {FOOTER_DATA.columns[label as keyof typeof FOOTER_DATA.columns].map((item: string) => (
-                  <button key={item} className="text-left" onClick={() => handleFooterLink(item, router.push)}>
-                    <span className={footerLinkClass}>{item}</span>
-                  </button>
-                ))}
+                {label === 'Our Drops'
+                  ? drops.map(drop => (
+                      <button key={drop._id} className="text-left" onClick={() => router.push(dropHref(drop))}>
+                        <span className={footerLinkClass}>{drop.name}</span>
+                      </button>
+                    ))
+                  : FOOTER_DATA.columns[label as keyof typeof FOOTER_DATA.columns].map((item: string) => (
+                      <button key={item} className="text-left" onClick={() => handleFooterLink(item, router.push)}>
+                        <span className={footerLinkClass}>{item}</span>
+                      </button>
+                    ))}
               </div>
             )}
           </div>
@@ -189,7 +198,7 @@ function MobileFooter() {
 }
 
 // ─── Desktop footer ───────────────────────────────────────────────────────────
-function DesktopFooter() {
+function DesktopFooter({ drops }: { drops: Drop[] }) {
   const router = useRouter();
 
   return (
@@ -216,11 +225,17 @@ function DesktopFooter() {
           {Object.entries(FOOTER_DATA.columns).map(([heading, links]) => (
             <div key={heading} className="flex w-[247px] flex-col">
               <span className="mb-3 font-clash font-semibold text-[16px] leading-[25px] text-white">{heading}</span>
-              {links.map((item: string) => (
-                <button key={item} onClick={() => handleFooterLink(item, router.push)} className="text-left">
-                  <span className={footerLinkClass}>{item}</span>
-                </button>
-              ))}
+              {heading === 'Our Drops'
+                ? drops.map(drop => (
+                    <button key={drop._id} onClick={() => router.push(dropHref(drop))} className="text-left">
+                      <span className={footerLinkClass}>{drop.name}</span>
+                    </button>
+                  ))
+                : links.map((item: string) => (
+                    <button key={item} onClick={() => handleFooterLink(item, router.push)} className="text-left">
+                      <span className={footerLinkClass}>{item}</span>
+                    </button>
+                  ))}
             </div>
           ))}
         </div>
@@ -235,5 +250,14 @@ function DesktopFooter() {
 
 export default function SiteFooter() {
   const isDesktop = useIsDesktop();
-  return isDesktop ? <DesktopFooter /> : <MobileFooter />;
+  const [drops, setDrops] = useState<Drop[]>([]);
+
+  useEffect(() => {
+    fetchDrops()
+      // Mirror the storefront /drops page: hidden drops never appear.
+      .then(data => setDrops(data.filter(drop => drop.status !== 'hidden')))
+      .catch(e => console.error('SiteFooter drops fetch error:', e));
+  }, []);
+
+  return isDesktop ? <DesktopFooter drops={drops} /> : <MobileFooter drops={drops} />;
 }

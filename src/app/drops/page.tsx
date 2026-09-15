@@ -26,7 +26,6 @@ export default function AllDropsPage() {
 
   const cardH = 202;
   const titleSize = isDesktop ? 56 : 32;
-  const subtitleSize = isDesktop ? 24 : 20;
 
   return (
     <PageLayout
@@ -66,11 +65,6 @@ export default function AllDropsPage() {
                     <span className={`font-clash font-medium ${textClass}`} style={{ fontSize: titleSize }}>
                       {drop.name.toUpperCase()}
                     </span>
-                    {drop.description ? (
-                      <span className={`mt-1 font-clash font-medium ${textClass}`} style={{ fontSize: subtitleSize }}>
-                        {drop.description}
-                      </span>
-                    ) : null}
                   </div>
                 </button>
               );

@@ -95,7 +95,7 @@ export default function PrivacyPolicyPage() {
             PRIVACY POLICY
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
-          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             Your information is handled with care and never sold or shared with third parties.
           </span>
         </div>

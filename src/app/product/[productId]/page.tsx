@@ -27,28 +27,104 @@ function Toast({ message }: { message: string }) {
   );
 }
 
-function Chevron({ dir, size = 22 }: { dir: 'left' | 'right' | 'up' | 'down'; size?: number }) {
+const ARROW_DARK = '#18230F'; // primary dark — for light backgrounds
+const ARROW_LIGHT = '#F8EDE3'; // primary light — for dark backgrounds
+
+function Chevron({
+  dir,
+  size = 22,
+  color = ARROW_DARK,
+}: {
+  dir: 'left' | 'right' | 'up' | 'down';
+  size?: number;
+  color?: string;
+}) {
   const rotate = { left: 90, right: -90, up: 180, down: 0 }[dir];
+  // Subtle opposite-tone shadow keeps the arrow legible in all cases (and covers
+  // cross-origin images whose pixels can't be sampled) without a solid backing.
+  const shadow =
+    color === ARROW_LIGHT
+      ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))'
+      : 'drop-shadow(0 1px 2px rgba(255,255,255,0.55))';
   return (
     <svg
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#18230F"
+      stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      style={{ transform: `rotate(${rotate}deg)` }}
+      style={{ transform: `rotate(${rotate}deg)`, filter: shadow, transition: 'stroke 200ms ease-out' }}
     >
       <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
 
+// Samples the left/right center bands of an image and picks the arrow tone that
+// contrasts with each side (light arrow on dark image, dark arrow on light).
+// Falls back to the dark tone if the image is cross-origin-tainted or fails.
+function useEdgeArrowColors(src: string | undefined) {
+  const [colors, setColors] = useState<{ left: string; right: string }>({
+    left: ARROW_DARK,
+    right: ARROW_DARK,
+  });
+
+  useEffect(() => {
+    if (!src) return;
+    let cancelled = false;
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      try {
+        const sw = 40;
+        const sh = 60;
+        const canvas = document.createElement('canvas');
+        canvas.width = sw;
+        canvas.height = sh;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, sw, sh);
+
+        const bandLum = (x0: number, x1: number) => {
+          const y0 = Math.floor(sh * 0.35);
+          const data = ctx.getImageData(x0, y0, x1 - x0, Math.ceil(sh * 0.3)).data;
+          let sum = 0;
+          let n = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            sum += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+            n++;
+          }
+          return n ? sum / n : 255;
+        };
+
+        const left = bandLum(0, Math.floor(sw * 0.22)) < 140 ? ARROW_LIGHT : ARROW_DARK;
+        const right = bandLum(Math.ceil(sw * 0.78), sw) < 140 ? ARROW_LIGHT : ARROW_DARK;
+        if (!cancelled) setColors({ left, right });
+      } catch {
+        if (!cancelled) setColors({ left: ARROW_DARK, right: ARROW_DARK });
+      }
+    };
+    img.onerror = () => {
+      if (!cancelled) setColors({ left: ARROW_DARK, right: ARROW_DARK });
+    };
+    img.src = src;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
+
+  return colors;
+}
+
 // ─── Image Carousel (mobile) ──────────────────────────────────────────────────
 function MobileCarousel({ images }: { images: string[] }) {
   const [idx, setIdx] = useState(0);
+  const arrowColors = useEdgeArrowColors(images[idx]);
   const prev = () => setIdx(i => (i - 1 + images.length) % images.length);
   const next = () => setIdx(i => (i + 1) % images.length);
 
@@ -58,16 +134,16 @@ function MobileCarousel({ images }: { images: string[] }) {
       <img src={images[idx]} alt="" className="h-full w-full object-cover" onError={e => { e.currentTarget.style.visibility = 'hidden'; }} onLoad={e => { e.currentTarget.style.visibility = 'visible'; }} />
 
       <button
-        className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-white/75"
+        className="absolute left-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center"
         onClick={prev}
       >
-        <Chevron dir="left" />
+        <Chevron dir="left" color={arrowColors.left} />
       </button>
       <button
-        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center bg-white/75"
+        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center"
         onClick={next}
       >
-        <Chevron dir="right" />
+        <Chevron dir="right" color={arrowColors.right} />
       </button>
 
       <div className="absolute bottom-3 left-0 right-0 flex flex-row justify-center gap-[6px]">
@@ -86,6 +162,7 @@ function MobileCarousel({ images }: { images: string[] }) {
 // ─── Image Gallery (desktop) ─────────────────────────────────────────────────
 function DesktopGallery({ images }: { images: string[] }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
+  const arrowColors = useEdgeArrowColors(images[selectedIdx]);
   const containerW = 684;
   const previews = images.slice(0, 3);
   const thumbW =
@@ -110,16 +187,16 @@ function DesktopGallery({ images }: { images: string[] }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={images[selectedIdx]} alt="" className="object-cover" style={{ width: containerW, height: 1036 }} onError={e => { e.currentTarget.style.visibility = 'hidden'; }} onLoad={e => { e.currentTarget.style.visibility = 'visible'; }} />
         <button
-          className="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center bg-white/85"
+          className="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center"
           onClick={() => setSelectedIdx(i => (i - 1 + images.length) % images.length)}
         >
-          <Chevron dir="left" />
+          <Chevron dir="left" color={arrowColors.left} />
         </button>
         <button
-          className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center bg-white/85"
+          className="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center"
           onClick={() => setSelectedIdx(i => (i + 1) % images.length)}
         >
-          <Chevron dir="right" />
+          <Chevron dir="right" color={arrowColors.right} />
         </button>
       </div>
     </div>

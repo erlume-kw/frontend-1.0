@@ -6,7 +6,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import CriteriaSection from '@/components/seller/CriteriaSection';
-import LegalCards from '@/components/seller/LegalCards';
+import PolicySections, { PolicyGroup } from '@/components/seller/PolicySections';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 
 const LAST_UPDATED = 'June 2026';
@@ -99,6 +99,49 @@ const LEGAL_CARDS = [
   },
 ];
 
+// Grouping is purely organizational — each group references the LEGAL_CARDS
+// entries above by their exact title, so no policy wording is changed, added,
+// or removed. Every card lands in exactly one group.
+const GROUP_TITLES: { category: string; layout: PolicyGroup['layout']; titles: string[] }[] = [
+  {
+    category: 'Pricing',
+    layout: 'features',
+    titles: ['Commission & Fees', 'Your Quote', 'Payout', 'How We Price', 'Price Reductions', 'Minimum Value'],
+  },
+  {
+    category: 'Collection and Handling',
+    layout: 'whyus',
+    titles: [
+      'Collection',
+      'How Long We List For',
+      'Uncollected Items',
+      'Logistics & Handling',
+      'Care While With Us',
+    ],
+  },
+  {
+    category: 'General',
+    layout: 'faq',
+    titles: [
+      'Ownership',
+      'Authenticity',
+      'Prohibited Items',
+      'Your Anonymity',
+      'Image Rights & Reuse',
+      'Marketing Rights',
+      'Policy Changes',
+    ],
+  },
+];
+
+const POLICY_GROUPS: PolicyGroup[] = GROUP_TITLES.map(({ category, layout, titles }) => ({
+  category,
+  layout,
+  items: titles
+    .map((t) => LEGAL_CARDS.find((c) => c.title === t))
+    .filter((c): c is (typeof LEGAL_CARDS)[number] => Boolean(c)),
+}));
+
 export default function SellerPolicyPage() {
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -115,7 +158,7 @@ export default function SellerPolicyPage() {
             SELLING POLICY
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
-          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             Everything you need to know before listing with erlume.
           </span>
         </div>
@@ -127,8 +170,8 @@ export default function SellerPolicyPage() {
           items={SELLING_CRITERIA}
         />
 
-        {/* Legal section */}
-        <LegalCards title="Legal" cards={LEGAL_CARDS} />
+        {/* Policies — grouped into banner-led, staggered sections */}
+        <PolicySections groups={POLICY_GROUPS} />
 
         <div className="h-10" />
       </MaxWidthContainer>

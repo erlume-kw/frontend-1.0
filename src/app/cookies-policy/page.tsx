@@ -63,7 +63,7 @@ export default function CookiesPolicyPage() {
             COOKIES POLICY
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
-          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             Learn about how we use cookies to enhance your experience on our platform.
           </span>
         </div>

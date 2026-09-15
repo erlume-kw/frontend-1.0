@@ -125,7 +125,7 @@ export default function HomePage() {
         <MaxWidthContainer className="flex flex-col items-center">
           <button onClick={() => router.push('/drops')}>
             <span
-              className={`text-center font-clash font-medium text-olive underline ${isDesktop ? 'text-[32px]' : 'text-[16px]'}`}
+              className={`text-center font-clash font-medium text-olive underline ${isDesktop ? 'text-[20px]' : 'text-[14px]'}`}
             >
               SHOP PREVIOUS DROPS HERE
             </span>
@@ -142,7 +142,7 @@ export default function HomePage() {
             {activeDrop ? activeDrop.name : 'Our Latest Drop'}
           </span>
           <button onClick={() => router.push('/drops')}>
-            <span className={`font-clash font-medium text-secondary ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}>
+            <span className="font-clash font-medium text-secondary text-[16px]">
               Shop all
             </span>
           </button>

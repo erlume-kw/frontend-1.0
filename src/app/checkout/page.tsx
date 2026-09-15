@@ -871,8 +871,8 @@ export default function CheckoutPage() {
       ))}
 
       <div className="mb-4 flex flex-row justify-between py-3">
-        <span className="font-dm font-semibold text-[19px] text-black">Total</span>
-        <span className="font-dm font-semibold text-[19px] text-black">{total.toFixed(2)} KWD</span>
+        <span className="font-dm font-semibold text-[16px] text-black">Total</span>
+        <span className="font-dm font-semibold text-[16px] text-black">{total.toFixed(2)} KWD</span>
       </div>
 
       {/* MyFatoorah widget / payment CTA — under the summary on desktop,

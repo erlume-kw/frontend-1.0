@@ -5,7 +5,7 @@ import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
-import LegalCards from '@/components/seller/LegalCards';
+import CriteriaSection from '@/components/seller/CriteriaSection';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 
 const LAST_UPDATED = 'September 2026';
@@ -108,14 +108,14 @@ export default function TermsPage() {
             TERMS & CONDITIONS
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
-          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             What you agree to when you buy from erlume.
           </span>
         </div>
 
-        <LegalCards title="Buying from erlume" cards={BUYER_CARDS} />
+        <CriteriaSection title="Buying from erlume" items={BUYER_CARDS} />
 
-        <LegalCards title="Using the site" cards={USE_CARDS} />
+        <CriteriaSection title="Using the site" items={USE_CARDS} />
 
         {/* Company identity disclosure */}
         <div className={`py-8 ${isDesktop ? 'px-16' : 'px-4'}`}>

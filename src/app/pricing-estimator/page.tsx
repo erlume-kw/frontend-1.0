@@ -175,7 +175,7 @@ export default function PricingEstimatorPage() {
           <h1 className={`font-clash font-medium leading-10 text-primary ${isDesktop ? 'text-[56px]' : 'text-[36px]'}`}>
             PRICING ESTIMATOR
           </h1>
-          <p className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <p className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             Discover how much your bag could earn
           </p>
         </div>

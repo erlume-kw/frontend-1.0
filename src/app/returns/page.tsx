@@ -5,7 +5,7 @@ import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
-import LegalCards from '@/components/seller/LegalCards';
+import CriteriaSection from '@/components/seller/CriteriaSection';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 
 const LAST_UPDATED = 'September 2026';
@@ -61,12 +61,12 @@ export default function ReturnsPage() {
             RETURNS & REFUNDS
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
-          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[17px]' : 'text-[15px]'}`}>
+          <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
             You have 28 days from delivery to change your mind.
           </span>
         </div>
 
-        <LegalCards title="How returns work" cards={RETURN_CARDS} />
+        <CriteriaSection title="How returns work" items={RETURN_CARDS} />
 
         <div className="h-10" />
       </MaxWidthContainer>

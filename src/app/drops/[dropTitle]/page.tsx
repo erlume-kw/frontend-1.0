@@ -147,7 +147,7 @@ export default function DropDetailPage() {
               {drop?.description ? (
                 <p
                   className="text-justify font-clash font-medium text-black"
-                  style={isDesktop ? { fontSize: 24, lineHeight: '32px' } : { fontSize: 16, lineHeight: '22px' }}
+                  style={{ fontSize: 16, lineHeight: '24px' }}
                 >
                   {drop.description}
                 </p>

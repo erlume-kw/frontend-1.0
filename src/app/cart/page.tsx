@@ -8,7 +8,9 @@ import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useCart } from '@/contexts/CartContext';
-import { validateDiscountCode } from '@/services/api';
+// Promo code lives on the checkout page only (it must re-price the live payment
+// session, which the cart can't do). Cart promo UI is commented out below.
+// import { validateDiscountCode } from '@/services/api';
 
 export default function CartPage() {
   const isDesktop = useIsDesktop();
@@ -16,24 +18,25 @@ export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, subtotal } = useCart();
 
-  const [promoCode, setPromoCode] = useState('');
-  const [promoError, setPromoError] = useState('');
-  const [discount, setDiscount] = useState(0);
+  // --- Cart promo code commented out — applied on checkout only ---
+  // const [promoCode, setPromoCode] = useState('');
+  // const [promoError, setPromoError] = useState('');
+  // const [discount, setDiscount] = useState(0);
 
   const activeItems = items.filter(i => !i.isSold);
-  const total = Math.max(0, subtotal - discount);
+  const total = subtotal;
 
-  const handleApplyPromo = async () => {
-    if (!promoCode.trim()) return;
-    try {
-      const result = await validateDiscountCode(promoCode.trim(), subtotal);
-      setDiscount(result.discountAmount);
-      setPromoError('');
-    } catch (e: any) {
-      setPromoError(e.message ?? 'Invalid promo code');
-      setDiscount(0);
-    }
-  };
+  // const handleApplyPromo = async () => {
+  //   if (!promoCode.trim()) return;
+  //   try {
+  //     const result = await validateDiscountCode(promoCode.trim(), subtotal);
+  //     setDiscount(result.discountAmount);
+  //     setPromoError('');
+  //   } catch (e: any) {
+  //     setPromoError(e.message ?? 'Invalid promo code');
+  //     setDiscount(0);
+  //   }
+  // };
 
   const OrderSummary = (
     <div className={`${isDesktop ? 'w-[428px] pb-6 pl-6 pt-4' : 'p-4'}`}>
@@ -41,6 +44,7 @@ export default function CartPage() {
         TOTAL
       </div>
 
+      {/* Promo code commented out — applied on the checkout page only.
       <div className="mb-2 flex h-[50px] flex-row overflow-hidden bg-lightGrey">
         <input
           className="min-w-0 flex-1 bg-transparent px-3 font-clash font-medium text-[16px] text-black outline-none placeholder:text-muted"
@@ -56,6 +60,7 @@ export default function CartPage() {
       {discount > 0 && (
         <div className="mb-2 font-dm text-[13px] text-olive">Discount applied: -{discount.toFixed(2)} KWD</div>
       )}
+      */}
 
       {[
         { label: 'Shipping', value: 'Free' },

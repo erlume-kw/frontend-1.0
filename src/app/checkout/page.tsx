@@ -496,6 +496,26 @@ export default function CheckoutPage() {
     }
   };
 
+  // For signed-in checkout the MyFatoorah session is created on arrival (before a
+  // code is typed), so applying a discount must RE-INITIATE that session or the
+  // widget keeps charging the pre-discount total. This re-prices the live session
+  // to `code`; it no-ops when there's no session yet (guest flow — the code is
+  // sent when the user first starts payment) so it never double-creates an order.
+  const reprice = useCallback(async (code: string) => {
+    if (!orderId) return;
+    if (phaseRef.current !== 'paying' && phaseRef.current !== 'failed') return;
+    setPhase('initiating');
+    try {
+      const session = await initiatePayment(orderId, code || undefined);
+      setSessionId(session.sessionId);
+      setPhase('paying');
+    } catch (e: any) {
+      if (e?.status === 409 || e?.status === 404) { clearStoredOrder(); setOrderId(null); }
+      setPayError(e.message ?? 'Could not update the discount. Please try again.');
+      setPhase('failed');
+    }
+  }, [orderId]);
+
   const handleApplyDiscount = async () => {
     if (!discountCode.trim()) return;
     try {
@@ -503,6 +523,8 @@ export default function CheckoutPage() {
       setDiscountAmount(result.discountAmount);
       setAppliedDiscountCode(discountCode.trim());
       setDiscountError('');
+      // Push the discount into the live payment session so the charge matches.
+      await reprice(discountCode.trim());
     } catch (e: any) {
       setDiscountError(e.message ?? 'Invalid discount code');
       setDiscountAmount(0);
@@ -847,8 +869,9 @@ export default function CheckoutPage() {
           onChange={e => {
             setDiscountCode(e.target.value);
             setDiscountError('');
-            // editing invalidates a previously applied code until re-applied
-            if (appliedDiscountCode) { setAppliedDiscountCode(''); setDiscountAmount(0); }
+            // editing invalidates a previously applied code until re-applied —
+            // re-price the live session back to full so the charge stays honest
+            if (appliedDiscountCode) { setAppliedDiscountCode(''); setDiscountAmount(0); void reprice(''); }
           }}
         />
         <button className="flex h-[52px] items-center justify-center bg-lightGrey px-4" onClick={handleApplyDiscount}>

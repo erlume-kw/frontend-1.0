@@ -52,6 +52,7 @@ export default function SignInRegisterPage() {
   // Address fields
   const [regStreet, setRegStreet] = useState('');
   const [regBlock, setRegBlock] = useState('');
+  const [regAvenue, setRegAvenue] = useState('');
   const [regHouse, setRegHouse] = useState('');
   const [regCity, setRegCity] = useState('');
   const [regGovernorate, setRegGovernorate] = useState('');
@@ -110,6 +111,7 @@ export default function SignInRegisterPage() {
         address: {
           street: regStreet,
           block: regBlock,
+          ...(regAvenue.trim() ? { avenue: regAvenue.trim() } : {}),
           house: regHouse,
           city: regCity,
           governorate: regGovernorate,
@@ -394,6 +396,17 @@ export default function SignInRegisterPage() {
                     />
                     {regErrors.house && <span className={fieldErrorClass}>{regErrors.house}</span>}
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <span className={labelClass}>Avenue (optional)</span>
+                  <input
+                    className={inputClass}
+                    placeholder="Avenue"
+                    value={regAvenue}
+                    onChange={e => setRegAvenue(e.target.value)}
+                    disabled={loading}
+                  />
                 </div>
 
                 {/* Governorate first, then City (dependent on governorate) */}

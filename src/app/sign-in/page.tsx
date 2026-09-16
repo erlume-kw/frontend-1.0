@@ -53,6 +53,7 @@ export default function SignInRegisterPage() {
   const [regStreet, setRegStreet] = useState('');
   const [regBlock, setRegBlock] = useState('');
   const [regAvenue, setRegAvenue] = useState('');
+  const [regFlat, setRegFlat] = useState('');
   const [regHouse, setRegHouse] = useState('');
   const [regCity, setRegCity] = useState('');
   const [regGovernorate, setRegGovernorate] = useState('');
@@ -112,6 +113,7 @@ export default function SignInRegisterPage() {
           street: regStreet,
           block: regBlock,
           ...(regAvenue.trim() ? { avenue: regAvenue.trim() } : {}),
+          ...(regFlat.trim() ? { flat: regFlat.trim() } : {}),
           house: regHouse,
           city: regCity,
           governorate: regGovernorate,
@@ -398,15 +400,27 @@ export default function SignInRegisterPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <span className={labelClass}>Avenue (optional)</span>
-                  <input
-                    className={inputClass}
-                    placeholder="Avenue"
-                    value={regAvenue}
-                    onChange={e => setRegAvenue(e.target.value)}
-                    disabled={loading}
-                  />
+                <div className="flex flex-row">
+                  <div className="flex flex-1 flex-col gap-2">
+                    <span className={labelClass}>Avenue (optional)</span>
+                    <input
+                      className={inputClass}
+                      placeholder="Avenue"
+                      value={regAvenue}
+                      onChange={e => setRegAvenue(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div className="ml-3 flex flex-1 flex-col gap-2">
+                    <span className={labelClass}>Flat / Apt (optional)</span>
+                    <input
+                      className={inputClass}
+                      placeholder="Flat / Apartment"
+                      value={regFlat}
+                      onChange={e => setRegFlat(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
                 </div>
 
                 {/* Governorate first, then City (dependent on governorate) */}

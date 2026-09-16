@@ -65,6 +65,8 @@ export default function ProfilePage() {
   const [block, setBlock] = useState('');
   const [street, setStreet] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
+  const [avenue, setAvenue] = useState('');
+  const [flat, setFlat] = useState('');
   const [addressErrors, setAddressErrors] = useState<Record<string, string>>({});
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressError, setAddressError] = useState('');
@@ -126,6 +128,8 @@ export default function ProfilePage() {
     setBlock(user?.address?.block ?? '');
     setStreet(user?.address?.street ?? '');
     setHouseNumber(user?.address?.house ?? '');
+    setAvenue(user?.address?.avenue ?? '');
+    setFlat(user?.address?.flat ?? '');
     setAddressErrors({});
     setAddressError('');
     setAddressSaved(false);
@@ -144,7 +148,15 @@ export default function ProfilePage() {
 
     setAddressSaving(true);
     setAddressError('');
-    const address = { street, block, city: area, governorate, house: houseNumber };
+    const address = {
+      street,
+      block,
+      city: area,
+      governorate,
+      house: houseNumber,
+      ...(avenue.trim() ? { avenue: avenue.trim() } : {}),
+      ...(flat.trim() ? { flat: flat.trim() } : {}),
+    };
     try {
       await updateMyAddress(user._id, address);
       setUser({ ...user, address });
@@ -544,6 +556,20 @@ export default function ProfilePage() {
                       inputMode="numeric"
                     />
                     <ErrorText field="houseNumber" />
+                    <div className={isDesktop ? 'flex flex-row gap-[14px]' : 'flex flex-col gap-[14px]'}>
+                      <input
+                        className={`${inputClass} ${isDesktop ? 'flex-1' : ''}`}
+                        placeholder="Avenue (optional)"
+                        value={avenue}
+                        onChange={e => setAvenue(e.target.value)}
+                      />
+                      <input
+                        className={`${inputClass} ${isDesktop ? 'flex-1' : ''}`}
+                        placeholder="Flat / Apartment (optional)"
+                        value={flat}
+                        onChange={e => setFlat(e.target.value)}
+                      />
+                    </div>
                   </div>
                   {!!addressError && <span className="font-dm text-[13px] text-error">{addressError}</span>}
                   <button

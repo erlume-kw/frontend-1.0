@@ -104,12 +104,13 @@ export default function CheckoutPage() {
   const [street, setStreet] = useState('');
   const [houseNumber, setHouseNumber] = useState('');
   const [avenue, setAvenue] = useState('');
+  const [flat, setFlat] = useState('');
 
   // Signed-in address selection: profile address by default, or a one-off address
   const [editingAddress, setEditingAddress] = useState(false);
   const [customAddress, setCustomAddress] = useState<{
     name: string;
-    shippingAddress: { street: string; city: string; block: string; governorate: string; house: string };
+    shippingAddress: { street: string; city: string; block: string; governorate: string; house: string; avenue?: string; flat?: string };
   } | null>(null);
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressError, setAddressError] = useState('');
@@ -431,11 +432,13 @@ export default function CheckoutPage() {
         emailAddress: guestEmail.trim(),
         phoneNumber: guestPhone.trim(),
         shippingAddress: {
-          street: avenue ? `${street}, Ave ${avenue}` : street,
+          street,
           city: area,
           block,
           governorate,
           house: houseNumber,
+          ...(avenue.trim() ? { avenue: avenue.trim() } : {}),
+          ...(flat.trim() ? { flat: flat.trim() } : {}),
         },
       },
       orderItems: activeCartItems.map(i => ({ item_id: i.id, quantity: 1 })),
@@ -454,11 +457,13 @@ export default function CheckoutPage() {
     const payload = {
       name: `${firstName} ${lastName}`.trim() || userData?.emailAddress || 'Account customer',
       shippingAddress: {
-        street: avenue ? `${street}, Ave ${avenue}` : street,
+        street,
         city: area,
         block,
         governorate,
         house: houseNumber,
+        ...(avenue.trim() ? { avenue: avenue.trim() } : {}),
+        ...(flat.trim() ? { flat: flat.trim() } : {}),
       },
     };
     try {
@@ -485,6 +490,8 @@ export default function CheckoutPage() {
           block: userData.address.block ?? '',
           governorate: userData.address.governorate ?? '',
           house: userData.address.house ?? '',
+          ...(userData.address.avenue ? { avenue: userData.address.avenue } : {}),
+          ...(userData.address.flat ? { flat: userData.address.flat } : {}),
         },
       });
       setCustomAddress(null);
@@ -621,6 +628,14 @@ export default function CheckoutPage() {
         />
       </div>
       <ErrorText field="houseNumber" />
+
+      {/* Flat / Apartment (optional) */}
+      <input
+        className={inputClass}
+        placeholder="Flat / Apartment (optional)"
+        value={flat}
+        onChange={e => setFlat(e.target.value)}
+      />
     </div>
   );
 

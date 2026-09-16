@@ -189,6 +189,8 @@ export interface AuthUser {
     city?: string;
     governorate?: string;
     house?: string;
+    avenue?: string;
+    flat?: string;
   };
 }
 
@@ -226,7 +228,7 @@ export async function register(payload: {
   emailAddress: string;
   password: string;
   phoneNumber: string;
-  address: { street: string; block: string; city: string; governorate: string; house: string };
+  address: { street: string; block: string; city: string; governorate: string; house: string; avenue?: string; flat?: string };
 }): Promise<AuthUser> {
   const data = await request<{ success: boolean; accessToken: string; refreshToken: string; user: AuthUser }>(
     '/api/auth/register',
@@ -257,7 +259,7 @@ export async function getMe(): Promise<AuthUser> {
 // Profile: update own saved address
 export async function updateMyAddress(
   userId: string,
-  address: { street: string; block: string; city: string; governorate: string; house: string },
+  address: { street: string; block: string; city: string; governorate: string; house: string; avenue?: string; flat?: string },
 ): Promise<void> {
   await request(`/api/users/${userId}`, {
     method: 'PATCH',
@@ -555,6 +557,7 @@ export interface GuestInfo {
     governorate: string;
     house: string;
     flat?: string;
+    avenue?: string;
   };
 }
 
@@ -605,7 +608,7 @@ export async function updateOrderShippingAddress(
   orderId: string,
   payload: {
     name: string;
-    shippingAddress: { street: string; city: string; block: string; governorate: string; house: string; flat?: string };
+    shippingAddress: { street: string; city: string; block: string; governorate: string; house: string; flat?: string; avenue?: string };
   },
 ): Promise<void> {
   await request(`/api/orders/${orderId}/shipping-address`, {

@@ -159,6 +159,17 @@ export interface Drop {
   bannerImageUrl?: string;
 }
 
+export interface Banner {
+  _id: string;
+  order: number;
+  imageUrl: string;
+  description: string;
+  ctaLabel: string;
+  ctaUrl: string;
+  showCta: boolean;
+  isVisible: boolean;
+}
+
 export interface Item {
   _id: string;
   itemName: string;
@@ -312,6 +323,12 @@ export async function fetchDrops(status?: string): Promise<Drop[]> {
   const q = status ? `?status=${status}` : '';
   const data = await dropsRequest<ApiList<Drop>>(`/api/drops${q}`);
   return data.data;
+}
+
+/** Visible homepage banners, sorted by order ascending. */
+export async function fetchBanners(): Promise<Banner[]> {
+  const data = await dropsRequest<ApiList<Banner>>('/api/banners');
+  return (data.data ?? []).slice().sort((a, b) => a.order - b.order);
 }
 
 export async function fetchDropById(id: string): Promise<Drop> {

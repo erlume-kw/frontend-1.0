@@ -14,6 +14,7 @@ interface PageLayoutProps {
 /**
  * Page shell with a sticky footer: short pages keep the footer at the bottom
  * of the viewport; long pages scroll normally with the footer after content.
+ * Main content is flex-1 so pages can stretch children to fill remaining space.
  */
 export default function PageLayout({
   children,
@@ -27,10 +28,8 @@ export default function PageLayout({
       {menu}
       {overlay}
       {header}
-      <div>{children}</div>
-      <div className="mt-auto">
-        <SiteFooter />
-      </div>
+      <div className="flex flex-1 flex-col">{children}</div>
+      <SiteFooter />
     </div>
   );
 }

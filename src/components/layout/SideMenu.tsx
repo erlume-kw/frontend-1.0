@@ -57,30 +57,30 @@ export default function SideMenu({ visible, onClose, onNavigate }: SideMenuProps
           onClick={onClose}
           aria-label="Close menu"
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
 
-        <div className="flex flex-col items-center gap-[34px] pt-10">
+        <div className="flex flex-col items-center gap-7 pt-7">
           {NAV_LINKS.map(({ label, href }) => (
             <button key={label} onClick={() => handleNav(href)}>
-              <span className="font-clash font-medium text-[20px] leading-[25px] text-white">{label}</span>
+              <span className="font-clash font-medium text-[16px] leading-5 text-white">{label}</span>
             </button>
           ))}
           <button onClick={() => handleNav('/cart')}>
-            <span className="font-clash font-medium text-[20px] leading-[25px] text-white">cart ({cartCount})</span>
+            <span className="font-clash font-medium text-[16px] leading-5 text-white">cart ({cartCount})</span>
           </button>
         </div>
 
         {isLoggedIn ? (
           <button className="mx-auto mt-12 block" onClick={() => handleNav('/profile')}>
-            <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">profile</span>
+            <span className="font-clash font-medium text-[16px] leading-5 text-secondary">profile</span>
           </button>
         ) : (
           <button className="mx-auto mt-12 block" onClick={() => handleNav('/sign-in')}>
-            <span className="font-clash font-medium text-[16px] uppercase tracking-[1px] text-secondary">sign in</span>
+            <span className="font-clash font-medium text-[16px] leading-5 text-secondary">sign in</span>
           </button>
         )}
       </div>

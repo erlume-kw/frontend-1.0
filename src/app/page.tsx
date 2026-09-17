@@ -11,12 +11,18 @@ import ProductCard from '@/components/ui/ProductCard';
 import { SkeletonProductCard } from '@/components/ui/Skeleton';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWindowWidth } from '@/lib/useWindowWidth';
-import { fetchDrops, fetchDropItems, fetchItems, type Drop, type Item } from '@/services/api';
+import {
+  fetchDrops,
+  fetchDropItems,
+  fetchItems,
+  fetchBanners,
+  type Drop,
+  type Item,
+  type Banner,
+} from '@/services/api';
 
 // Update to real drop date/time (UTC)
 const DROP_DATE = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 60 * 1000);
-
-const SPOTLIGHT_IMG = 'https://www.figma.com/api/mcp/asset/d6f1e861-670e-4cf8-8261-c4a81f9a9892';
 
 function getTimeRemaining(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -75,6 +81,49 @@ function CountdownHero({ isDesktop }: { isDesktop: boolean }) {
   );
 }
 
+function HomeBanner({
+  banner,
+  isDesktop,
+  onCta,
+}: {
+  banner: Banner;
+  isDesktop: boolean;
+  onCta: (url: string) => void;
+}) {
+  return (
+    <div
+      className="relative w-full overflow-hidden bg-[#FBF1DF]"
+      style={{ height: isDesktop ? 634 : 437 }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={banner.imageUrl}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        onError={e => { e.currentTarget.style.display = 'none'; }}
+      />
+      <div className="absolute inset-0 flex flex-col items-end justify-end bg-black/50 p-8">
+        {!!banner.description && (
+          <span
+            className={`mb-2 text-right font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
+          >
+            {banner.description}
+          </span>
+        )}
+        {banner.showCta && !!banner.ctaLabel && (
+          <button type="button" onClick={() => onCta(banner.ctaUrl)}>
+            <span
+              className={`text-right font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
+            >
+              {banner.ctaLabel}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const width = useWindowWidth();
   const isDesktop = useIsDesktop();
@@ -82,13 +131,21 @@ export default function HomePage() {
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [activeDrop, setActiveDrop] = useState<Drop | null>(null);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   useEffect(() => {
     (async () => {
       try {
-        const drops = await fetchDrops('active');
+        const [drops, homeBanners] = await Promise.all([
+          fetchDrops('active'),
+          fetchBanners().catch(e => {
+            console.error('HomePage banners fetch error:', e);
+            return [] as Banner[];
+          }),
+        ]);
+        setBanners(homeBanners);
         const drop = drops[0] ?? null;
         setActiveDrop(drop);
         if (drop) {
@@ -106,6 +163,15 @@ export default function HomePage() {
       }
     })();
   }, []);
+
+  const handleBannerCta = (url: string) => {
+    if (!url) return;
+    if (/^https?:\/\//i.test(url)) {
+      window.location.href = url;
+      return;
+    }
+    router.push(url.startsWith('/') ? url : `/${url}`);
+  };
 
   const numCols = isDesktop ? 4 : 2;
   const gapSize = isDesktop ? 16 : 8;
@@ -198,27 +264,15 @@ export default function HomePage() {
         )}
       </MaxWidthContainer>
 
-      {/* Spotlight feature */}
-      <div
-        className="relative w-full overflow-hidden bg-[#FBF1DF]"
-        style={{ height: isDesktop ? 634 : 437 }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={SPOTLIGHT_IMG} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 flex flex-col items-end justify-end bg-black/50 p-8">
-          <span className={`mb-2 text-right font-clash font-medium text-white ${isDesktop ? 'text-[32px]' : 'text-[20px]'}`}>
-            Spotlight: The Burgundy Birkin
-          </span>
-          <span className={`mb-2 text-right font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}>
-            Introduced in 1984 for Jane Birkin; now a symbol of luxury and craftsmanship.
-          </span>
-          <button onClick={() => router.push('/product/1')}>
-            <span className={`text-right font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}>
-              Shop Now
-            </span>
-          </button>
-        </div>
-      </div>
+      {/* CMS homepage banners (ordered) */}
+      {banners.map(banner => (
+        <HomeBanner
+          key={banner._id}
+          banner={banner}
+          isDesktop={isDesktop}
+          onCta={handleBannerCta}
+        />
+      ))}
     </PageLayout>
   );
 }

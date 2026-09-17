@@ -68,7 +68,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
 
   if (isDesktop) {
     return (
-      <div className="h-[98px] bg-white">
+      <div className="sticky top-0 z-50 h-[98px] bg-white">
         <MaxWidthContainer>
           <div className="flex h-[98px] w-full flex-row items-center justify-between gap-10 px-16">
             {/* Left: Logo */}
@@ -118,7 +118,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
   }
 
   return (
-    <div className="flex h-[76px] flex-row items-center justify-between bg-white px-4">
+    <div className="sticky top-0 z-50 flex h-[76px] flex-row items-center justify-between bg-white px-4">
       <button onClick={onMenuPress} className="flex w-[30px] flex-col justify-center gap-[5px] py-2">
         <span className="block h-[2px] w-6 bg-primary" />
         <span className="block h-[2px] w-[18px] bg-primary" />
@@ -140,10 +140,15 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
         </button>
         <button
           onClick={() => go('/cart')}
-          className="p-1"
+          className="relative p-1"
           aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
         >
           <ShoppingBagIcon />
+          {cartCount > 0 && (
+            <span className="absolute -right-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
+              <span className="font-dm font-medium text-[9px] leading-3 text-white">{cartCount}</span>
+            </span>
+          )}
         </button>
       </div>
     </div>

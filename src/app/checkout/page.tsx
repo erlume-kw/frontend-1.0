@@ -12,6 +12,7 @@ import {
   initiatePayment,
   confirmPayment,
   requestEmailOtp,
+  checkEmailVerified,
   updateOrderShippingAddress,
   AuthUser,
 } from '@/services/api';
@@ -121,7 +122,10 @@ export default function CheckoutPage() {
   // Guest email verification popup
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
-  const guestPaymentStartedRef = useRef(false);
+  // The address the guest has verified — verification only counts while the field still matches it
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const normalizedGuestEmail = guestEmail.trim().toLowerCase();
+  const guestEmailVerified = !!normalizedGuestEmail && verifiedEmail === normalizedGuestEmail;
 
   // Payment flow
   const [phase, setPhase] = useState<PaymentPhase>('idle');
@@ -478,29 +482,46 @@ export default function CheckoutPage() {
     const newErrors: Record<string, string> = {};
     if (!guestEmail.trim()) newErrors.guestEmail = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) newErrors.guestEmail = 'Invalid email';
+    else if (!guestEmailVerified) newErrors.guestEmail = 'Please verify your email before choosing a payment method';
     if (!guestPhone.trim()) newErrors.guestPhone = 'Phone number is required';
     validateAddressFields(newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Guests confirm their email with a code before the order is created. An email that
-  // was verified in the last day skips the popup; the backend enforces this too.
-  const handleChoosePaymentMethod = async () => {
-    if (!validateGuestForm()) return;
-    if (activeCartItems.length === 0) {
-      setPayError('Your cart is empty.');
+  // Guests confirm their email with a code (own button next to the email field) before
+  // they can pay. An email verified in the last day counts straight away; the backend
+  // enforces this too.
+  const isValidGuestEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim());
+
+  useEffect(() => {
+    if (isLoggedIn || !isValidGuestEmail || guestEmailVerified) return;
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      try {
+        if (await checkEmailVerified(guestEmail.trim()) && !cancelled) setVerifiedEmail(normalizedGuestEmail);
+      } catch {
+        // the Verify button still works
+      }
+    }, 500);
+    return () => { cancelled = true; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedGuestEmail, isLoggedIn]);
+
+  const handleVerifyEmail = async () => {
+    if (!guestEmail.trim()) {
+      setErrors(prev => ({ ...prev, guestEmail: 'Email is required' }));
+      return;
+    }
+    if (!isValidGuestEmail) {
+      setErrors(prev => ({ ...prev, guestEmail: 'Invalid email' }));
       return;
     }
     setSendingCode(true);
     try {
       const { alreadyVerified } = await requestEmailOtp(guestEmail.trim());
-      if (alreadyVerified) {
-        startGuestPayment();
-      } else {
-        guestPaymentStartedRef.current = false;
-        setShowVerifyModal(true);
-      }
+      if (alreadyVerified) setVerifiedEmail(normalizedGuestEmail);
+      else setShowVerifyModal(true);
     } catch (e: any) {
       setPayError(e?.message ?? 'Could not send the verification code. Please try again.');
     } finally {
@@ -508,12 +529,18 @@ export default function CheckoutPage() {
     }
   };
 
-  // Called once the email is verified (the popup can report it twice — the code
-  // entry and the background check — so only the first call starts the payment)
   const handleGuestEmailVerified = () => {
     setShowVerifyModal(false);
-    if (guestPaymentStartedRef.current) return;
-    guestPaymentStartedRef.current = true;
+    setVerifiedEmail(normalizedGuestEmail);
+    setErrors(prev => ({ ...prev, guestEmail: '' }));
+  };
+
+  const handleChoosePaymentMethod = () => {
+    if (!validateGuestForm()) return;
+    if (activeCartItems.length === 0) {
+      setPayError('Your cart is empty.');
+      return;
+    }
     startGuestPayment();
   };
 
@@ -842,17 +869,35 @@ export default function CheckoutPage() {
           <div className="mb-7 flex flex-col gap-[14px]">
             <FormSection title="Contact information" />
             <div>
-              <input
-                className={inputClass}
-                placeholder="Email address"
-                value={guestEmail}
-                onChange={e => {
-                  setGuestEmail(e.target.value);
-                  if (errors.guestEmail) setErrors({ ...errors, guestEmail: '' });
-                }}
-                type="email"
-                autoCapitalize="none"
-              />
+              <div className="flex flex-row">
+                <input
+                  className={`${inputClass} min-w-0 flex-1`}
+                  placeholder="Email address"
+                  value={guestEmail}
+                  onChange={e => {
+                    setGuestEmail(e.target.value);
+                    if (errors.guestEmail) setErrors({ ...errors, guestEmail: '' });
+                  }}
+                  type="email"
+                  autoCapitalize="none"
+                />
+                {guestEmailVerified ? (
+                  <div className="flex h-[52px] items-center bg-lightGrey pr-[14px]">
+                    <span className="font-dm text-[13px] font-medium text-[#2E7D4F]">✓ Verified</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className={`h-[52px] shrink-0 bg-secondary px-6 ${sendingCode ? 'opacity-60' : ''}`}
+                    onClick={handleVerifyEmail}
+                    disabled={sendingCode}
+                  >
+                    <span className="font-clash font-medium text-[13px] uppercase tracking-[1.2px] text-white">
+                      {sendingCode ? 'SENDING…' : 'VERIFY'}
+                    </span>
+                  </button>
+                )}
+              </div>
               <ErrorText field="guestEmail" />
             </div>
             <div>
@@ -915,12 +960,11 @@ export default function CheckoutPage() {
 
       {phase === 'idle' && !isLoggedIn && (
         <button
-          className={`flex h-[60px] items-center justify-center bg-secondary ${sendingCode ? 'opacity-60' : ''}`}
+          className="flex h-[60px] items-center justify-center bg-secondary"
           onClick={handleChoosePaymentMethod}
-          disabled={sendingCode}
         >
           <span className="font-clash font-semibold text-[15px] uppercase tracking-[1.2px] text-white">
-            {sendingCode ? 'SENDING CODE…' : 'CHOOSE A PAYMENT METHOD'}
+            CHOOSE A PAYMENT METHOD
           </span>
         </button>
       )}

@@ -115,11 +115,11 @@ export default function DropDetailPage() {
   const cardWidth = useCardWidth(isDesktop, width);
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // Hidden drops (and anything that failed to load, e.g. a stale/bad link)
-  // read as a plain "not found" — no name, no description, nothing revealed.
-  const notFound = !loading && (!drop || drop.status === 'hidden');
+  // Only active and upcoming drops are public. Hidden/ended drops (and anything that
+  // failed to load, e.g. a stale/bad link) read as a plain "not found" — no name, no
+  // description, nothing revealed.
+  const notFound = !loading && (!drop || (drop.status !== 'active' && drop.status !== 'upcoming'));
   const isUpcoming = drop?.status === 'upcoming';
-  const isEnded = drop?.status === 'ended';
   const hasMore = items.length < totalCount;
 
   return (
@@ -154,55 +154,45 @@ export default function DropDetailPage() {
               ) : null}
             </div>
 
-            {/* Ended drops show a status message instead of the grid. Active and
-                upcoming drops both show items — upcoming ones dimmed and inert. */}
-            {isEnded ? (
+            {/* Active and upcoming drops both show items — upcoming ones dimmed and inert. */}
+            <>
               <div
-                className="py-20 text-center font-clash font-medium text-primary"
-                style={{ fontSize: isDesktop ? 22 : 18 }}
+                className={`flex flex-row flex-wrap justify-start ${
+                  isDesktop ? 'gap-x-4 gap-y-8 px-0' : 'gap-2 px-4'
+                }`}
               >
-                This drop has ended.
+                {loading
+                  ? Array.from({ length: isDesktop ? 4 : 8 }).map((_, i) => {
+                      const skeletonH = Math.round(340 * (cardWidth / 255));
+                      return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
+                    })
+                  : items.map(item => (
+                      <ProductCard
+                        key={item._id}
+                        brand={item.brandName}
+                        name={item.itemName}
+                        price={`${item.listingPrice} KWD`}
+                        imageUri={item.imageUrls?.[0]}
+                        cardWidth={cardWidth}
+                        disabled={isUpcoming}
+                        isWishlisted={isInWishlist(item._id)}
+                        onWishlistPress={isUpcoming ? undefined : () => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+                        onPress={isUpcoming ? undefined : () => router.push(`/product/${item._id}`)}
+                      />
+                    ))}
               </div>
-            ) : (
-              <>
-                <div
-                  className={`flex flex-row flex-wrap justify-start ${
-                    isDesktop ? 'gap-x-4 gap-y-8 px-0' : 'gap-2 px-4'
-                  }`}
-                >
-                  {loading
-                    ? Array.from({ length: isDesktop ? 4 : 8 }).map((_, i) => {
-                        const skeletonH = Math.round(340 * (cardWidth / 255));
-                        return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
-                      })
-                    : items.map(item => (
-                        <ProductCard
-                          key={item._id}
-                          brand={item.brandName}
-                          name={item.itemName}
-                          price={`${item.listingPrice} KWD`}
-                          imageUri={item.imageUrls?.[0]}
-                          cardWidth={cardWidth}
-                          disabled={isUpcoming}
-                          isWishlisted={isInWishlist(item._id)}
-                          onWishlistPress={isUpcoming ? undefined : () => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
-                          onPress={isUpcoming ? undefined : () => router.push(`/product/${item._id}`)}
-                        />
-                      ))}
-                </div>
 
-                {!loading && (
-                  <LoadMoreFooter
-                    shown={items.length}
-                    total={totalCount}
-                    hasMore={hasMore}
-                    loading={loadingMore}
-                    onLoadMore={loadMore}
-                    isDesktop={isDesktop}
-                  />
-                )}
-              </>
-            )}
+              {!loading && (
+                <LoadMoreFooter
+                  shown={items.length}
+                  total={totalCount}
+                  hasMore={hasMore}
+                  loading={loadingMore}
+                  onLoadMore={loadMore}
+                  isDesktop={isDesktop}
+                />
+              )}
+            </>
           </>
         )}
       </MaxWidthContainer>

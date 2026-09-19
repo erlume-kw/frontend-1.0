@@ -267,7 +267,7 @@ export default function SiteFooter() {
   useEffect(() => {
     fetchDrops()
       // Mirror the storefront /drops page: hidden drops never appear.
-      .then(data => setDrops(data.filter(drop => drop.status !== 'hidden')))
+      .then(data => setDrops(data.filter(drop => drop.status === 'active' || drop.status === 'upcoming')))
       .catch(e => console.error('SiteFooter drops fetch error:', e));
   }, []);
 

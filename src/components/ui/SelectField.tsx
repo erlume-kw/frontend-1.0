@@ -2,6 +2,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+type KeyLike = {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  altKey: boolean;
+  preventDefault: () => void;
+};
+
 // ─── Dropdown — floats above all content ──────────────────────────────────────
 // Keyboard: type a letter (or the first few letters) to jump to the matching
 // option, ↑/↓ to move, Enter to choose, Esc to close. There is no search box.
@@ -21,8 +29,10 @@ export default function SelectField({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
   const typedRef = useRef('');
   const typedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleKeyRef = useRef<(e: KeyLike) => void>(() => {});
 
   // Keep the highlighted option in view while moving through a long list
   useEffect(() => {
@@ -34,6 +44,8 @@ export default function SelectField({
   const openList = () => {
     setActiveIndex(options.indexOf(value));
     setOpen(true);
+    // Safari and Firefox on Mac don't focus a button when it is clicked
+    triggerRef.current?.focus();
   };
 
   const choose = (opt: string) => {
@@ -64,7 +76,7 @@ export default function SelectField({
     setActiveIndex(match);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  const handleKeyDown = (e: KeyLike) => {
     if (disabled || e.ctrlKey || e.metaKey || e.altKey) return;
 
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -84,13 +96,29 @@ export default function SelectField({
     }
   };
 
+  handleKeyRef.current = handleKeyDown;
+
+  // While the list is open, listen on the whole page so typing works wherever the
+  // focus is (a clicked button isn't focused in every browser)
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      handleKeyRef.current(e);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
   return (
     <div className="relative">
       <button
+        ref={triggerRef}
         type="button"
         className={`flex h-[52px] w-full flex-row items-center justify-between px-[11px] ${disabled ? 'bg-[#E8E8E8]' : 'bg-lightGrey'}`}
         onClick={() => { if (!disabled) { if (open) setOpen(false); else openList(); } }}
-        onKeyDown={handleKeyDown}
+        onKeyDown={e => { if (!open) handleKeyDown(e); }}
         aria-haspopup="listbox"
         aria-expanded={open}
       >

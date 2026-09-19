@@ -167,6 +167,8 @@ export interface Banner {
   ctaLabel: string;
   ctaUrl: string;
   showCta: boolean;
+  /** Where description + CTA sit; defaults to right when omitted. */
+  contentAlign?: 'left' | 'right';
   isVisible: boolean;
 }
 

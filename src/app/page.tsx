@@ -48,7 +48,7 @@ function CountdownHero({ isDesktop }: { isDesktop: boolean }) {
   const labelSize = isDesktop ? 60 : 20;
   const numSize = isDesktop ? 150 : 60;
   const lineHeight = isDesktop ? '120px' : '56px';
-  const heroHeight = isDesktop ? 895 : 348;
+  const heroHeight = isDesktop ? 640 : 348;
   // Spacing between "NEXT DROP IN" label and the first countdown row
   const labelSpacing = isDesktop ? 40 : 16;
 
@@ -90,6 +90,8 @@ function HomeBanner({
   isDesktop: boolean;
   onCta: (url: string) => void;
 }) {
+  const alignLeft = banner.contentAlign === 'left';
+
   return (
     <div
       className="relative w-full overflow-hidden bg-[#FBF1DF]"
@@ -102,10 +104,16 @@ function HomeBanner({
         className="absolute inset-0 h-full w-full object-cover"
         onError={e => { e.currentTarget.style.display = 'none'; }}
       />
-      <div className="absolute inset-0 flex flex-col items-end justify-end bg-black/50 p-8">
+      <div
+        className={`absolute inset-0 flex flex-col justify-end bg-black/50 p-8 ${
+          alignLeft ? 'items-start' : 'items-end'
+        }`}
+      >
         {!!banner.description && (
           <span
-            className={`mb-2 text-right font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
+            className={`mb-2 font-clash font-light text-white ${
+              alignLeft ? 'text-left' : 'text-right'
+            } ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
           >
             {banner.description}
           </span>
@@ -113,7 +121,9 @@ function HomeBanner({
         {banner.showCta && !!banner.ctaLabel && (
           <button type="button" onClick={() => onCta(banner.ctaUrl)}>
             <span
-              className={`text-right font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
+              className={`font-clash text-white underline ${
+                alignLeft ? 'text-left' : 'text-right'
+              } ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
             >
               {banner.ctaLabel}
             </span>
@@ -150,8 +160,12 @@ export default function HomePage() {
         setActiveDrop(drop);
         if (drop) {
           const dropItems = await fetchDropItems(drop._id);
-          // Sold/reserved items never appear on the shop surfaces
-          setItems(dropItems.filter(i => i.itemStatus === 'available').slice(0, 6));
+          // Keep sold bags in the strip (greyed on the card); hide other non-shop statuses
+          setItems(
+            dropItems
+              .filter(i => i.itemStatus === 'available' || i.itemStatus === 'sold')
+              .slice(0, 6),
+          );
         } else {
           const fallback = await fetchItems({ itemStatus: 'available', limit: '6' });
           setItems(fallback);
@@ -240,8 +254,20 @@ export default function HomePage() {
                   name={item.itemName}
                   price={`${item.listingPrice} KWD`}
                   imageUri={item.imageUrls?.[0]}
+                  sold={item.itemStatus === 'sold'}
                   isWishlisted={isInWishlist(item._id)}
-                  onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+                  onWishlistPress={
+                    item.itemStatus === 'sold'
+                      ? undefined
+                      : () =>
+                          toggleWishlist({
+                            id: item._id,
+                            brand: item.brandName,
+                            sub: item.itemName,
+                            price: `${item.listingPrice} KWD`,
+                            imageUri: item.imageUrls?.[0],
+                          })
+                  }
                   onPress={() => router.push(`/product/${item._id}`)}
                 />
               </div>
@@ -257,6 +283,7 @@ export default function HomePage() {
                 price={`${item.listingPrice} KWD`}
                 imageUri={item.imageUrls?.[0]}
                 cardWidth={cardW}
+                sold={item.itemStatus === 'sold'}
                 onPress={() => router.push(`/product/${item._id}`)}
               />
             ))}

@@ -25,11 +25,11 @@ function useCardWidth(isDesktop: boolean, viewportWidth: number) {
 
 const PAGE_SIZE = 20;
 
-// Active drops only ever show items still on sale. Upcoming drops preview
-// their (not-yet-purchasable) items instead — items added to an upcoming
-// drop are always "pending" on the backend, never "available".
+// Active drops show what's still for sale plus sold pieces (greyed in the UI).
+// Upcoming drops preview their (not-yet-purchasable) items instead — items
+// added to an upcoming drop are always "pending" on the backend, never "available".
 function statusFilterFor(drop: Drop | null): string {
-  return drop?.status === 'upcoming' ? 'pending' : 'available';
+  return drop?.status === 'upcoming' ? 'pending' : 'available,sold';
 }
 
 export default function DropDetailPage() {
@@ -166,7 +166,9 @@ export default function DropDetailPage() {
                       const skeletonH = Math.round(340 * (cardWidth / 255));
                       return <SkeletonProductCard key={i} width={cardWidth} height={skeletonH} isDesktop={isDesktop} />;
                     })
-                  : items.map(item => (
+                  : items.map(item => {
+                      const isSold = item.itemStatus === 'sold';
+                      return (
                       <ProductCard
                         key={item._id}
                         brand={item.brandName}
@@ -175,11 +177,24 @@ export default function DropDetailPage() {
                         imageUri={item.imageUrls?.[0]}
                         cardWidth={cardWidth}
                         disabled={isUpcoming}
+                        sold={isSold}
                         isWishlisted={isInWishlist(item._id)}
-                        onWishlistPress={isUpcoming ? undefined : () => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
+                        onWishlistPress={
+                          isUpcoming || isSold
+                            ? undefined
+                            : () =>
+                                toggleWishlist({
+                                  id: item._id,
+                                  brand: item.brandName,
+                                  sub: item.itemName,
+                                  price: `${item.listingPrice} KWD`,
+                                  imageUri: item.imageUrls?.[0],
+                                })
+                        }
                         onPress={isUpcoming ? undefined : () => router.push(`/product/${item._id}`)}
                       />
-                    ))}
+                      );
+                    })}
               </div>
 
               {!loading && (

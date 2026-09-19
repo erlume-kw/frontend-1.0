@@ -26,8 +26,11 @@ export default function PageLayout({
   return (
     <div className="flex min-h-screen flex-col" style={{ backgroundColor }}>
       {menu}
-      {overlay}
       {header}
+      {overlay ? (
+        // Below SiteHeader: 76px mobile / 98px desktop
+        <div className="sticky top-[76px] z-40 md:top-[98px]">{overlay}</div>
+      ) : null}
       <div className="flex flex-1 flex-col">{children}</div>
       <SiteFooter />
     </div>

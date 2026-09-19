@@ -21,6 +21,8 @@ interface ProductCardProps {
   cardWidth?: number;
   /** Preview-only (e.g. an upcoming drop's items): dimmed, not clickable, no wishlist action. */
   disabled?: boolean;
+  /** Sold items stay in the grid, greyed with a SOLD label in place of the price. */
+  sold?: boolean;
 }
 
 export default function ProductCard({
@@ -33,6 +35,7 @@ export default function ProductCard({
   isWishlisted = false,
   cardWidth,
   disabled = false,
+  sold = false,
 }: ProductCardProps) {
   const isDesktop = useIsDesktop();
 
@@ -43,14 +46,19 @@ export default function ProductCard({
   const imgH = Math.round(239 * scale);
   const textSize = isDesktop ? 14 : 11;
   const heartSize = isDesktop ? 22 : 18;
+  const inert = disabled;
+  // Match drop-page banner scrim, nudged ~20% darker than the active /50.
+  // Upcoming preview cards keep the heavier upcoming-banner treatment (/70).
+  const showScrim = disabled || sold;
+  const scrimClass = disabled ? 'bg-black/70' : 'bg-black/60';
 
   return (
     <div
-      className={`relative overflow-hidden bg-white ${disabled ? 'cursor-default' : 'cursor-pointer'}`}
+      className={`relative overflow-hidden bg-white ${inert ? 'cursor-default' : 'cursor-pointer'}`}
       style={{ width: baseW, height: cardH }}
-      onClick={disabled ? undefined : onPress}
-      role={disabled ? undefined : 'button'}
-      aria-disabled={disabled || undefined}
+      onClick={inert ? undefined : onPress}
+      role={inert ? undefined : 'button'}
+      aria-disabled={inert || undefined}
     >
       {/* Image / placeholder area */}
       <div className="relative w-full bg-[#F2F2F2]" style={{ height: imgH }}>
@@ -64,8 +72,7 @@ export default function ProductCard({
             onError={e => { e.currentTarget.style.display = 'none'; }}
           />
         ) : null}
-        {/* Same scrim treatment as an upcoming drop's banner on the drops page */}
-        {disabled ? <div className="absolute inset-0 bg-black/40" /> : null}
+        {showScrim ? <div className={`absolute inset-0 ${scrimClass}`} /> : null}
       </div>
 
       {/* Info area — left-aligned */}
@@ -77,12 +84,12 @@ export default function ProductCard({
           {name}
         </span>
         <span className="w-full truncate font-clash text-olive" style={{ fontSize: textSize }}>
-          {price}
+          {sold ? 'SOLD' : price}
         </span>
       </div>
 
-      {/* Wishlist heart — top-right of image area. Hidden for preview-only cards. */}
-      {disabled ? null : (
+      {/* Wishlist heart — top-right of image area. Hidden for preview-only / sold cards. */}
+      {disabled || sold ? null : (
         <button
           className="absolute flex items-center justify-center p-2 -m-2"
           style={{ top: Math.round(10 * scale), right: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}

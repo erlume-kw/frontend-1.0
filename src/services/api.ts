@@ -249,6 +249,21 @@ export async function register(payload: {
   return data.user;
 }
 
+// Forgot password: the backend emails a 6-digit code to the account's email address.
+export async function requestPasswordReset(emailAddress: string): Promise<void> {
+  await request('/api/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify({ emailAddress }),
+  });
+}
+
+export async function resetPassword(emailAddress: string, otp: string, newPassword: string): Promise<void> {
+  await request('/api/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ emailAddress, otp, newPassword }),
+  });
+}
+
 export async function logout(): Promise<void> {
   const refreshToken = storage.get(REFRESH_KEY) ?? getCookie(REFRESH_KEY);
   try {

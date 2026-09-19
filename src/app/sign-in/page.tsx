@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
@@ -10,7 +10,7 @@ import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
 import SelectField from '@/components/ui/SelectField';
 import PasswordInput from '@/components/ui/PasswordInput';
-import { login, register, requestEmailOtp } from '@/services/api';
+import { login, register, requestEmailOtp, requestPasswordReset, resetPassword } from '@/services/api';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
 
 function Toast({ message }: { message: string }) {
@@ -32,7 +32,7 @@ export default function SignInRegisterPage() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<'signin' | 'register'>('signin');
+  const [mode, setMode] = useState<'signin' | 'register' | 'forgot'>('signin');
   const { areas, governorates } = useKuwaitAreas();
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -41,6 +41,14 @@ export default function SignInRegisterPage() {
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
   const [signInError, setSignInError] = useState('');
+
+  // Forgot Password State
+  const [forgotStep, setForgotStep] = useState<'email' | 'reset'>('email');
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotCode, setForgotCode] = useState('');
+  const [forgotNewPassword, setForgotNewPassword] = useState('');
+  const [forgotNewPasswordConfirm, setForgotNewPasswordConfirm] = useState('');
+  const [forgotError, setForgotError] = useState('');
 
   // Register State
   const [regEmail, setRegEmail] = useState('');
@@ -69,6 +77,15 @@ export default function SignInRegisterPage() {
   // create the account then report a false "already in use" failure.
   const registeringRef = useRef(false);
 
+  // The seller welcome email links to /sign-in?forgot=1&email=… — open the reset form directly
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('forgot') === '1') {
+      setMode('forgot');
+      setForgotEmail(params.get('email') ?? '');
+    }
+  }, []);
+
   const handleGovernorateSelect = (gov: string) => {
     setRegGovernorate(gov);
     setRegCity(''); // city depends on governorate — reset when it changes
@@ -93,6 +110,70 @@ export default function SignInRegisterPage() {
       }, 2500);
     } catch (error: any) {
       setSignInError(error?.message || 'Sign in failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openForgotPassword = () => {
+    setMode('forgot');
+    setForgotEmail(signInEmail.trim());
+    setForgotStep('email');
+    setForgotError('');
+    setSignInError('');
+  };
+
+  const forgotErrorMessage = (error: any, fallback: string) =>
+    error?.data?.details?.[0]?.message || error?.data?.error || error?.message || fallback;
+
+  // Step 1 — the backend emails a code to the account's email address
+  const handleSendResetCode = async () => {
+    setForgotError('');
+    const email = forgotEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setForgotError('Please enter a valid email address');
+      return;
+    }
+    setLoading(true);
+    try {
+      await requestPasswordReset(email);
+      setForgotStep('reset');
+    } catch (error: any) {
+      setForgotError(forgotErrorMessage(error, 'Could not send the code. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2 — code + new password
+  const handleResetPassword = async () => {
+    setForgotError('');
+    if (!/^[0-9]{4,8}$/.test(forgotCode.trim())) {
+      setForgotError('Please enter the code from your email');
+      return;
+    }
+    if (forgotNewPassword.length < 8) {
+      setForgotError('Password must be at least 8 characters');
+      return;
+    }
+    if (forgotNewPassword !== forgotNewPasswordConfirm) {
+      setForgotError('Passwords do not match');
+      return;
+    }
+    setLoading(true);
+    try {
+      await resetPassword(forgotEmail.trim(), forgotCode.trim(), forgotNewPassword);
+      setForgotCode('');
+      setForgotNewPassword('');
+      setForgotNewPasswordConfirm('');
+      setToastMessage('Password updated. You can now sign in.');
+      setToastVisible(true);
+      setTimeout(() => {
+        setToastVisible(false);
+        setMode('signin');
+      }, 2500);
+    } catch (error: any) {
+      setForgotError(forgotErrorMessage(error, 'Could not reset your password. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -248,6 +329,9 @@ export default function SignInRegisterPage() {
                     onChange={e => setSignInPassword(e.target.value)}
                     disabled={loading}
                   />
+                  <button type="button" className="self-end" onClick={openForgotPassword}>
+                    <span className="font-dm text-[13px] text-secondary underline">Forgot password?</span>
+                  </button>
                 </div>
 
                 {signInError && <span className="mt-2 font-dm text-[13px] text-error">{signInError}</span>}
@@ -267,6 +351,116 @@ export default function SignInRegisterPage() {
                   <span className="font-dm text-[14px] text-muted">Don&apos;t have an account? </span>
                   <button onClick={() => { setMode('register'); setSignInError(''); }}>
                     <span className="font-dm text-[14px] text-secondary underline">Sign up here</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* FORGOT PASSWORD CARD */}
+          {mode === 'forgot' && (
+            <div className="border border-border bg-white">
+              <div className="flex flex-col gap-5 p-6">
+                <span className="mb-2 font-clash font-medium text-[20px] text-primary">Reset Your Password</span>
+
+                {forgotStep === 'email' && (
+                  <>
+                    <span className="font-dm text-[14px] text-muted">
+                      Enter the email address on your account and we&apos;ll send you a verification code.
+                    </span>
+
+                    <div className="flex flex-col gap-2">
+                      <span className={labelClass}>Email</span>
+                      <input
+                        className={inputClass}
+                        placeholder="your@email.com"
+                        value={forgotEmail}
+                        onChange={e => setForgotEmail(e.target.value)}
+                        type="email"
+                        autoCapitalize="none"
+                        disabled={loading}
+                      />
+                    </div>
+
+                    {forgotError && <span className="mt-2 font-dm text-[13px] text-error">{forgotError}</span>}
+
+                    <button
+                      className={`mt-2 flex h-14 items-center justify-center bg-secondary ${loading ? 'opacity-60' : ''}`}
+                      onClick={handleSendResetCode}
+                      disabled={loading}
+                    >
+                      <span className="font-clash font-medium text-[14px] uppercase tracking-[1.2px] text-white">
+                        {loading ? 'SENDING...' : 'SEND CODE'}
+                      </span>
+                    </button>
+                  </>
+                )}
+
+                {forgotStep === 'reset' && (
+                  <>
+                    <span className="font-dm text-[14px] text-muted">
+                      We&apos;ve sent a code to {forgotEmail.trim()}. It expires in 10 minutes.
+                    </span>
+
+                    <div className="flex flex-col gap-2">
+                      <span className={labelClass}>Verification Code</span>
+                      <input
+                        className={inputClass}
+                        placeholder="123456"
+                        value={forgotCode}
+                        onChange={e => setForgotCode(e.target.value)}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <span className={labelClass}>New Password</span>
+                      <PasswordInput
+                        placeholder="••••••••"
+                        value={forgotNewPassword}
+                        onChange={e => setForgotNewPassword(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <span className={labelClass}>Confirm New Password</span>
+                      <PasswordInput
+                        placeholder="••••••••"
+                        value={forgotNewPasswordConfirm}
+                        onChange={e => setForgotNewPasswordConfirm(e.target.value)}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    {forgotError && <span className="mt-2 font-dm text-[13px] text-error">{forgotError}</span>}
+
+                    <button
+                      className={`mt-2 flex h-14 items-center justify-center bg-secondary ${loading ? 'opacity-60' : ''}`}
+                      onClick={handleResetPassword}
+                      disabled={loading}
+                    >
+                      <span className="font-clash font-medium text-[14px] uppercase tracking-[1.2px] text-white">
+                        {loading ? 'UPDATING...' : 'RESET PASSWORD'}
+                      </span>
+                    </button>
+
+                    <div className="flex flex-row items-center justify-center">
+                      <button
+                        onClick={() => { setForgotStep('email'); setForgotError(''); }}
+                        disabled={loading}
+                      >
+                        <span className="font-dm text-[14px] text-secondary underline">Didn&apos;t get a code? Send it again</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                <div className="mt-3 flex flex-row items-center justify-center">
+                  <button onClick={() => { setMode('signin'); setForgotError(''); }}>
+                    <span className="font-dm text-[14px] text-secondary underline">Back to sign in</span>
                   </button>
                 </div>
               </div>

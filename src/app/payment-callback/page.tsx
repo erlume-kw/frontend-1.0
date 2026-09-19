@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { confirmPayment } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
+import { clearCheckoutDraft } from '@/lib/checkoutDraft';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
@@ -37,6 +38,7 @@ function PaymentCallbackInner() {
         if (cancelled) return;
         if (result.success) {
           clearCart();
+          clearCheckoutDraft();
           setOrderRef(result.orderId);
           setState('success');
         } else {

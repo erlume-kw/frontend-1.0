@@ -25,7 +25,7 @@ const RETURN_CARDS = [
   },
   {
     title: 'Refund Timing',
-    body: 'Refunds are issued to your original payment method, normally within 7 business days of us receiving and inspecting the item.',
+    body: 'Refunds are issued to your original payment method, normally within 3 to 14 business days of us receiving and inspecting the item.',
   },
   {
     title: 'Authenticity',

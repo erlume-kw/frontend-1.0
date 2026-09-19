@@ -25,6 +25,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import SelectField from '@/components/ui/SelectField';
 import { useKuwaitAreas } from '@/lib/useKuwaitAreas';
+import { clearCheckoutDraft, readCheckoutDraft, writeCheckoutDraft } from '@/lib/checkoutDraft';
 
 // Payment slot phases — the MyFatoorah embedded widget carries the actual
 // payment methods (KNET / cards / Apple Pay / Google Pay); there is no PAY NOW.
@@ -151,6 +152,61 @@ export default function CheckoutPage() {
     [activeCartItems],
   );
 
+  // ─── Form draft (survives redirects) ─────────────────────────────────────────
+  // Restore what the buyer had typed before a redirect/reload wiped the page, and
+  // keep saving it. `draftReady` gates the auto-start and the saving so neither
+  // runs against the empty initial state.
+  const [draftReady, setDraftReady] = useState(false);
+  const pendingDiscountRef = useRef('');
+
+  useEffect(() => {
+    const d = readCheckoutDraft();
+    if (d) {
+      setGuestEmail(d.guestEmail ?? '');
+      setGuestPhone(d.guestPhone ?? '');
+      setFirstName(d.firstName ?? '');
+      setLastName(d.lastName ?? '');
+      setGovernorate(d.governorate ?? '');
+      setArea(d.area ?? '');
+      setBlock(d.block ?? '');
+      setStreet(d.street ?? '');
+      setHouseNumber(d.houseNumber ?? '');
+      setAvenue(d.avenue ?? '');
+      setFlat(d.flat ?? '');
+      setDiscountCode(d.discountCode ?? '');
+      setCustomAddress(d.customAddress ?? null);
+      pendingDiscountRef.current = d.appliedDiscountCode ?? '';
+    }
+    if (!pendingDiscountRef.current) setDraftReady(true);
+  }, []);
+
+  // A restored discount is re-checked once the cart total is known (the cart loads
+  // from local storage after the first render); a code that is no longer valid is
+  // simply dropped.
+  useEffect(() => {
+    const code = pendingDiscountRef.current;
+    if (!code || subtotal <= 0) return;
+    pendingDiscountRef.current = '';
+    validateDiscountCode(code, subtotal)
+      .then(result => {
+        setDiscountAmount(result.discountAmount);
+        setAppliedDiscountCode(code);
+      })
+      .catch(() => { /* stale code — leave it unapplied */ })
+      .finally(() => setDraftReady(true));
+  }, [subtotal]);
+
+  useEffect(() => {
+    if (!draftReady || phase === 'success') return;
+    writeCheckoutDraft({
+      guestEmail, guestPhone, firstName, lastName, governorate, area, block, street,
+      houseNumber, avenue, flat, discountCode, appliedDiscountCode, customAddress,
+    });
+  }, [
+    draftReady, phase, guestEmail, guestPhone, firstName, lastName, governorate, area, block,
+    street, houseNumber, avenue, flat, discountCode, appliedDiscountCode, customAddress,
+  ]);
+
   // Keep refs in sync so timers always see the latest values
   useEffect(() => { orderIdRef.current = orderId; }, [orderId]);
   useEffect(() => { phaseRef.current = phase; }, [phase]);
@@ -258,7 +314,7 @@ export default function CheckoutPage() {
   // Signed-in: the order is initiated automatically on arrival (profile address
   // by default) and the widget appears with no button press.
   useEffect(() => {
-    if (!authChecked || !isLoggedIn || !userData?._id) return;
+    if (!authChecked || !isLoggedIn || !userData?._id || !draftReady) return;
     if (autoStartedRef.current || activeCartItems.length === 0) return;
     autoStartedRef.current = true;
     startPayment({
@@ -266,7 +322,7 @@ export default function CheckoutPage() {
       orderItems: activeCartItems.map(i => ({ item_id: i.id, quantity: 1 })),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authChecked, isLoggedIn, userData]);
+  }, [authChecked, isLoggedIn, userData, draftReady]);
 
   const handleWidgetResult = async (result: MFWidgetResult) => {
     // Hosted methods (KNET) navigate the whole page away; this callback only
@@ -287,6 +343,7 @@ export default function CheckoutPage() {
       if (verdict.success) {
         clearCart();
         clearStoredOrder();
+        clearCheckoutDraft();
         setPhase('success');
       } else {
         setPayError(verdict.message || 'Payment was not successful.');

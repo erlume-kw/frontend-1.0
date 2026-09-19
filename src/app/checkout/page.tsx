@@ -706,7 +706,7 @@ export default function CheckoutPage() {
       <div className={isDesktop ? 'flex flex-row gap-[14px]' : 'flex flex-col gap-[14px]'}>
         <input
           className={`${inputClass} ${isDesktop ? 'flex-1' : ''}`}
-          placeholder="House / Apartment no."
+          placeholder="House"
           value={houseNumber}
           onChange={e => setHouseNumber(e.target.value.replace(/[^0-9]/g, ''))}
           inputMode="numeric"

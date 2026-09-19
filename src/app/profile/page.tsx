@@ -550,7 +550,7 @@ export default function ProfilePage() {
                     <ErrorText field="street" />
                     <input
                       className={inputClass}
-                      placeholder="House / Apartment no."
+                      placeholder="House"
                       value={houseNumber}
                       onChange={e => setHouseNumber(e.target.value.replace(/[^0-9]/g, ''))}
                       inputMode="numeric"

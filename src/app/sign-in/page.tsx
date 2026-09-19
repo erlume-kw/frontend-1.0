@@ -12,6 +12,7 @@ import SelectField from '@/components/ui/SelectField';
 import PasswordInput from '@/components/ui/PasswordInput';
 import { login, register, requestEmailOtp, requestPasswordReset, resetPassword } from '@/services/api';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
+import ErrorModal from '@/components/ErrorModal';
 
 function Toast({ message }: { message: string }) {
   return (
@@ -334,7 +335,12 @@ export default function SignInRegisterPage() {
                   </button>
                 </div>
 
-                {signInError && <span className="mt-2 font-dm text-[13px] text-error">{signInError}</span>}
+                <ErrorModal
+                  visible={!!signInError}
+                  title="Sign In Error"
+                  message={signInError}
+                  onClose={() => setSignInError('')}
+                />
 
                 <button
                   className={`mt-2 flex h-14 items-center justify-center bg-secondary ${loading ? 'opacity-60' : ''}`}

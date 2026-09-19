@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { requestEmailOtp, subscribeNewsletter, fetchDrops, type Drop } from '@/services/api';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
+import ErrorModal from '@/components/ErrorModal';
 import { FOOTER_DATA, SOCIAL_ICONS } from '@/lib/brand';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import MaxWidthContainer from './MaxWidthContainer';
@@ -21,9 +22,15 @@ const isValidEmail = (val: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim
 function NewsletterSection({ compact = false }: { compact?: boolean }) {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [errorOpen, setErrorOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [otpModalVisible, setOtpModalVisible] = useState(false);
+
+  const showError = (message: string) => {
+    setEmailError(message);
+    setErrorOpen(true);
+  };
 
   const completeSubscribe = async () => {
     setOtpModalVisible(false);
@@ -32,7 +39,7 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
       setSuccess(true);
       setEmail('');
     } catch (error: any) {
-      setEmailError(error?.message || 'Something went wrong. Please try again.');
+      showError(error?.message || 'Something went wrong. Please try again.');
     } finally {
       setVerifying(false);
     }
@@ -40,7 +47,7 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
 
   const handleSubscribe = async () => {
     if (!isValidEmail(email)) {
-      setEmailError('Please enter a valid email address.');
+      showError('Please enter a valid email address.');
       return;
     }
 
@@ -56,7 +63,7 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
       }
       setOtpModalVisible(true);
     } catch (error: any) {
-      setEmailError(error?.message || 'Something went wrong. Please try again.');
+      showError(error?.message || 'Something went wrong. Please try again.');
       setVerifying(false);
     }
   };
@@ -96,9 +103,14 @@ function NewsletterSection({ compact = false }: { compact?: boolean }) {
               </span>
             </button>
           </div>
-          {!!emailError && <span className="mt-[6px] font-dm text-[13px] text-error">{emailError}</span>}
         </div>
       )}
+      <ErrorModal
+        visible={errorOpen && !!emailError}
+        title="Newsletter"
+        message={emailError}
+        onClose={() => setErrorOpen(false)}
+      />
       <VerifyEmailModal
         visible={otpModalVisible}
         email={email.trim()}

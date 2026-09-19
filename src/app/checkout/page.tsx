@@ -11,6 +11,7 @@ import {
   cancelOrder,
   initiatePayment,
   confirmPayment,
+  requestEmailOtp,
   updateOrderShippingAddress,
   AuthUser,
 } from '@/services/api';
@@ -18,6 +19,7 @@ import MyFatoorahEmbed, { MFWidgetResult } from '@/components/checkout/MyFatoora
 import CheckoutSessionModal from '@/components/CheckoutSessionModal';
 import LeaveCheckoutModal from '@/components/LeaveCheckoutModal';
 import ErrorModal from '@/components/ErrorModal';
+import VerifyEmailModal from '@/components/VerifyEmailModal';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
@@ -115,6 +117,11 @@ export default function CheckoutPage() {
   } | null>(null);
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressError, setAddressError] = useState('');
+
+  // Guest email verification popup
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const guestPaymentStartedRef = useRef(false);
 
   // Payment flow
   const [phase, setPhase] = useState<PaymentPhase>('idle');
@@ -477,12 +484,40 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChoosePaymentMethod = () => {
+  // Guests confirm their email with a code before the order is created. An email that
+  // was verified in the last day skips the popup; the backend enforces this too.
+  const handleChoosePaymentMethod = async () => {
     if (!validateGuestForm()) return;
     if (activeCartItems.length === 0) {
       setPayError('Your cart is empty.');
       return;
     }
+    setSendingCode(true);
+    try {
+      const { alreadyVerified } = await requestEmailOtp(guestEmail.trim());
+      if (alreadyVerified) {
+        startGuestPayment();
+      } else {
+        guestPaymentStartedRef.current = false;
+        setShowVerifyModal(true);
+      }
+    } catch (e: any) {
+      setPayError(e?.message ?? 'Could not send the verification code. Please try again.');
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  // Called once the email is verified (the popup can report it twice — the code
+  // entry and the background check — so only the first call starts the payment)
+  const handleGuestEmailVerified = () => {
+    setShowVerifyModal(false);
+    if (guestPaymentStartedRef.current) return;
+    guestPaymentStartedRef.current = true;
+    startGuestPayment();
+  };
+
+  const startGuestPayment = () => {
     startPayment({
       guestInfo: {
         name: `${firstName} ${lastName}`.trim() || 'Guest',
@@ -879,9 +914,13 @@ export default function CheckoutPage() {
       )}
 
       {phase === 'idle' && !isLoggedIn && (
-        <button className="flex h-[60px] items-center justify-center bg-secondary" onClick={handleChoosePaymentMethod}>
+        <button
+          className={`flex h-[60px] items-center justify-center bg-secondary ${sendingCode ? 'opacity-60' : ''}`}
+          onClick={handleChoosePaymentMethod}
+          disabled={sendingCode}
+        >
           <span className="font-clash font-semibold text-[15px] uppercase tracking-[1.2px] text-white">
-            CHOOSE A PAYMENT METHOD
+            {sendingCode ? 'SENDING CODE…' : 'CHOOSE A PAYMENT METHOD'}
           </span>
         </button>
       )}
@@ -1018,6 +1057,12 @@ export default function CheckoutPage() {
         visible={!!payError}
         message={payError}
         onClose={() => setPayError('')}
+      />
+      <VerifyEmailModal
+        visible={showVerifyModal}
+        email={guestEmail.trim()}
+        onClose={() => setShowVerifyModal(false)}
+        onVerified={handleGuestEmailVerified}
       />
       <MaxWidthContainer className={isDesktop ? 'px-16' : ''}>
         {phase === 'success' ? (

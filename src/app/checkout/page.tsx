@@ -122,6 +122,7 @@ export default function CheckoutPage() {
   // Guest email verification popup
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
+  const [verifyPrompt, setVerifyPrompt] = useState(false);
   // The address the guest has verified — verification only counts while the field still matches it
   const [verifiedEmail, setVerifiedEmail] = useState('');
   const normalizedGuestEmail = guestEmail.trim().toLowerCase();
@@ -482,11 +483,12 @@ export default function CheckoutPage() {
     const newErrors: Record<string, string> = {};
     if (!guestEmail.trim()) newErrors.guestEmail = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) newErrors.guestEmail = 'Invalid email';
-    else if (!guestEmailVerified) newErrors.guestEmail = 'Please verify your email before choosing a payment method';
     if (!guestPhone.trim()) newErrors.guestPhone = 'Phone number is required';
     validateAddressFields(newErrors);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // A valid but unverified email is reported in a popup rather than under the field
+    setVerifyPrompt(!newErrors.guestEmail && !guestEmailVerified);
+    return Object.keys(newErrors).length === 0 && guestEmailVerified;
   };
 
   // Guests confirm their email with a code (own button next to the email field) before
@@ -1101,6 +1103,12 @@ export default function CheckoutPage() {
         visible={!!payError}
         message={payError}
         onClose={() => setPayError('')}
+      />
+      <ErrorModal
+        visible={verifyPrompt}
+        title="Verify Your Email"
+        message="Please verify your email before choosing a payment method."
+        onClose={() => setVerifyPrompt(false)}
       />
       <VerifyEmailModal
         visible={showVerifyModal}

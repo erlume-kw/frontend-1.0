@@ -1,6 +1,8 @@
 'use client';
 
+import { toWesternDigits, useNumerals } from '@/lib/useNumerals';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { checkEmailVerified, confirmEmailOtp, requestEmailOtp } from '@/services/api';
 
 interface VerifyEmailModalProps {
@@ -15,6 +17,8 @@ const RESEND_COOLDOWN_S = 30;
 const POLL_INTERVAL_MS = 3000;
 
 export default function VerifyEmailModal({ visible, email, onClose, onVerified }: VerifyEmailModalProps) {
+  const t = useTranslations('VerifyEmail');
+  const num = useNumerals();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [verifying, setVerifying] = useState(false);
@@ -65,7 +69,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
 
   const handleVerify = async () => {
     if (code.length !== 6) {
-      setError('Please enter the 6-digit code.');
+      setError(t('enterCode'));
       return;
     }
     setVerifying(true);
@@ -87,7 +91,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
       } catch {
         // fall through to the failure message below
       }
-      setError(err?.message || 'Verification failed. Please try again.');
+      setError(err?.message || t('failed'));
       setVerifying(false);
     }
   };
@@ -102,7 +106,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
       }
       setResendIn(RESEND_COOLDOWN_S);
     } catch (err: any) {
-      setError(err?.message || 'Could not resend the code. Please try again.');
+      setError(err?.message || t('resendFailed'));
     }
   };
 
@@ -110,20 +114,27 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50">
       <div className="flex w-[85%] max-w-[400px] flex-col gap-4 border border-border bg-white p-6">
         <span className="font-clash font-medium text-[18px] uppercase tracking-[1px] text-primary">
-          Verify Your Email
+          {t('title')}
         </span>
         <span className="font-dm text-[14px] leading-[22px] text-muted">
-          We sent a code to <span className="text-primary">{email}</span>. Enter it below, or tap
-          &ldquo;Verify email&rdquo; in that message — this screen will continue automatically either way.
+          {t.rich('body', {
+            email,
+            addr: chunks => (
+              <span className="text-primary" dir="ltr">
+                {chunks}
+              </span>
+            ),
+          })}
         </span>
 
         <input
           ref={inputRef}
+          dir="ltr"
           className={`h-14 w-full border border-border text-center font-clash text-[24px] tracking-[10px] text-primary outline-none placeholder:tracking-[4px] placeholder:text-muted ${error ? 'border-error bg-[rgba(185,64,64,0.08)]' : ''}`}
           placeholder="______"
           value={code}
           onChange={e => {
-            setCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+            setCode(toWesternDigits(e.target.value).replace(/\D/g, '').slice(0, 6));
             if (error) setError('');
           }}
           onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
@@ -140,18 +151,18 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
           disabled={verifying}
         >
           <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-white">
-            {verifying ? 'VERIFYING...' : 'VERIFY'}
+            {verifying ? t('verifying') : t('verify')}
           </span>
         </button>
 
         <div className="flex flex-row items-center justify-between">
           <button onClick={handleResend} disabled={resendIn > 0 || verifying}>
             <span className={`font-dm text-[13px] underline ${resendIn > 0 ? 'text-muted' : 'text-secondary'}`}>
-              {resendIn > 0 ? `Resend code in ${resendIn}s` : 'Resend code'}
+              {resendIn > 0 ? t('resendIn', { seconds: num(resendIn) }) : t('resend')}
             </span>
           </button>
           <button onClick={onClose} disabled={verifying}>
-            <span className="font-dm text-[13px] text-muted underline">Cancel</span>
+            <span className="font-dm text-[13px] text-muted underline">{t('cancel')}</span>
           </button>
         </div>
       </div>

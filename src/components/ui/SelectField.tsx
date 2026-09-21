@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 type KeyLike = {
   key: string;
@@ -19,13 +20,18 @@ export default function SelectField({
   options,
   onSelect,
   disabled = false,
+  optionLabel,
 }: {
   value: string;
   placeholder: string;
   options: string[];
   onSelect: (v: string) => void;
   disabled?: boolean;
+  /** Text shown for an option (e.g. its Arabic name); the value passed to onSelect is unchanged. */
+  optionLabel?: (option: string) => string;
 }) {
+  const tc = useTranslations('Common');
+  const labelOf = optionLabel ?? ((option: string) => option);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -59,7 +65,7 @@ export default function SelectField({
     typedTimerRef.current = setTimeout(() => { typedRef.current = ''; }, 800);
 
     const typed = typedRef.current;
-    const lower = options.map(o => o.toLowerCase());
+    const lower = options.map(o => labelOf(o).toLowerCase());
     let match = lower.findIndex(o => o.startsWith(typed));
 
     // One letter (or the same letter pressed again) steps through the options that
@@ -122,8 +128,8 @@ export default function SelectField({
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className={`flex-1 truncate text-left font-dm text-[14px] ${value ? 'text-black' : 'text-muted'}`}>
-          {value || placeholder}
+        <span className={`flex-1 truncate text-start font-dm text-[14px] ${value ? 'text-black' : 'text-muted'}`}>
+          {value ? labelOf(value) : placeholder}
         </span>
         <span className={`font-clash text-[18px] text-muted ${open ? '-rotate-90' : 'rotate-90'}`}>›</span>
       </button>
@@ -135,7 +141,7 @@ export default function SelectField({
             type="button"
             className="fixed inset-0 z-[500] cursor-default"
             onClick={() => setOpen(false)}
-            aria-label="Close dropdown"
+            aria-label={tc('closeDropdown')}
             tabIndex={-1}
           />
           <div className="absolute left-0 right-0 top-full z-[501] bg-white shadow-[0_4px_8px_rgba(0,0,0,0.12)]">
@@ -148,13 +154,13 @@ export default function SelectField({
                   tabIndex={-1}
                   role="option"
                   aria-selected={value === opt}
-                  className={`block w-full border-b border-lightGrey px-[11px] py-3 text-left ${
+                  className={`block w-full border-b border-lightGrey px-[11px] py-3 text-start ${
                     value === opt ? 'bg-[#EFF5FF]' : i === activeIndex ? 'bg-lightGrey' : ''
                   }`}
                   onClick={() => choose(opt)}
                 >
                   <span className={`font-dm text-[14px] ${value === opt ? 'font-medium text-primary' : 'text-black'}`}>
-                    {opt}
+                    {labelOf(opt)}
                   </span>
                 </button>
               ))}

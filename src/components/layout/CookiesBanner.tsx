@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { handleFooterLink } from '@/lib/interactions';
 
@@ -10,6 +11,7 @@ const COOKIES_CONSENT_KEY = 'erlume_cookies_consent';
 export default function CookiesBanner() {
   const isDesktop = useIsDesktop();
   const router = useRouter();
+  const t = useTranslations('Cookies');
   const [showBanner, setShowBanner] = useState(false);
   const [entered, setEntered] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -53,13 +55,12 @@ export default function CookiesBanner() {
           {/* Text section */}
           <div className={`${isDesktop ? 'flex flex-row items-center gap-5' : 'flex flex-col gap-2'}`}>
             <span className="font-clash font-medium text-[14px] uppercase tracking-[1px] text-primary">
-              We Use Cookies
+              {t('title')}
             </span>
             <span className="font-dm text-[13px] leading-5 text-muted">
-              We use cookies to enhance your browsing experience, personalize content, and analyze
-              traffic. By clicking &quot;Accept&quot;, you consent to our use of cookies.{' '}
+              {t('body')}{' '}
               <button className="align-baseline" onClick={() => handleFooterLink('Cookies Policy', router.push)}>
-                <span className="text-secondary underline">Learn more</span>
+                <span className="text-secondary underline">{t('learnMore')}</span>
               </button>
             </span>
           </div>
@@ -70,13 +71,13 @@ export default function CookiesBanner() {
               className="flex items-center justify-center border border-border px-5 py-3"
               onClick={() => handleConsent(false)}
             >
-              <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-primary">DECLINE</span>
+              <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-primary">{t('decline')}</span>
             </button>
             <button
               className="flex items-center justify-center bg-secondary px-5 py-3"
               onClick={() => handleConsent(true)}
             >
-              <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-white">ACCEPT</span>
+              <span className="font-clash font-medium text-[12px] uppercase tracking-[0.8px] text-white">{t('accept')}</span>
             </button>
           </div>
         </div>

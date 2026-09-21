@@ -1,0 +1,949 @@
+{
+  "Common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "closeMenu": "Close menu",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "price": "{amount} KWD",
+    "sold": "SOLD",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "lastUpdated": "Last Updated: {date}",
+    "updatedDate": "September 2026",
+    "scrollLeft": "Scroll left",
+    "scrollRight": "Scroll right",
+    "closeDropdown": "Close dropdown"
+  },
+  "LanguageSwitcher": {
+    "switchTo": "العربية",
+    "switchToLabel": "Switch to Arabic"
+  },
+  "Header": {
+    "new": "new",
+    "drops": "drops",
+    "sell": "sell",
+    "wishlist": "wishlist",
+    "cart": "cart",
+    "profile": "profile",
+    "signIn": "sign in",
+    "cartAria": "Cart",
+    "cartAriaWithCount": "Cart, {count} items"
+  },
+  "Footer": {
+    "newsletterTitle": "STAY IN THE LOOP",
+    "newsletterText": "Be the first to hear about new drops and exclusive pieces",
+    "emailPlaceholder": "your@email.com",
+    "subscribe": "SUBSCRIBE",
+    "verifying": "VERIFYING...",
+    "subscribed": "You're subscribed!",
+    "invalidEmail": "Please enter a valid email address.",
+    "genericError": "Something went wrong. Please try again.",
+    "newsletterModalTitle": "Newsletter",
+    "contact": "Contact",
+    "contactUs": "Contact us at",
+    "copyright": "Copyright © 2026 Erlume",
+    "columns": {
+      "Our Drops": "Our Drops",
+      "Erlume": "Erlume",
+      "Sellers": "Sellers"
+    },
+    "links": {
+      "About Us": "About Us",
+      "Terms & Conditions": "Terms & Conditions",
+      "Returns & Refunds": "Returns & Refunds",
+      "Privacy Policy": "Privacy Policy",
+      "Cookies Policy": "Cookies Policy",
+      "How to Sell": "How to Sell",
+      "Selling Policy": "Selling Policy",
+      "Pricing Estimator": "Pricing Estimator"
+    }
+  },
+  "Cookies": {
+    "title": "We Use Cookies",
+    "body": "We use cookies to enhance your browsing experience, personalize content, and analyze traffic. By clicking \"Accept\", you consent to our use of cookies.",
+    "learnMore": "Learn more",
+    "decline": "DECLINE",
+    "accept": "ACCEPT"
+  },
+  "VerifyEmail": {
+    "title": "Verify Your Email",
+    "body": "We sent a code to <addr>{email}</addr>. Enter it below, or tap “Verify email” in that message — this screen will continue automatically either way.",
+    "enterCode": "Please enter the 6-digit code.",
+    "failed": "Verification failed. Please try again.",
+    "resendFailed": "Could not resend the code. Please try again.",
+    "verify": "VERIFY",
+    "verifying": "VERIFYING...",
+    "resendIn": "Resend code in {seconds}s",
+    "resend": "Resend code",
+    "cancel": "Cancel"
+  },
+  "ErrorModal": {
+    "paymentError": "Payment Error"
+  },
+  "SignIn": {
+    "signInTitle": "Sign In to Your Account",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "password": "Password",
+    "forgotLink": "Forgot password?",
+    "signInButton": "SIGN IN",
+    "signingIn": "SIGNING IN...",
+    "noAccount": "Don't have an account?",
+    "signUpHere": "Sign up here",
+    "errorTitle": "Sign In Error",
+    "bothRequired": "Please enter both email and password",
+    "signInFailed": "Sign in failed. Please try again.",
+    "signedIn": "Successfully signed in!",
+    "forgot": {
+      "title": "Reset Your Password",
+      "intro": "Enter the email address on your account and we'll send you a verification code.",
+      "sendCode": "SEND CODE",
+      "sending": "SENDING...",
+      "validEmail": "Please enter a valid email address",
+      "couldNotSend": "Could not send the code. Please try again.",
+      "sentTo": "We've sent a code to <addr>{email}</addr>. It expires in 10 minutes.",
+      "verificationCode": "Verification Code",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "resetButton": "RESET PASSWORD",
+      "updating": "UPDATING...",
+      "sendAgain": "Didn't get a code? Send it again",
+      "backToSignIn": "Back to sign in",
+      "codeRequired": "Please enter the code from your email",
+      "passwordMin8": "Password must be at least 8 characters",
+      "passwordsMismatch": "Passwords do not match",
+      "resetDone": "Password updated. You can now sign in.",
+      "resetFailed": "Could not reset your password. Please try again.",
+      "codePlaceholder": "123456"
+    },
+    "register": {
+      "title": "Create Your Account",
+      "confirmPassword": "Confirm Password",
+      "phone": "Phone Number",
+      "streetAddress": "Street Address",
+      "streetPlaceholder": "Street name",
+      "block": "Block",
+      "blockPlaceholder": "Block #",
+      "house": "House #",
+      "avenueOptional": "Avenue (optional)",
+      "avenue": "Avenue",
+      "flatOptional": "Flat / Apt (optional)",
+      "flat": "Flat / Apartment",
+      "governorate": "Governorate",
+      "selectGovernorate": "Select governorate",
+      "city": "City",
+      "selectCity": "Select city",
+      "selectGovernorateFirst": "Select governorate first",
+      "createButton": "CREATE ACCOUNT",
+      "creating": "CREATING ACCOUNT...",
+      "haveAccount": "Already have an account?",
+      "signInHere": "Sign in here",
+      "created": "Account created successfully!",
+      "failed": "Registration failed. Please try again.",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "passwordRequired": "Password is required",
+      "passwordMin6": "Password must be at least 6 characters",
+      "confirmRequired": "Please confirm your password",
+      "phoneRequired": "Phone number is required",
+      "phoneMin": "Phone number must be at least 8 digits",
+      "streetRequired": "Street is required",
+      "blockRequired": "Block is required",
+      "houseRequired": "House number is required",
+      "cityRequired": "City is required",
+      "governorateRequired": "Governorate is required",
+      "codeSendFailed": "Could not send the verification code. Please try again.",
+      "phonePlaceholder": "XXXX XXXX"
+    }
+  },
+  "Pagination": {
+    "loadMore": "LOAD MORE",
+    "loading": "LOADING…",
+    "shownOf": "{shown} of {total}"
+  },
+  "NewArrivals": {
+    "title": "LOOK WHAT WE JUST FOUND",
+    "empty": "Nothing new just yet — check back soon."
+  },
+  "Drops": {
+    "seasonLabel": "{season} {year}",
+    "seasons": {
+      "spring": "spring",
+      "summer": "summer",
+      "fall": "fall",
+      "winter": "winter"
+    },
+    "notFound": "Drop not found."
+  },
+  "Terms": {
+    "title": "TERMS & CONDITIONS",
+    "subtitle": "What you agree to when you buy from erlume.",
+    "buyingTitle": "Buying from erlume",
+    "usingTitle": "Using the site",
+    "companyTitle": "Company details",
+    "buyerCards": [
+      {
+        "title": "Authenticity",
+        "body": "Every item is authenticated before listing. If an item is later shown not to be authentic, we refund you in full, including delivery."
+      },
+      {
+        "title": "Returns",
+        "body": "Returns are accepted within 14 days of delivery. See our Returns & Refunds policy for the full details."
+      },
+      {
+        "title": "Condition Grading",
+        "body": "Every item is graded New, Like New, Gently Used, Fair or Worn, and photographed as received. The grade and the photographs form part of the description you are purchasing against."
+      },
+      {
+        "title": "Pre-Loved Items",
+        "body": "Items are second-hand unless stated otherwise. Minor signs of wear consistent with the stated grade are expected and are not grounds for return."
+      },
+      {
+        "title": "Ordering & Payment",
+        "body": "All orders are placed and paid in full on the website. We accept KNET, cards and Apple Pay. An order is confirmed only once payment clears, and you receive a confirmation email with your invoice attached."
+      },
+      {
+        "title": "Delivery",
+        "body": "Delivery fees are shown before payment and are charged in addition to the item price. We currently deliver within Kuwait only."
+      },
+      {
+        "title": "Item Reservation",
+        "body": "If payment is not completed, the item returns to sale and may be purchased by someone else. Every item is one of a kind — a completed payment is the only reservation."
+      },
+      {
+        "title": "Drops",
+        "body": "Items in an upcoming drop are not purchasable until that drop opens. Drop timing may change."
+      },
+      {
+        "title": "Discount Codes",
+        "body": "Codes apply to the item price only, not to delivery, and cannot be combined unless stated otherwise."
+      },
+      {
+        "title": "Pricing Errors",
+        "body": "If an item is listed at an obviously incorrect price, we may cancel the order and refund you in full rather than fulfil it."
+      }
+    ],
+    "useCards": [
+      {
+        "title": "Using the Site",
+        "body": "You may browse and purchase for personal use. You may not scrape, copy or republish our listings, photographs or descriptions without permission."
+      },
+      {
+        "title": "Content Ownership",
+        "body": "All photographs, descriptions and site content belong to erlume."
+      },
+      {
+        "title": "Accounts",
+        "body": "You are responsible for activity on your account, so keep your details accurate and your login secure. Some actions need email verification. You can delete your account at any time, and we may suspend accounts used fraudulently, abusively, or in breach of these terms."
+      },
+      {
+        "title": "Reviews",
+        "body": "Reviews must be your own honest experience. We may remove reviews that are abusive, false, or unrelated to the item."
+      },
+      {
+        "title": "Availability",
+        "body": "We aim to keep the site available but do not guarantee uninterrupted service."
+      },
+      {
+        "title": "Changes to These Terms",
+        "body": "We may update these terms. The version that applies to an order is the version published when that order was placed."
+      },
+      {
+        "title": "Governing Law",
+        "body": "These terms are governed by the laws of the State of Kuwait."
+      },
+      {
+        "title": "Disputes",
+        "body": "We would rather resolve problems directly — contact us first and we will try to settle it. Any dispute that cannot be resolved will be subject to the courts of Kuwait."
+      }
+    ],
+    "companyRows": [
+      {
+        "label": "Registered name",
+        "value": "شركة فاشن ايرلوم لترويج المنتجات"
+      },
+      {
+        "label": "Legal form",
+        "value": "One Person Company · شركة الشخص الواحد"
+      },
+      {
+        "label": "Commercial licence no.",
+        "value": "2025/7386"
+      },
+      {
+        "label": "Commercial register no.",
+        "value": "525618 (registered 12/05/2025)"
+      },
+      {
+        "label": "Contact",
+        "value": "info@erlume.com.kw · +965 97226735"
+      }
+    ]
+  },
+  "Returns": {
+    "title": "RETURNS & REFUNDS",
+    "subtitle": "You have 14 days from delivery to change your mind.",
+    "sectionTitle": "How returns work",
+    "cards": [
+      {
+        "title": "14 Days to Return",
+        "body": "Tell us within 14 days of receiving your item if you would like to return it. Items must come back in the condition they were sent, with all packaging and inclusions."
+      },
+      {
+        "title": "Not as Described",
+        "body": "If an item differs materially from its listed condition, its photographs, or its authenticity, we cover the return delivery and refund you in full."
+      },
+      {
+        "title": "Change of Mind",
+        "body": "Where a return is accepted for any other reason, return delivery is at your cost and the original delivery fee is not refunded."
+      },
+      {
+        "title": "Refund Timing",
+        "body": "Refunds are issued to your original payment method, normally within 3 to 14 business days of the item being received and inspected."
+      },
+      {
+        "title": "Cancelled or Expired Checkouts",
+        "body": "An unpaid checkout is released automatically. If a payment arrives after an order has been cancelled, it is refunded automatically, so there is no need to contact us."
+      },
+      {
+        "title": "Authenticity",
+        "body": "Every item is authenticated before listing. If an item is later shown not to be authentic, we refund you in full including delivery."
+      },
+      {
+        "title": "Pre-Loved Items",
+        "body": "Items are second-hand unless stated otherwise. Minor signs of wear consistent with the stated grade are expected and are not grounds for return."
+      },
+      {
+        "title": "Starting a Return",
+        "body": "Email info@erlume.com.kw or message +965 97226735 with your order number, and we will arrange collection."
+      }
+    ]
+  },
+  "SellerPolicy": {
+    "title": "SELLING POLICY",
+    "subtitle": "Everything you need to know before listing with erlume.",
+    "criteriaTitle": "Selling Criteria",
+    "criteriaSubtitle": "Items that don't meet these criteria won't be listed, and we'll arrange to return them to you. Please review before submitting.",
+    "criteria": [
+      "Clean, free of odours, stains or visible dirt",
+      "Not torn, broken, or damaged beyond repair",
+      "A bag — we only accept bags",
+      "Complete — straps, buckles and zippers intact, no missing parts",
+      "Functional — the bag must open and close properly",
+      "Free of broken clasps, missing stones or structural damage",
+      "Material type disclosed (leather, fabric, metal), with sizing included where applicable",
+      "Original box or pouch is preferred but not required"
+    ],
+    "feesTitle": "Commission & Fees",
+    "fees": [
+      {
+        "title": "Commission",
+        "body": "25% of the item’s assessed value"
+      },
+      {
+        "title": "Minimum commission",
+        "body": "10 KWD"
+      },
+      {
+        "title": "Logistics & handling",
+        "body": "2.5% added to the buyer price — not deducted from you"
+      },
+      {
+        "title": "Minimum accepted value",
+        "body": "100 KWD estimated listing price"
+      },
+      {
+        "title": "Drop-off by you",
+        "body": "Free"
+      },
+      {
+        "title": "Collection",
+        "body": "3–5 KWD, by erlume driver or third-party courier"
+      }
+    ],
+    "groups": {
+      "pricing": "Pricing",
+      "collection": "Collection and Handling",
+      "general": "General"
+    },
+    "cards": [
+      {
+        "title": "Written Quote",
+        "body": "You receive a written quote before handing anything over, showing the estimated listing price, our commission, and your payout. Nothing proceeds without your acceptance."
+      },
+      {
+        "title": "Ownership & Warranty",
+        "body": "You confirm that the item is yours to sell, is free of any claim by another party, and is genuine. You remain the owner of the item until it is sold."
+      },
+      {
+        "title": "Commission",
+        "body": "25% of the item’s assessed value, deducted from the sale proceeds. Your quote states the exact amount in KWD."
+      },
+      {
+        "title": "Logistics & Handling",
+        "body": "A 2.5% logistics & handling charge is added to the buyer-facing price. This is not deducted from your payout."
+      },
+      {
+        "title": "Collection",
+        "body": "We collect your items before the drop opens. Collection costs between 3 and 5 KWD."
+      },
+      {
+        "title": "Authentication & Verification",
+        "body": "All items are authenticated. We reserve the right to decline any item we cannot verify. Counterfeit items result in account suspension and forfeiture of earnings."
+      },
+      {
+        "title": "Prohibited Items",
+        "body": "No illegal, hazardous, recalled or legally restricted items. We may remove a listing without notice."
+      },
+      {
+        "title": "Care While With Us",
+        "body": "We take reasonable care of your item while it is in our possession for cleaning, photography and storage. If an item is lost or damaged while with us, we compensate you at the payout value stated on your accepted quote."
+      },
+      {
+        "title": "Photography & Listing",
+        "body": "Items are cleaned, photographed and listed by erlume, and we determine how they are presented. Photographs taken by erlume remain our property and we may continue to use them after the item is sold or returned."
+      },
+      {
+        "title": "Pricing",
+        "body": "Prices are set by our valuation method — brand tier, age, condition and comparable sold prices — rather than negotiated per item."
+      },
+      {
+        "title": "Payout",
+        "body": "Your share is transferred once the buyer’s payment has cleared and the return window has passed (14 days)."
+      },
+      {
+        "title": "How Long We List For",
+        "body": "Your item stays listed for its drop and continues afterwards while we work to sell it — a drop can run longer than a month."
+      },
+      {
+        "title": "Uncollected Items",
+        "body": "If we cannot reach you to return an item, we will contact you at your registered details. Items uncollected six months after they become due may be donated."
+      },
+      {
+        "title": "Your Details",
+        "body": "We do not share your contact details with buyers. All communication goes through erlume."
+      },
+      {
+        "title": "Policy Changes",
+        "body": "We may update these terms at any time. You will be notified of any material change."
+      }
+    ]
+  },
+  "Privacy": {
+    "title": "PRIVACY POLICY",
+    "subtitle": "Your information is handled with care and never sold.",
+    "sections": [
+      {
+        "title": "We collect",
+        "items": [
+          "Name, email, phone and address",
+          "Account details — username, password and optional profile photo",
+          "Order history, wishlist and reviews",
+          "For sellers, payout and bank details",
+          "Technical data — IP address, device type, operating system and browser analytics",
+          "Approximate location derived from IP or device settings"
+        ]
+      },
+      {
+        "title": "How we use it",
+        "items": [
+          "List, sell and manage items",
+          "Process payments and payouts",
+          "Send transactional email and support replies",
+          "Personalise your experience"
+        ]
+      },
+      {
+        "title": "How we protect it",
+        "items": [
+          "Bank details and sensitive information are encrypted in transit using industry-standard TLS",
+          "Access to personal data is restricted to authorised personnel",
+          "Personal and financial information is stored in certified, secure data centres"
+        ]
+      },
+      {
+        "title": "How long we keep it",
+        "items": [
+          "As long as necessary to provide you with services",
+          "As long as necessary to comply with legal obligations",
+          "For as long as needed to resolve disputes and enforce agreements"
+        ]
+      },
+      {
+        "title": "Cookies and similar technologies",
+        "items": [
+          "Keep you signed in",
+          "Analyse usage",
+          "Remember your preferences",
+          "See our Cookies policy for the detail"
+        ]
+      },
+      {
+        "title": "Payment data",
+        "items": [
+          "Card details are handled by our payment provider and are never stored by erlume"
+        ]
+      },
+      {
+        "title": "Who we share it with",
+        "items": [
+          "We share data only with the services needed to fulfil your order: payment, delivery and invoicing",
+          "We do not sell your data to anyone",
+          "Your contact details are never shared between buyers and sellers"
+        ]
+      },
+      {
+        "title": "Processing outside Kuwait",
+        "items": [
+          "Some services we rely on process data outside Kuwait: payment, email delivery, image hosting and invoicing",
+          "By using erlume you consent to your information being processed by these providers"
+        ]
+      },
+      {
+        "title": "Email you receive",
+        "items": [
+          "Transactional email (orders, verification, returns) is separate from marketing email",
+          "Newsletter subscribers can unsubscribe from any marketing email in one click"
+        ]
+      },
+      {
+        "title": "Deletion",
+        "items": [
+          "You may request deletion of your account and associated data at any time",
+          "We may retain order and invoice records where required for accounting"
+        ]
+      },
+      {
+        "title": "Changes to this policy",
+        "items": [
+          "We may update this policy at any time",
+          "Changes will be posted on this page with an updated effective date",
+          "Continued use of our platform indicates your acceptance of the revised policy"
+        ]
+      }
+    ]
+  },
+  "CookiesPolicy": {
+    "title": "COOKIES POLICY",
+    "subtitle": "Learn about how we use cookies to enhance your experience on our platform.",
+    "sectionTitle": "How We Use Cookies",
+    "cards": [
+      {
+        "title": "What Cookies Are",
+        "body": "Small files a site stores in your browser so it can recognise you between pages and visits."
+      },
+      {
+        "title": "Essential Cookies",
+        "body": "Required for the site to work — keeping you signed in, remembering your cart, and completing payment. These cannot be switched off."
+      },
+      {
+        "title": "Analytics",
+        "body": "If used, analytics cookies help us understand how the site is used. They are optional and you may decline them."
+      },
+      {
+        "title": "Managing Cookies",
+        "body": "You can clear or block cookies in your browser. Blocking essential cookies will prevent checkout from working."
+      },
+      {
+        "title": "Cookie Duration",
+        "body": "Session cookies are cleared when you close your browser. Persistent cookies remain until they expire or you delete them."
+      },
+      {
+        "title": "Third-Party Cookies",
+        "body": "Some cookies are set by the services we use rather than by erlume directly, such as our payment provider during checkout."
+      },
+      {
+        "title": "Changes to This Policy",
+        "body": "We may update this policy. Changes are posted on this page with an updated effective date."
+      }
+    ],
+    "ctaTitle": "Have Questions?",
+    "ctaBody": "If you have any questions about our use of cookies, please contact us at <mail>{email}</mail>"
+  },
+  "About": {
+    "title": "ABOUT ERLUME",
+    "subtitle": "Every piece carries a story.",
+    "storyTitle": "Our story",
+    "story": [
+      "Erlume is Kuwait's curated destination for pre-loved treasures where every piece carries a story. We're a trusted community dedicated to buying and selling quality, pre-loved bags in a kind and respectful way.",
+      "Our mission is to offer a sustainable and stylish alternative to fast fashion, while creating a supportive space for both buyers and sellers. Whether you're searching for a unique find or a new home for a cherished piece, Erlume helps you make a meaningful impact — one beautiful bag at a time."
+    ],
+    "howTitle": "How it works",
+    "how": [
+      {
+        "title": "Sellers hand their bags to us",
+        "body": "We authenticate, clean and photograph every bag, then list it on the website."
+      },
+      {
+        "title": "Every bag is graded",
+        "body": "Each item is graded New, Like New, Gently Used, Fair or Worn, and photographed as received, so you know exactly what you are buying."
+      },
+      {
+        "title": "New pieces arrive in drops",
+        "body": "Browse what is live now, or see what is coming next."
+      },
+      {
+        "title": "Delivered to you",
+        "body": "Order and pay on the website, and we deliver across Kuwait."
+      }
+    ],
+    "contactTitle": "Get in touch",
+    "contactBody": "Questions? Email <mail>{email}</mail> or message <tel>{phone}</tel>.",
+    "sellCta": "Have a bag to sell?"
+  },
+  "Cart": {
+    "title": "YOUR CART ({count})",
+    "total": "TOTAL",
+    "shipping": "Shipping",
+    "free": "Free",
+    "tax": "Tax",
+    "subtotal": "Subtotal",
+    "totalLabel": "Total",
+    "checkout": "CHECKOUT",
+    "empty": "Your cart is empty.",
+    "remove": "REMOVE"
+  },
+  "Wishlist": {
+    "title": "WISHLIST",
+    "items": "{count, plural, one {{n} item} other {{n} items}}",
+    "emptyTitle": "Your wishlist is empty",
+    "emptyText": "Save items you love and come back to them later.",
+    "browse": "BROWSE DROPS"
+  },
+  "Unsubscribe": {
+    "working": "Unsubscribing…",
+    "doneTitle": "You're unsubscribed",
+    "doneText": "<addr>{email}</addr> won't receive newsletter emails from Erlume anymore.",
+    "failedTitle": "Something went wrong",
+    "failedText": "We couldn't process this unsubscribe request. Please contact us if this continues.",
+    "backHome": "BACK TO HOME"
+  },
+  "VerifyEmailPage": {
+    "incomplete": "This verification link is incomplete. Please use the code from the email instead.",
+    "failedFallback": "We could not verify your email. Please request a new code.",
+    "verifying": "Verifying your email…",
+    "dontClose": "Please don't close this page.",
+    "successTitle": "Email verified!",
+    "successText": "Your email is confirmed. If you were signing up in another tab, head back there and continue — you won't be asked for a code again.",
+    "continueShopping": "CONTINUE SHOPPING",
+    "failedTitle": "Verification failed",
+    "backHome": "BACK TO HOME"
+  },
+  "PaymentCallback": {
+    "missingRef": "Missing payment reference. If you were charged, please contact us.",
+    "notCompleted": "Your payment was not completed.",
+    "couldNotVerify": "We could not verify your payment. Please contact us.",
+    "verifying": "Verifying your payment…",
+    "dontClose": "Please don't close this page.",
+    "thanks": "Thank you — order confirmed!",
+    "received": "Your payment was received and your order is being processed.",
+    "orderRef": "Order reference: {ref}",
+    "continueShopping": "CONTINUE SHOPPING",
+    "failedTitle": "Payment not completed",
+    "saved": "Your order is saved — you can try paying again from checkout.",
+    "tryAgain": "TRY AGAIN",
+    "backHome": "BACK TO HOME"
+  },
+  "Sell": {
+    "headline": "YOUR PIECE IS REALLY ONE OF A KIND?",
+    "ask": "What if you could find a new home for it without the hassle?",
+    "reach": "Reach out to us and we'll take care of everything...",
+    "earn": "starting with how much you're going to make",
+    "policyLink": "Before submitting, review our Selling Policy →",
+    "upload": "Upload a photo of what you would like to sell",
+    "tapBrowse": "Tap to browse",
+    "tapChange": "Tap to change",
+    "itemAlt": "Your item",
+    "chat": "LET'S CHAT",
+    "waWithPhoto": "Hi, I'd like to sell an item with erlume. I've prepared a photo to share.",
+    "wa": "Hi, I'd like to sell an item with erlume.",
+    "steps": [
+      {
+        "label": "Send us a photo",
+        "desc": "Upload a photo of your item. We'll handle quality checks and professional listing photography."
+      },
+      {
+        "label": "We handle everything",
+        "desc": "From listing to delivery coordination. You don't have to worry about a thing."
+      },
+      {
+        "label": "Earn instantly",
+        "desc": "Get paid 1–2 days after your item sells. No waiting around for payouts."
+      }
+    ]
+  },
+  "Home": {
+    "nextDrop": "NEXT DROP IN",
+    "days": " DAYS",
+    "hours": " HOURS",
+    "mins": " MINS",
+    "previousDrops": "SHOP PREVIOUS DROPS HERE",
+    "latestDrop": "Our Latest Drop",
+    "shopAll": "Shop all"
+  },
+  "Product": {
+    "added": "Added to cart!",
+    "notFound": "Item not found.",
+    "color": "Color: {value}",
+    "size": "Size: {value}",
+    "condition": "Condition: {value}",
+    "year": "Year: {value}",
+    "about": "About your <n>{name}</n>",
+    "related": "Check this out",
+    "shopAll": "Shop all",
+    "addToCart": "ADD TO CART",
+    "notifyText": "Get notified when a similar piece is launched! Sign up and be the first to hear about our next drop:",
+    "notifySuccess": "You're on the list!",
+    "notifyPlaceholder": "your@email.com",
+    "verifying": "VERIFYING...",
+    "signUp": "SIGN UP",
+    "genericError": "Something went wrong. Please try again.",
+    "invalidEmail": "Please enter a valid email address.",
+    "deliveryTitle": "Delivery & Returns",
+    "deliveryText": "Delivered across Kuwait. If it's not quite right, you have 14 days from delivery to request a return — see our <link>Returns Policy</link>.",
+    "conditions": {
+      "new": "new",
+      "like_new": "like new",
+      "gently_used": "gently used",
+      "fair_condition": "fair condition",
+      "worn_condition": "worn condition"
+    },
+    "colors": {
+      "black": "Black",
+      "white": "White",
+      "red": "Red",
+      "blue": "Blue",
+      "green": "Green",
+      "brown": "Brown",
+      "beige": "Beige",
+      "grey": "Grey",
+      "gray": "Gray",
+      "pink": "Pink",
+      "yellow": "Yellow",
+      "orange": "Orange",
+      "purple": "Purple",
+      "gold": "Gold",
+      "silver": "Silver",
+      "navy": "Navy",
+      "cream": "Cream",
+      "tan": "Tan",
+      "multicolor": "Multicolor"
+    },
+    "sizes": {
+      "one_size": "One Size",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    }
+  },
+  "Checkout": {
+    "loadAccountError": "Unable to load your account. Please refresh the page.",
+    "couldNotStart": "Could not start payment. Please try again.",
+    "paymentIncomplete": "Payment could not be completed.",
+    "notSuccessful": "Payment was not successful.",
+    "verificationFailed": "Payment verification failed.",
+    "couldNotRestart": "Could not restart payment.",
+    "errGovernorate": "Governorate is required",
+    "errArea": "Area is required",
+    "errBlock": "Block is required",
+    "errStreet": "Street is required",
+    "errHouse": "House number is required",
+    "errEmailRequired": "Email is required",
+    "errEmailInvalid": "Invalid email",
+    "errPhone": "Phone number is required",
+    "sendCodeFailed": "Could not send the verification code. Please try again.",
+    "cartEmpty": "Your cart is empty.",
+    "orderNotReady": "Order not ready yet — one moment.",
+    "couldNotUpdateAddress": "Could not update the address.",
+    "couldNotUpdateDiscount": "Could not update the discount. Please try again.",
+    "invalidDiscount": "Invalid discount code",
+    "kuwait": "Kuwait",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "governorate": "Governorate",
+    "area": "Area",
+    "selectGovernorateFirst": "Select governorate first",
+    "block": "Block",
+    "street": "Street",
+    "house": "House",
+    "avenueOptional": "Avenue (optional)",
+    "flatOptional": "Flat / Apartment (optional)",
+    "addressLine": "{street}, Block {block}, {city}, {governorate}, House {house}",
+    "oneOff": "One-off address",
+    "profileAddress": "Profile address",
+    "yourAccount": "Your account",
+    "noAddress": "No address saved on your profile",
+    "selected": "SELECTED",
+    "deliveryAddress": "Delivery address",
+    "differentAddress": "USE A DIFFERENT ADDRESS",
+    "switching": "Switching…",
+    "switchBack": "Switch back to profile address",
+    "saving": "SAVING…",
+    "deliverHere": "DELIVER TO THIS ADDRESS",
+    "keepSelected": "Keep the selected address",
+    "back": "← Back",
+    "title": "Checkout",
+    "signedInAs": "Signed in as {who}",
+    "yourAccountLower": "your account",
+    "guestCheckout": "Guest checkout",
+    "haveAccount": "Have an account?",
+    "signIn": "Sign in",
+    "contactInfo": "Contact information",
+    "emailPlaceholder": "Email address",
+    "verified": "✓ Verified",
+    "sending": "SENDING…",
+    "verify": "VERIFY",
+    "phonePlaceholder": "Phone number",
+    "delivery": "Delivery",
+    "deliveryMethods": "Delivery methods",
+    "express": "Express",
+    "withinKuwait": "Delivery within Kuwait",
+    "addressTitle": "Address",
+    "agree": "By placing this order you agree to our <terms>Terms</terms> and <returns>Returns Policy</returns>.",
+    "choosePayment": "CHOOSE A PAYMENT METHOD",
+    "preparingSecure": "Preparing secure payment…",
+    "preparingPayment": "PREPARING PAYMENT…",
+    "secure": "All transactions are secure and encrypted",
+    "verifyingPayment": "Verifying your payment…",
+    "tryAgain": "TRY AGAIN",
+    "summary": "Order summary",
+    "discountPlaceholder": "Discount code",
+    "apply": "Apply",
+    "discountLine": "Discount: <n>-{amount}</n>",
+    "subtotal": "Subtotal • {count, plural, one {{n} item} other {{n} items}}",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "thanks": "Thank you — order confirmed!",
+    "received": "Your payment was received and your order is being processed.",
+    "orderRef": "Order reference: {ref}",
+    "continueShopping": "CONTINUE SHOPPING",
+    "loading": "Loading…",
+    "refresh": "Refresh",
+    "verifyPromptTitle": "Verify Your Email",
+    "verifyPromptText": "Tap Verify next to your email address to continue.",
+    "loadingPayment": "Loading secure payment…"
+  },
+  "LeaveCheckout": {
+    "title": "Leave Checkout?",
+    "body": "Leaving now will cancel your checkout session and release the item so others can purchase it.",
+    "stay": "STAY",
+    "leave": "LEAVE"
+  },
+  "CheckoutSession": {
+    "title": "Still There?",
+    "body": "Your checkout session expires in <n>{seconds}s</n>. Confirm to keep your reservation, or leave to release the item.",
+    "leave": "LEAVE CHECKOUT",
+    "extending": "EXTENDING…",
+    "stillHere": "I'M STILL HERE"
+  },
+  "LogoutConfirm": {
+    "title": "Sign Out?",
+    "body": "Are you sure you want to sign out of your account?",
+    "keep": "KEEP BROWSING",
+    "signingOut": "SIGNING OUT...",
+    "signOut": "SIGN OUT"
+  },
+  "SignInPrompt": {
+    "title": "Sign In Required",
+    "body": "You need to be signed in to add items to your wishlist.",
+    "later": "MAYBE LATER",
+    "signIn": "SIGN IN"
+  },
+  "Profile": {
+    "title": "PROFILE",
+    "account": "Account",
+    "email": "Email",
+    "editEmail": "EDIT EMAIL",
+    "emailUpdated": "Email updated.",
+    "emailPlaceholder": "your@email.com",
+    "verifySave": "VERIFY & SAVE",
+    "sending": "SENDING…",
+    "cancel": "Cancel",
+    "phone": "Phone number",
+    "editPhone": "EDIT PHONE",
+    "phoneUpdated": "Phone number updated.",
+    "savePhone": "SAVE PHONE",
+    "saving": "SAVING…",
+    "savedAddress": "Saved address",
+    "profileAddress": "Profile address",
+    "default": "DEFAULT",
+    "editAddress": "EDIT ADDRESS",
+    "addressUpdated": "Address updated.",
+    "saveAddress": "SAVE ADDRESS",
+    "governorate": "Governorate",
+    "area": "Area",
+    "selectGovernorateFirst": "Select governorate first",
+    "block": "Block",
+    "street": "Street",
+    "house": "House",
+    "avenueOptional": "Avenue (optional)",
+    "flatOptional": "Flat / Apartment (optional)",
+    "changePassword": "CHANGE PASSWORD",
+    "passwordChanged": "Password changed.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "updatePassword": "UPDATE PASSWORD",
+    "logout": "LOG OUT",
+    "noAddress": "No address saved yet.",
+    "addressLine": "{street}, Block {block}, {city}, {governorate}, House {house}",
+    "errGovernorate": "Governorate is required",
+    "errArea": "Area is required",
+    "errBlock": "Block is required",
+    "errStreet": "Street is required",
+    "errHouse": "House number is required",
+    "couldNotSaveAddress": "Could not save the address.",
+    "couldNotUpdateEmail": "Could not update email.",
+    "emailRequired": "Email is required.",
+    "emailInvalid": "Invalid email format.",
+    "couldNotSendVerify": "Could not send verification email.",
+    "phoneRequired": "Phone number is required.",
+    "phoneInvalid": "Invalid phone number format.",
+    "couldNotUpdatePhone": "Could not update phone number.",
+    "fillAllPasswords": "Please fill in all password fields.",
+    "passwordMin6": "New password must be at least 6 characters.",
+    "passwordMismatch": "New passwords do not match.",
+    "couldNotChangePassword": "Could not change the password."
+  },
+  "Estimator": {
+    "title": "PRICING ESTIMATOR",
+    "subtitle": "Discover how much your bag could earn",
+    "brand": "Brand",
+    "selectBrand": "Select a brand",
+    "otherBrand": "Or type another brand",
+    "add": "ADD",
+    "model": "Model (optional)",
+    "modelPlaceholder": "e.g., Classic Flap",
+    "photos": "Photos (optional) — let AI auto-fill brand & model",
+    "changePhotos": "CHANGE PHOTOS",
+    "addPhotos": "ADD PHOTOS",
+    "identifying": "IDENTIFYING…",
+    "autofill": "AUTO-FILL",
+    "year": "Year Purchased (optional)",
+    "yearPlaceholder": "e.g., 2020",
+    "originalPriceLabel": "Original Purchase Price (KWD)",
+    "originalPricePlaceholder": "e.g., 500",
+    "condition": "Condition",
+    "conditions": {
+      "like-new": "Like New",
+      "gently-used": "Gently Used",
+      "fair-worn": "Fair or Worn"
+    },
+    "calculating": "CALCULATING…",
+    "getEstimate": "GET ESTIMATE",
+    "originalPrice": "Original price: {price} • {condition}",
+    "listingPrice": "Estimated Listing Price",
+    "commission": "Erlume Commission",
+    "youEarn": "You Earn",
+    "belowMin": "Based on these details, this item may be below our minimum listing threshold. Message us directly on WhatsApp and we'll take a closer look.",
+    "whatsapp": "START CHAT ON WHATSAPP",
+    "another": "CALCULATE ANOTHER",
+    "waMessage": "Hi! I'm interested in selling my {brand} bag.",
+    "waMessageYear": "Hi! I'm interested in selling my {brand} bag from {year}.",
+    "identifyLow": "We're not fully sure about this one — please double check the brand and model below.",
+    "identifyFailed": "Could not identify the bag from these photos. Please fill in the details manually.",
+    "estimateFailed": "Could not calculate an estimate. Please try again."
+  }
+}

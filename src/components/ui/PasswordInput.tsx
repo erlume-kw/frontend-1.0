@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import EyeIcon from '@/components/ui/EyeIcon';
 
 const variantClass = {
@@ -25,21 +26,22 @@ export default function PasswordInput({
   ...props
 }: PasswordInputProps) {
   const [visible, setVisible] = useState(false);
+  const t = useTranslations('Common');
 
   return (
     <div className="relative">
       <input
         {...props}
         type={visible ? 'text' : 'password'}
-        className={`${variantClass[variant]} pr-12 ${error ? inputErrorClass : ''} ${className}`}
+        className={`${variantClass[variant]} pe-12 ${error ? inputErrorClass : ''} ${className}`}
         disabled={disabled}
       />
       <button
         type="button"
-        className="absolute right-0 top-0 flex h-full w-12 items-center justify-center text-muted transition-colors duration-150 hover:text-primary disabled:opacity-60"
+        className="absolute end-0 top-0 flex h-full w-12 items-center justify-center text-muted transition-colors duration-150 hover:text-primary disabled:opacity-60"
         onClick={() => setVisible(v => !v)}
         disabled={disabled}
-        aria-label={visible ? 'Hide password' : 'Show password'}
+        aria-label={visible ? t('hidePassword') : t('showPassword')}
       >
         <EyeIcon slashed={visible} />
       </button>

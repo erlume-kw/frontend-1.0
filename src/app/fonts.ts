@@ -1,4 +1,4 @@
-import { DM_Sans, Sarina } from 'next/font/google';
+import { DM_Sans, Sarina, Readex_Pro, IBM_Plex_Sans_Arabic } from 'next/font/google';
 import localFont from 'next/font/local';
 
 // Weight mapping preserves the previous per-family names:
@@ -29,5 +29,21 @@ export const sarina = Sarina({
   subsets: ['latin'],
   weight: '400',
   variable: '--font-sarina',
+  display: 'swap',
+});
+
+// Arabic pages swap Clash Display / DM Sans for one of these (see globals.css). Both cover
+// Arabic and Latin, so numbers and brand names inside Arabic text stay in the same family.
+// Two candidates while we choose — Readex Pro is the default, ?font=plex previews the other.
+export const readexPro = Readex_Pro({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-readex',
+  display: 'swap',
+});
+
+export const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic', 'latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-plex-ar',
   display: 'swap',
 });

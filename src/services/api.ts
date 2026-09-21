@@ -153,7 +153,11 @@ async function tryRefresh(): Promise<boolean> {
 export interface Drop {
   _id: string;
   name: string;
+  /** Arabic name for the Arabic site (falls back to `name` when empty) */
+  nameAr?: string;
   description: string;
+  /** Arabic description for the Arabic site (falls back to `description` when empty) */
+  descriptionAr?: string;
   releaseDate: string;
   status: 'upcoming' | 'active' | 'ended' | 'hidden';
   bannerImageUrl?: string;
@@ -164,7 +168,10 @@ export interface Banner {
   order: number;
   imageUrl: string;
   description: string;
+  /** Arabic text for the Arabic site (fall back to the English fields when empty) */
+  descriptionAr?: string;
   ctaLabel: string;
+  ctaLabelAr?: string;
   ctaUrl: string;
   showCta: boolean;
   /** Where description + CTA sit; defaults to right when omitted. */

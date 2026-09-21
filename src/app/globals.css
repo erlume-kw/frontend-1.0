@@ -12,7 +12,7 @@
     @apply bg-white font-dm text-black antialiased;
   }
   button {
-    @apply cursor-pointer text-left;
+    @apply cursor-pointer text-start;
     background: none;
     /* Only zero the width, not the shorthand — `border: none` also sets
        border-style: none, which then forces ANY border-width utility
@@ -42,4 +42,26 @@
   .font-glyph {
     font-family: 'Apple Symbols', 'Segoe UI Symbol', system-ui, sans-serif;
   }
+}
+
+/* ─── Arabic ─────────────────────────────────────────────────────────────────
+   Arabic pages use an Arabic-capable family for both the "clash" (display) and
+   "dm" (body) fonts, so every existing font-clash / font-dm class just works. */
+html[lang='ar'] {
+  --font-arabic: var(--font-readex);
+  --font-clash: var(--font-arabic);
+  --font-dm: var(--font-arabic);
+}
+html[lang='ar'][data-arabic-font='plex'] {
+  --font-arabic: var(--font-plex-ar);
+}
+/* The Arabic fonts have larger letters than DM Sans / Clash Display at the same size, so
+   every Arabic page is scaled down to match. One number controls it: the x-height as a
+   fraction of the font size (0.52 = no change; lower = smaller text). */
+html[lang='ar'] {
+  font-size-adjust: 0.48;
+}
+/* Letter-spacing breaks Arabic letters apart (they join), so it is switched off */
+html[lang='ar'] * {
+  letter-spacing: normal !important;
 }

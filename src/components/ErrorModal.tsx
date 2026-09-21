@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface ErrorModalProps {
   visible: boolean;
@@ -9,14 +10,16 @@ interface ErrorModalProps {
   onClose: () => void;
 }
 
-export default function ErrorModal({ visible, title = 'Payment Error', message, onClose }: ErrorModalProps) {
+export default function ErrorModal({ visible, title, message, onClose }: ErrorModalProps) {
+  const t = useTranslations('ErrorModal');
+  const tc = useTranslations('Common');
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50">
       <div className="flex w-[85%] max-w-[400px] flex-col gap-4 border border-border bg-white p-6">
         <span className="font-clash font-medium text-[18px] uppercase tracking-[1px] text-primary">
-          {title}
+          {title ?? t('paymentError')}
         </span>
         <span className="font-dm text-[14px] leading-[22px] text-muted">
           {message}
@@ -27,7 +30,7 @@ export default function ErrorModal({ visible, title = 'Payment Error', message, 
           onClick={onClose}
         >
           <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-white">
-            OK
+            {tc('ok')}
           </span>
         </button>
       </div>

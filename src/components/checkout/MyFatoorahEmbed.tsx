@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React, { useEffect, useRef, useState } from 'react';
 import { MYFATOORAH_SCRIPT_URL } from '@/lib/config';
 
@@ -54,6 +55,7 @@ export default function MyFatoorahEmbed({
   amount?: number;
   onResult: (result: MFWidgetResult) => void;
 }) {
+  const t = useTranslations('Checkout');
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [errorMsg, setErrorMsg] = useState('');
   // Keep the latest onResult without re-initializing the widget
@@ -96,7 +98,7 @@ export default function MyFatoorahEmbed({
     <div className="w-full">
       {status === 'loading' && (
         <div className="flex flex-col items-center gap-2 py-6">
-          <span className="font-dm text-[13px] text-muted">Loading secure payment…</span>
+          <span className="font-dm text-[13px] text-muted">{t('loadingPayment')}</span>
         </div>
       )}
       {status === 'error' && <span className="py-3 font-dm text-[14px] text-error">{errorMsg}</span>}

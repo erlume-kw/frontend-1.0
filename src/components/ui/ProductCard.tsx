@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import HeartIcon from './HeartIcon';
 
@@ -38,6 +39,7 @@ export default function ProductCard({
   sold = false,
 }: ProductCardProps) {
   const isDesktop = useIsDesktop();
+  const t = useTranslations('Common');
 
   // Figma base: 255 × 340 card, 239px image area, 101px info area
   const baseW = cardWidth ?? (isDesktop ? 255 : 160);
@@ -84,17 +86,17 @@ export default function ProductCard({
           {name}
         </span>
         <span className="w-full truncate font-clash text-olive" style={{ fontSize: textSize }}>
-          {sold ? 'SOLD' : price}
+          {sold ? t('sold') : price}
         </span>
       </div>
 
-      {/* Wishlist heart — top-right of image area. Hidden for preview-only / sold cards. */}
+      {/* Wishlist heart — top corner (end side) of image area. Hidden for preview-only / sold cards. */}
       {disabled || sold ? null : (
         <button
           className="absolute flex items-center justify-center p-2 -m-2"
-          style={{ top: Math.round(10 * scale), right: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}
+          style={{ top: Math.round(10 * scale), insetInlineEnd: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}
           onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
-          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-label={isWishlisted ? t('removeFromWishlist') : t('addToWishlist')}
         >
           <HeartIcon size={heartSize} color="#C5705D" filled={isWishlisted} />
         </button>

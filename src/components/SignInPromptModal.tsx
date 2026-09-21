@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import React from 'react';
 
 interface SignInPromptModalProps {
@@ -9,16 +10,17 @@ interface SignInPromptModalProps {
 }
 
 export default function SignInPromptModal({ visible, onClose, onSignIn }: SignInPromptModalProps) {
+  const t = useTranslations('SignInPrompt');
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50">
       <div className="flex w-[85%] max-w-[400px] flex-col gap-4 border border-border bg-white p-6">
         <span className="font-clash font-medium text-[18px] uppercase tracking-[1px] text-primary">
-          Sign In Required
+          {t('title')}
         </span>
         <span className="font-dm text-[14px] leading-[22px] text-muted">
-          You need to be signed in to add items to your wishlist.
+          {t('body')}
         </span>
 
         <div className="mt-2 flex flex-row gap-3">
@@ -27,7 +29,7 @@ export default function SignInPromptModal({ visible, onClose, onSignIn }: SignIn
             onClick={onClose}
           >
             <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-primary">
-              MAYBE LATER
+              {t('later')}
             </span>
           </button>
           <button
@@ -35,7 +37,7 @@ export default function SignInPromptModal({ visible, onClose, onSignIn }: SignIn
             onClick={onSignIn}
           >
             <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-white">
-              SIGN IN
+              {t('signIn')}
             </span>
           </button>
         </div>

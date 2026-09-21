@@ -174,6 +174,7 @@ export interface Banner {
 
 export interface Item {
   _id: string;
+  createdAt?: string;
   itemName: string;
   itemModel?: string;
   brandName: string;

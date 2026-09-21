@@ -11,27 +11,25 @@ import { useIsDesktop } from '@/lib/useIsDesktop';
 const LAST_UPDATED = 'September 2026';
 
 const PRIVACY_COLLECT = [
-  'Full name, email address, phone number, and physical address',
-  'Bank account details and payment provider information',
-  'Username, password, and optional profile photo',
-  'Sales data, item descriptions, and transaction history',
-  'IP address, device type, operating system, and browser analytics',
-  'Approximate location based on IP address or device settings',
+  'Name, email, phone and address',
+  'Account details — username, password and optional profile photo',
+  'Order history, wishlist and reviews',
+  'For sellers, payout and bank details',
+  'Technical data — IP address, device type, operating system and browser analytics',
+  'Approximate location derived from IP or device settings',
 ];
 
 const PRIVACY_USE = [
-  'Enable you to list, sell, and manage your products on our platform',
-  'Process payments to your bank account or preferred payment provider',
-  'Enhance functionality and personalise your experience',
-  'Send transactional emails and support responses',
-  'Verify your identity for anti-fraud and anti-money laundering compliance',
-  'Monitor and prevent fraudulent activity on the platform',
+  'List, sell and manage items',
+  'Process payments and payouts',
+  'Send transactional email and support replies',
+  'Personalise your experience',
 ];
 
 const PRIVACY_PROTECT = [
-  'Bank details and sensitive information encrypted using industry-standard TLS protocols',
-  'Restricted access to personal data for authorised personnel only',
-  'Personal and financial information stored in certified, secure data centres',
+  'Bank details and sensitive information are encrypted in transit using industry-standard TLS',
+  'Access to personal data is restricted to authorised personnel',
+  'Personal and financial information is stored in certified, secure data centres',
 ];
 
 const PRIVACY_RETENTION = [
@@ -41,14 +39,14 @@ const PRIVACY_RETENTION = [
 ];
 
 const PRIVACY_COOKIES = [
-  'Authenticate your login and maintain your session',
-  'Analyse usage trends to improve the platform',
-  'Customise your experience and remember your preferences',
+  'Keep you signed in',
+  'Analyse usage',
+  'Remember your preferences',
+  'See our Cookies policy for the detail',
 ];
 
 const PRIVACY_PAYMENTS = [
   'Card details are handled by our payment provider and are never stored by erlume',
-  'We receive only the result of a payment, not your card number',
 ];
 
 const PRIVACY_TRANSFERS = [
@@ -59,13 +57,11 @@ const PRIVACY_TRANSFERS = [
 const PRIVACY_EMAIL = [
   'Transactional email (orders, verification, returns) is separate from marketing email',
   'Newsletter subscribers can unsubscribe from any marketing email in one click',
-  'We will always send you transactional email about an order you placed',
 ];
 
 const PRIVACY_RIGHTS = [
   'You may request deletion of your account and associated data at any time',
   'We may retain order and invoice records where required for accounting',
-  'You can ask us what information we hold about you',
 ];
 
 const PRIVACY_SHARING = [
@@ -75,7 +71,7 @@ const PRIVACY_SHARING = [
 ];
 
 const PRIVACY_CHANGES = [
-  'We reserve the right to update this Privacy Policy at any time',
+  'We may update this policy at any time',
   'Changes will be posted on this page with an updated effective date',
   'Continued use of our platform indicates your acceptance of the revised policy',
 ];
@@ -96,7 +92,7 @@ export default function PrivacyPolicyPage() {
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
           <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
-            Your information is handled with care and never sold or shared with third parties.
+            Your information is handled with care and never sold.
           </span>
         </div>
 
@@ -109,7 +105,7 @@ export default function PrivacyPolicyPage() {
         <CriteriaSection title="Who we share it with" items={PRIVACY_SHARING} />
         <CriteriaSection title="Processing outside Kuwait" items={PRIVACY_TRANSFERS} />
         <CriteriaSection title="Email you receive" items={PRIVACY_EMAIL} />
-        <CriteriaSection title="Your rights" items={PRIVACY_RIGHTS} />
+        <CriteriaSection title="Deletion" items={PRIVACY_RIGHTS} />
         <CriteriaSection title="Changes to this policy" items={PRIVACY_CHANGES} />
 
         <div className="h-10" />

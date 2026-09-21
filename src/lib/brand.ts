@@ -8,7 +8,7 @@ export const FOOTER_DATA = {
   },
   columns: {
     'Our Drops': ['Drop I', 'Drop II', 'Drop III', 'Drop IV', 'Drop VI'],
-    Erlume: ['Terms & Conditions', 'Returns & Refunds', 'Privacy Policy', 'Cookies Policy'],
+    Erlume: ['About Us', 'Terms & Conditions', 'Returns & Refunds', 'Privacy Policy', 'Cookies Policy'],
     Sellers: ['How to Sell', 'Selling Policy', 'Pricing Estimator'],
   },
 } as const;

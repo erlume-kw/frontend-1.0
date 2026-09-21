@@ -13,7 +13,7 @@ import LoadMoreFooter from '@/components/ui/LoadMoreFooter';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWindowWidth } from '@/lib/useWindowWidth';
 import { usePaginatedItems } from '@/lib/usePaginatedItems';
-import { fetchItemsPage } from '@/services/api';
+import { fetchDrops, fetchDropItemsPage, type ItemsPage } from '@/services/api';
 
 // Same card-width math as the drop detail page, so the grid matches exactly.
 function useCardWidth(isDesktop: boolean, viewportWidth: number) {
@@ -27,15 +27,28 @@ function useCardWidth(isDesktop: boolean, viewportWidth: number) {
 
 const PAGE_SIZE = 20;
 
+// "New" is the bags for sale in the active drop(s) — not the whole catalog. Each active drop
+// returns its own newest-first slice, so merging those slices and keeping the first `limit`
+// gives the newest `limit` bags overall.
+async function fetchActiveDropItems(limit: number): Promise<ItemsPage> {
+  const drops = await fetchDrops('active');
+  const pages = await Promise.all(drops.map(drop => fetchDropItemsPage(drop._id, 'available', limit)));
+  const items = pages
+    .flatMap(page => page.items)
+    .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
+    .slice(0, limit);
+  return { items, totalCount: pages.reduce((sum, page) => sum + page.totalCount, 0) };
+}
+
 export default function NewArrivalsPage() {
   const width = useWindowWidth();
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
-  // Newest-in-stock first — /api/items already sorts by createdAt descending.
+  // Newest-in-stock first, from the active drop(s) — each drop's items come sorted by createdAt.
   const { items, totalCount, loading, loadingMore, hasMore, loadMore, refresh } = usePaginatedItems(
-    (limit) => fetchItemsPage({ itemStatus: 'available' }, limit),
+    fetchActiveDropItems,
     PAGE_SIZE,
     [],
   );

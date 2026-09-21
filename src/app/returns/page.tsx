@@ -12,8 +12,8 @@ const LAST_UPDATED = 'September 2026';
 
 const RETURN_CARDS = [
   {
-    title: '28 Days to Return',
-    body: 'Tell us within 28 days of receiving your item if you would like to return it. Items must come back in the condition they were sent, with all packaging and inclusions.',
+    title: '14 Days to Return',
+    body: 'Tell us within 14 days of receiving your item if you would like to return it. Items must come back in the condition they were sent, with all packaging and inclusions.',
   },
   {
     title: 'Not as Described',
@@ -25,7 +25,11 @@ const RETURN_CARDS = [
   },
   {
     title: 'Refund Timing',
-    body: 'Refunds are issued to your original payment method, normally within 3 to 14 business days of us receiving and inspecting the item.',
+    body: 'Refunds are issued to your original payment method, normally within 3 to 14 business days of the item being received and inspected.',
+  },
+  {
+    title: 'Cancelled or Expired Checkouts',
+    body: 'An unpaid checkout is released automatically. If a payment arrives after an order has been cancelled, it is refunded automatically, so there is no need to contact us.',
   },
   {
     title: 'Authenticity',
@@ -34,10 +38,6 @@ const RETURN_CARDS = [
   {
     title: 'Pre-Loved Items',
     body: 'Items are second-hand unless stated otherwise. Minor signs of wear consistent with the stated grade are expected and are not grounds for return.',
-  },
-  {
-    title: 'Cancelled Checkouts',
-    body: 'An unpaid checkout is released automatically. If a payment arrives after an order has been cancelled, it is refunded automatically, so there is no need to contact us.',
   },
   {
     title: 'Starting a Return',
@@ -62,7 +62,7 @@ export default function ReturnsPage() {
           </h1>
           <span className="font-dm text-[13px] text-muted">Last Updated: {LAST_UPDATED}</span>
           <span className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
-            You have 28 days from delivery to change your mind.
+            You have 14 days from delivery to change your mind.
           </span>
         </div>
 

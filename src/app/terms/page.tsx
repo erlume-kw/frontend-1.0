@@ -17,11 +17,11 @@ const BUYER_CARDS = [
   },
   {
     title: 'Returns',
-    body: 'Returns are accepted within 28 days of delivery. See our Returns & Refunds policy for the full details.',
+    body: 'Returns are accepted within 14 days of delivery. See our Returns & Refunds policy for the full details.',
   },
   {
     title: 'Condition Grading',
-    body: 'Every item is graded New, Like New, Gently Used, Fair or Worn, and photographed as received. The grade and the photographs form part of the description you are buying against.',
+    body: 'Every item is graded New, Like New, Gently Used, Fair or Worn, and photographed as received. The grade and the photographs form part of the description you are purchasing against.',
   },
   {
     title: 'Pre-Loved Items',
@@ -29,19 +29,19 @@ const BUYER_CARDS = [
   },
   {
     title: 'Ordering & Payment',
-    body: 'All orders are placed and paid in full on the website. We accept KNET and cards. Your order is confirmed once payment clears, and you receive a confirmation email with your invoice attached.',
+    body: 'All orders are placed and paid in full on the website. We accept KNET, cards and Apple Pay. An order is confirmed only once payment clears, and you receive a confirmation email with your invoice attached.',
   },
   {
-    title: 'Delivery & Pickup',
-    body: 'Choose delivery or pickup at checkout. Delivery fees are shown before payment and are charged in addition to the item price. We currently deliver within Kuwait only.',
+    title: 'Delivery',
+    body: 'Delivery fees are shown before payment and are charged in addition to the item price. We currently deliver within Kuwait only.',
   },
   {
     title: 'Item Reservation',
-    body: 'Starting checkout holds the item for 5 minutes. If payment is not completed in that time, the item returns to sale and may be purchased by someone else. Every piece is one of a kind, so a completed payment is the only reservation.',
+    body: 'If payment is not completed, the item returns to sale and may be purchased by someone else. Every item is one of a kind — a completed payment is the only reservation.',
   },
   {
     title: 'Drops',
-    body: 'Items in an upcoming drop are not purchasable until that drop opens, and drop timing may change.',
+    body: 'Items in an upcoming drop are not purchasable until that drop opens. Drop timing may change.',
   },
   {
     title: 'Discount Codes',
@@ -68,11 +68,11 @@ const USE_CARDS = [
   },
   {
     title: 'Reviews',
-    body: 'Reviews must reflect your own honest experience. We may remove reviews that are abusive, false, or unrelated to the item.',
+    body: 'Reviews must be your own honest experience. We may remove reviews that are abusive, false, or unrelated to the item.',
   },
   {
     title: 'Availability',
-    body: 'We aim to keep the site available at all times but cannot guarantee uninterrupted service.',
+    body: 'We aim to keep the site available but do not guarantee uninterrupted service.',
   },
   {
     title: 'Changes to These Terms',
@@ -80,15 +80,19 @@ const USE_CARDS = [
   },
   {
     title: 'Governing Law',
-    body: 'These terms are governed by the laws of the State of Kuwait. Any dispute that cannot be resolved directly will be subject to the courts of Kuwait.',
+    body: 'These terms are governed by the laws of the State of Kuwait.',
+  },
+  {
+    title: 'Disputes',
+    body: 'We would rather resolve problems directly — contact us first and we will try to settle it. Any dispute that cannot be resolved will be subject to the courts of Kuwait.',
   },
 ];
 
 const COMPANY_DETAILS: { label: string; value: string; rtl?: boolean }[] = [
   { label: 'Registered name', value: 'شركة فاشن ايرلوم لترويج المنتجات', rtl: true },
-  { label: 'Legal form', value: 'One Person Company' },
+  { label: 'Legal form', value: 'One Person Company · شركة الشخص الواحد' },
   { label: 'Commercial licence no.', value: '2025/7386' },
-  { label: 'Commercial register no.', value: '525618' },
+  { label: 'Commercial register no.', value: '525618 (registered 12/05/2025)' },
   { label: 'Contact', value: 'info@erlume.com.kw · +965 97226735' },
 ];
 

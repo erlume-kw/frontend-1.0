@@ -43,6 +43,7 @@ export function openWhatsApp(prefill?: string) {
 export function handleFooterLink(label: string, push: (href: string) => void) {
   const drop = DROP_NAV[label];
   if (drop) { push(`/drops/${encodeURIComponent(drop.dropTitle)}?dropId=${drop.dropId}`); return; }
+  if (label === 'About Us') { push('/about'); return; }
   if (label === 'How to Sell') { push('/sell'); return; }
   if (label === 'Selling Policy') { push('/seller-policy'); return; }
   if (label === 'Pricing Estimator') { push('/pricing-estimator'); return; }

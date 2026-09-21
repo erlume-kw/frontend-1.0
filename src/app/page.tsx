@@ -8,6 +8,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import ProductCard from '@/components/ui/ProductCard';
+import ScrollRow from '@/components/ui/ScrollRow';
 import { SkeletonProductCard } from '@/components/ui/Skeleton';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWindowWidth } from '@/lib/useWindowWidth';
@@ -246,7 +247,7 @@ export default function HomePage() {
             </div>
           )
         ) : isDesktop ? (
-          <div className="flex flex-row gap-4 overflow-x-auto pb-1 [scrollbar-width:none]">
+          <ScrollRow className="flex flex-row gap-4 pb-1">
             {items.map(item => (
               <div key={item._id} className="shrink-0">
                 <ProductCard
@@ -272,7 +273,7 @@ export default function HomePage() {
                 />
               </div>
             ))}
-          </div>
+          </ScrollRow>
         ) : (
           <div className="flex flex-row flex-wrap justify-start gap-2">
             {items.map(item => (

@@ -1107,7 +1107,7 @@ export default function CheckoutPage() {
       <ErrorModal
         visible={verifyPrompt}
         title="Verify Your Email"
-        message="Please verify your email before choosing a payment method."
+        message="Tap Verify next to your email address to continue."
         onClose={() => setVerifyPrompt(false)}
       />
       <VerifyEmailModal

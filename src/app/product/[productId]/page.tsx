@@ -8,6 +8,7 @@ import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import ProductCard from '@/components/ui/ProductCard';
 import HeartIcon from '@/components/ui/HeartIcon';
+import { Chevron, ARROW_DARK, ARROW_LIGHT } from '@/components/ui/Chevron';
 import SignInPromptModal from '@/components/SignInPromptModal';
 import { SkeletonProductDetail } from '@/components/ui/Skeleton';
 import { useWishlist, type WishlistItem } from '@/contexts/WishlistContext';
@@ -24,42 +25,6 @@ function Toast({ message }: { message: string }) {
     <div className="flex items-center justify-center bg-olive px-5 py-3">
       <span className="font-clash font-medium text-[12px] text-white">{message}</span>
     </div>
-  );
-}
-
-const ARROW_DARK = '#18230F'; // primary dark — for light backgrounds
-const ARROW_LIGHT = '#F8EDE3'; // primary light — for dark backgrounds
-
-function Chevron({
-  dir,
-  size = 22,
-  color = ARROW_DARK,
-}: {
-  dir: 'left' | 'right' | 'up' | 'down';
-  size?: number;
-  color?: string;
-}) {
-  const rotate = { left: 90, right: -90, up: 180, down: 0 }[dir];
-  // Subtle opposite-tone shadow keeps the arrow legible in all cases (and covers
-  // cross-origin images whose pixels can't be sampled) without a solid backing.
-  const shadow =
-    color === ARROW_LIGHT
-      ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))'
-      : 'drop-shadow(0 1px 2px rgba(255,255,255,0.55))';
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ transform: `rotate(${rotate}deg)`, filter: shadow, transition: 'stroke 200ms ease-out' }}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
   );
 }
 
@@ -509,7 +474,7 @@ export default function ProductDetailPage() {
         Delivery &amp; Returns
       </span>
       <span className="block text-justify font-dm text-black" style={{ fontSize: contentSize, lineHeight: `${contentLine}px` }}>
-        Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 28 days from delivery to
+        Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 14 days from delivery to
         request a return &mdash; see our{' '}
         <a href="/returns" target="_blank" rel="noreferrer" className="underline">
           Returns Policy
@@ -536,7 +501,7 @@ export default function ProductDetailPage() {
               {notifyBlock}
               <span className="mb-1 mt-2 block font-clash font-medium text-[24px] text-black">Delivery &amp; Returns</span>
               <span className="block text-justify font-dm text-black" style={{ fontSize: contentSize, lineHeight: `${contentLine}px` }}>
-                Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 28 days from
+                Delivered across Kuwait, or collect in person. If it&apos;s not quite right, you have 14 days from
                 delivery to request a return &mdash; see our{' '}
                 <a href="/returns" target="_blank" rel="noreferrer" className="underline">
                   Returns Policy

@@ -111,6 +111,7 @@ async function request<T>(
   const token = await getAccessToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'X-Site-Language': siteLanguage(),
     ...(options.headers as Record<string, string>),
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -143,7 +144,7 @@ async function tryRefresh(): Promise<boolean> {
     if (!refreshToken) return false;
     const res = await fetch(`${BASE_URL}/api/auth/refresh`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Site-Language': siteLanguage() },
       body: JSON.stringify({ refreshToken }),
     });
     const data = await res.json();
@@ -357,7 +358,7 @@ export async function changePassword(currentPassword: string, newPassword: strin
 // — the storefront must never hold an admin credential.
 async function dropsRequest<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-Site-Language': siteLanguage() },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
@@ -478,6 +479,7 @@ export async function identifyBagPhotos(
 
   const res = await fetch(`${BASE_URL}/api/pricing-estimator/identify`, {
     method: 'POST',
+    headers: { 'X-Site-Language': siteLanguage() },
     body: formData,
   });
   const data = await res.json();
@@ -649,7 +651,7 @@ export async function createOrder(payload: {
 // Tolerates empty / non-JSON responses; callers still swallow errors as a fallback.
 export async function cancelOrder(orderId: string): Promise<void> {
   const token = await getAccessToken();
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', 'X-Site-Language': siteLanguage() };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE_URL}/api/orders/${orderId}/cancel`, {

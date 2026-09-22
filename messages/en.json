@@ -176,7 +176,8 @@
       "fall": "fall",
       "winter": "winter"
     },
-    "notFound": "Drop not found."
+    "notFound": "Drop not found.",
+    "metaDescription": "Shop {name} at erlume — pre-loved luxury and vintage, Kuwait."
   },
   "Terms": {
     "title": "TERMS & CONDITIONS",
@@ -737,7 +738,8 @@
       "small": "Small",
       "medium": "Medium",
       "large": "Large"
-    }
+    },
+    "metaDescription": "Buy {name} for {price} at erlume — pre-loved luxury and vintage, Kuwait."
   },
   "Checkout": {
     "loadAccountError": "Unable to load your account. Please refresh the page.",
@@ -953,5 +955,14 @@
     "identifyLow": "We're not fully sure about this one — please double check the brand and model below.",
     "identifyFailed": "Could not identify the bag from these photos. Please fill in the details manually.",
     "estimateFailed": "Could not calculate an estimate. Please try again."
+  },
+  "Metadata": {
+    "title": "erlume",
+    "description": "Buy and sell pre-loved luxury and vintage pieces in Kuwait."
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or may have moved.",
+    "cta": "Back to erlume"
   }
 }

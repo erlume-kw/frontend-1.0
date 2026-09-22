@@ -5,6 +5,10 @@
 // Backend API base URL
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3000';
 
+// The site's own canonical origin — used to build absolute URLs for metadata
+// (Open Graph, hreflang alternates). No trailing slash.
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://erlume.com.kw').replace(/\/$/, '');
+
 // MyFatoorah embedded-payment script (demo vs live)
 export const MYFATOORAH_SCRIPT_URL =
   process.env.NEXT_PUBLIC_MYFATOORAH_SCRIPT_URL ??

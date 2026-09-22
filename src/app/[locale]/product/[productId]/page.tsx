@@ -443,8 +443,8 @@ export default function ProductDetailPage() {
           <span className="font-clash font-semibold text-[16px] text-white">{tc('sold')}</span>
         </div>
       ) : (
-        <button className="flex flex-1 items-center justify-center bg-secondary" onClick={handleAddToCart}>
-          <span className="font-clash font-semibold text-[20px] tracking-[1px] text-white">{t('addToCart')}</span>
+        <button className="flex flex-1 items-center justify-center bg-secondary px-2" onClick={handleAddToCart}>
+          <span className="whitespace-nowrap font-clash font-semibold text-[15px] tracking-[1px] text-white sm:text-[16px]">{t('addToCart')}</span>
         </button>
       )}
     </div>

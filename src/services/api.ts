@@ -94,6 +94,13 @@ async function handleSessionExpired(): Promise<void> {
   }
 }
 
+// The language of the page the visitor is on. Sent with sign-up, newsletter, verification codes,
+// password reset and checkout so the backend writes to them in that language (a saved
+// "preferred communication language" on their profile still wins over it).
+function siteLanguage(): 'en' | 'ar' {
+  return typeof document !== 'undefined' && document.documentElement.lang === 'ar' ? 'ar' : 'en';
+}
+
 // ─── Core fetch wrapper ───────────────────────────────────────────────────────
 
 async function request<T>(
@@ -204,6 +211,8 @@ export interface AuthUser {
   emailAddress: string;
   roles: string[];
   phoneNumber?: string;
+  /** Language erlume writes to them in (emails today). Unset until chosen. */
+  preferredLanguage?: 'en' | 'ar';
   address?: {
     street?: string;
     block?: string;
@@ -253,7 +262,7 @@ export async function register(payload: {
 }): Promise<AuthUser> {
   const data = await request<{ success: boolean; accessToken: string; refreshToken: string; user: AuthUser }>(
     '/api/auth/register',
-    { method: 'POST', body: JSON.stringify(payload) },
+    { method: 'POST', body: JSON.stringify({ ...payload, language: siteLanguage() }) },
   );
   await setTokens(data.accessToken, data.refreshToken);
   return data.user;
@@ -263,7 +272,7 @@ export async function register(payload: {
 export async function requestPasswordReset(emailAddress: string): Promise<void> {
   await request('/api/auth/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ emailAddress }),
+    body: JSON.stringify({ emailAddress, language: siteLanguage() }),
   });
 }
 
@@ -317,6 +326,15 @@ export async function updateMyPhone(userId: string, phoneNumber: string): Promis
   const data = await request<{ success: boolean; data: { user: AuthUser } }>(`/api/users/${userId}`, {
     method: 'PATCH',
     body: JSON.stringify({ phoneNumber }),
+  });
+  return data.data.user;
+}
+
+// Profile: preferred communication language (the language of erlume's emails to them)
+export async function updateMyLanguage(userId: string, preferredLanguage: 'en' | 'ar'): Promise<AuthUser> {
+  const data = await request<{ success: boolean; data: { user: AuthUser } }>(`/api/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ preferredLanguage }),
   });
   return data.data.user;
 }
@@ -408,7 +426,7 @@ export async function fetchItemById(id: string): Promise<Item> {
 export async function requestEmailOtp(email: string): Promise<{ alreadyVerified: boolean }> {
   const data = await request<{ success: boolean; alreadyVerified?: boolean }>(
     '/api/email-verification/request',
-    { method: 'POST', body: JSON.stringify({ email }) },
+    { method: 'POST', body: JSON.stringify({ email, language: siteLanguage() }) },
   );
   return { alreadyVerified: !!data.alreadyVerified };
 }
@@ -502,7 +520,7 @@ export async function estimateBagPrice(input: EstimateBagPriceInput): Promise<Es
 export async function subscribeNewsletter(email: string): Promise<void> {
   await request('/api/newsletter', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, language: siteLanguage() }),
   });
 }
 
@@ -515,7 +533,7 @@ export async function unsubscribeNewsletter(email: string): Promise<void> {
 export async function submitNotifyRequest(email: string, item: Pick<Item, '_id' | 'itemName' | 'brandName'>): Promise<void> {
   await request('/api/notify', {
     method: 'POST',
-    body: JSON.stringify({ email, itemId: item._id, itemName: item.itemName, brandName: item.brandName }),
+    body: JSON.stringify({ email, itemId: item._id, itemName: item.itemName, brandName: item.brandName, language: siteLanguage() }),
   });
 }
 
@@ -616,7 +634,8 @@ export async function createOrder(payload: {
 }): Promise<CreatedOrder> {
   const data = await request<ApiSingle<CreatedOrder>>('/api/orders', {
     method: 'POST',
-    body: JSON.stringify(payload),
+    // `language` = the page they are checking out on; the backend keeps it on the order for their emails.
+    body: JSON.stringify({ ...payload, language: siteLanguage() }),
   });
   return data.data;
 }

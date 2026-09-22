@@ -905,7 +905,11 @@
     "fillAllPasswords": "Please fill in all password fields.",
     "passwordMin6": "New password must be at least 6 characters.",
     "passwordMismatch": "New passwords do not match.",
-    "couldNotChangePassword": "Could not change the password."
+    "couldNotChangePassword": "Could not change the password.",
+    "commLanguage": "Preferred communication language",
+    "commLanguageHint": "The language we use in emails about your orders and account.",
+    "commLanguageSaved": "Preference saved.",
+    "commLanguageError": "Could not save your preference. Please try again."
   },
   "Estimator": {
     "title": "PRICING ESTIMATOR",

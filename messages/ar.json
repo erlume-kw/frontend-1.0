@@ -905,7 +905,11 @@
     "fillAllPasswords": "يرجى تعبئة جميع حقول كلمة المرور.",
     "passwordMin6": "يجب ألا تقل كلمة المرور الجديدة عن 6 أحرف.",
     "passwordMismatch": "كلمتا المرور الجديدتان غير متطابقتين.",
-    "couldNotChangePassword": "تعذّر تغيير كلمة المرور."
+    "couldNotChangePassword": "تعذّر تغيير كلمة المرور.",
+    "commLanguage": "لغة التواصل المفضلة",
+    "commLanguageHint": "اللغة التي نستخدمها في رسائل البريد الإلكتروني عن طلباتك وحسابك.",
+    "commLanguageSaved": "تم حفظ تفضيلك.",
+    "commLanguageError": "تعذّر حفظ تفضيلك. يرجى المحاولة مرة أخرى."
   },
   "Estimator": {
     "title": "مقدّر الأسعار",

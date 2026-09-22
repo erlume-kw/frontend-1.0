@@ -1,7 +1,7 @@
 'use client';
 
 import { toWesternDigits } from '@/lib/useNumerals';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -22,6 +22,7 @@ import {
   updateMyAddress,
   updateMyEmail,
   updateMyPhone,
+  updateMyLanguage,
   requestEmailOtp,
   changePassword,
   type AuthUser,
@@ -56,6 +57,7 @@ export default function ProfilePage() {
   const { areas, governorates, placeLabel } = useKuwaitAreas();
   const router = useRouter();
   const t = useTranslations('Profile');
+  const locale = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -90,6 +92,11 @@ export default function ProfilePage() {
   const [phoneSaving, setPhoneSaving] = useState(false);
   const [phoneError, setPhoneError] = useState('');
   const [phoneSaved, setPhoneSaved] = useState(false);
+
+  // Preferred communication language (the language of the emails we send them)
+  const [langSaving, setLangSaving] = useState(false);
+  const [langSaved, setLangSaved] = useState(false);
+  const [langError, setLangError] = useState('');
 
   // Change password
   const [editingPassword, setEditingPassword] = useState(false);
@@ -248,6 +255,25 @@ export default function ProfilePage() {
       setPhoneError(e.message ?? t('couldNotUpdatePhone'));
     } finally {
       setPhoneSaving(false);
+    }
+  };
+
+  // Until they choose, emails follow the language of the page they order on — so show that as the selection.
+  const commLanguage: 'en' | 'ar' = user?.preferredLanguage ?? (locale === 'ar' ? 'ar' : 'en');
+
+  const handleChangeLanguage = async (next: 'en' | 'ar') => {
+    if (!user || langSaving || next === commLanguage) return;
+    setLangError('');
+    setLangSaved(false);
+    setLangSaving(true);
+    try {
+      const updated = await updateMyLanguage(user._id, next);
+      setUser(updated);
+      setLangSaved(true);
+    } catch (e: any) {
+      setLangError(e.message ?? t('commLanguageError'));
+    } finally {
+      setLangSaving(false);
     }
   };
 
@@ -486,6 +512,36 @@ export default function ProfilePage() {
                       </button>
                     </>
                   )}
+                </div>
+
+                {/* Preferred communication language */}
+                <div className="flex flex-col gap-[6px] border-t border-border pt-4">
+                  <span className="font-dm font-medium text-[12px] uppercase tracking-[0.8px] text-muted">{t('commLanguage')}</span>
+                  <span className="font-dm text-[13px] leading-[19px] text-muted">{t('commLanguageHint')}</span>
+                  <div className="mt-1 flex flex-row items-center" role="radiogroup" aria-label={t('commLanguage')}>
+                    {(['en', 'ar'] as const).map((code, i) => {
+                      const active = commLanguage === code;
+                      return (
+                        <React.Fragment key={code}>
+                          {i > 0 && <span aria-hidden className="mx-4 h-[14px] w-px bg-border" />}
+                          <button
+                            type="button"
+                            role="radio"
+                            aria-checked={active}
+                            disabled={langSaving}
+                            onClick={() => handleChangeLanguage(code)}
+                            className={`py-1 font-dm text-[14px] outline-none ${
+                              active ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                            } ${langSaving ? 'opacity-60' : ''}`}
+                          >
+                            {code === 'en' ? 'English' : 'العربية'}
+                          </button>
+                        </React.Fragment>
+                      );
+                    })}
+                  </div>
+                  {langSaved && <span className="font-dm text-[13px] text-olive">{t('commLanguageSaved')}</span>}
+                  {!!langError && <span className="font-dm text-[13px] text-error">{langError}</span>}
                 </div>
               </div>
             </div>

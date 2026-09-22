@@ -259,10 +259,12 @@ export async function register(payload: {
   password: string;
   phoneNumber: string;
   address: { street: string; block: string; city: string; governorate: string; house: string; avenue?: string; flat?: string };
+  /** Preferred communication language, if the sign-up form let them pick one. Defaults to the page's language. */
+  language?: 'en' | 'ar';
 }): Promise<AuthUser> {
   const data = await request<{ success: boolean; accessToken: string; refreshToken: string; user: AuthUser }>(
     '/api/auth/register',
-    { method: 'POST', body: JSON.stringify({ ...payload, language: siteLanguage() }) },
+    { method: 'POST', body: JSON.stringify({ ...payload, language: payload.language ?? siteLanguage() }) },
   );
   await setTokens(data.accessToken, data.refreshToken);
   return data.user;
@@ -631,11 +633,14 @@ export async function createOrder(payload: {
   user_id?: string;
   guestInfo?: GuestInfo;
   orderItems: { item_id: string; quantity?: number }[];
+  /** Preferred communication language, if the guest checkout form let them pick one. Defaults to the page's language. */
+  language?: 'en' | 'ar';
 }): Promise<CreatedOrder> {
   const data = await request<ApiSingle<CreatedOrder>>('/api/orders', {
     method: 'POST',
-    // `language` = the page they are checking out on; the backend keeps it on the order for their emails.
-    body: JSON.stringify({ ...payload, language: siteLanguage() }),
+    // `language` = the page they are checking out on (or their explicit pick); the backend
+    // keeps it on the order for their emails.
+    body: JSON.stringify({ ...payload, language: payload.language ?? siteLanguage() }),
   });
   return data.data;
 }

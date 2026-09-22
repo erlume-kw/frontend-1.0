@@ -1,7 +1,7 @@
 'use client';
 
 import { toWesternDigits, useNumerals } from '@/lib/useNumerals';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMoney } from '@/lib/useMoney';
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -88,6 +88,7 @@ export default function CheckoutPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
   const t = useTranslations('Checkout');
+  const locale = useLocale();
   const money = useMoney();
   const num = useNumerals();
   const { areas, governorates, placeLabel } = useKuwaitAreas();
@@ -104,6 +105,7 @@ export default function CheckoutPage() {
   // Guest contact
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
+  const [guestLanguage, setGuestLanguage] = useState<'en' | 'ar'>('en');
 
   // Name + address fields (guest checkout, or signed-in "different address")
   const [firstName, setFirstName] = useState('');
@@ -285,6 +287,8 @@ export default function CheckoutPage() {
   // Sequence: create order (backend reserves items, order = pending) → request
   // MyFatoorah session → embedded widget renders under the order summary.
   // The order is only confirmed after the BACKEND verifies the payment.
+
+  useEffect(() => { setGuestLanguage(locale === 'ar' ? 'ar' : 'en'); }, [locale]);
 
   const startPayment = useCallback(async (payload: Parameters<typeof createOrder>[0]) => {
     setPayError('');
@@ -569,6 +573,7 @@ export default function CheckoutPage() {
         },
       },
       orderItems: activeCartItems.map(i => ({ item_id: i.id, quantity: 1 })),
+      language: guestLanguage,
     });
   };
 
@@ -934,6 +939,28 @@ export default function CheckoutPage() {
                 type="tel"
               />
               <ErrorText field="guestPhone" />
+            </div>
+            <div className="flex flex-col gap-[6px]">
+              <span className="font-dm font-medium text-[12px] uppercase tracking-[0.8px] text-muted">{t('commLanguage')}</span>
+              <span className="font-dm text-[13px] leading-[19px] text-muted">{t('commLanguageHint')}</span>
+              <div className="mt-1 flex flex-row items-center" role="radiogroup" aria-label={t('commLanguage')}>
+                {(['en', 'ar'] as const).map((code, i) => (
+                  <React.Fragment key={code}>
+                    {i > 0 && <span aria-hidden className="mx-4 h-[14px] w-px bg-border" />}
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={guestLanguage === code}
+                      onClick={() => setGuestLanguage(code)}
+                      className={`py-1 font-dm text-[14px] outline-none ${
+                        guestLanguage === code ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                      }`}
+                    >
+                      {code === 'en' ? 'English' : 'العربية'}
+                    </button>
+                  </React.Fragment>
+                ))}
+              </div>
             </div>
           </div>
 

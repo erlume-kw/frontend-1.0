@@ -154,7 +154,9 @@
       "cityRequired": "City is required",
       "governorateRequired": "Governorate is required",
       "codeSendFailed": "Could not send the verification code. Please try again.",
-      "phonePlaceholder": "XXXX XXXX"
+      "phonePlaceholder": "XXXX XXXX",
+      "language": "Preferred communication language",
+      "languageHint": "The language we use in emails about your orders and account."
     }
   },
   "Pagination": {
@@ -823,7 +825,9 @@
     "refresh": "Refresh",
     "verifyPromptTitle": "Verify Your Email",
     "verifyPromptText": "Tap Verify next to your email address to continue.",
-    "loadingPayment": "Loading secure payment…"
+    "loadingPayment": "Loading secure payment…",
+    "commLanguage": "Preferred communication language",
+    "commLanguageHint": "The language we use for order emails."
   },
   "LeaveCheckout": {
     "title": "Leave Checkout?",

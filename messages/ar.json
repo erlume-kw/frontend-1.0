@@ -154,7 +154,9 @@
       "cityRequired": "المنطقة مطلوبة",
       "governorateRequired": "المحافظة مطلوبة",
       "codeSendFailed": "تعذّر إرسال رمز التحقق. يرجى المحاولة مرة أخرى.",
-      "phonePlaceholder": "رقم الهاتف"
+      "phonePlaceholder": "رقم الهاتف",
+      "language": "لغة التواصل المفضلة",
+      "languageHint": "اللغة التي نستخدمها في رسائل البريد الإلكتروني عن طلباتك وحسابك."
     }
   },
   "Pagination": {
@@ -823,7 +825,9 @@
     "refresh": "تحديث",
     "verifyPromptTitle": "تحقق من بريدك الإلكتروني",
     "verifyPromptText": "اضغط على «تحقق» بجانب بريدك الإلكتروني للمتابعة.",
-    "loadingPayment": "جارٍ تحميل الدفع الآمن…"
+    "loadingPayment": "جارٍ تحميل الدفع الآمن…",
+    "commLanguage": "لغة التواصل المفضلة",
+    "commLanguageHint": "اللغة التي نستخدمها في رسائل البريد الإلكتروني عن الطلب."
   },
   "LeaveCheckout": {
     "title": "مغادرة إتمام الطلب؟",

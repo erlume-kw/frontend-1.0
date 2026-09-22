@@ -2,7 +2,7 @@
 
 import { toWesternDigits } from '@/lib/useNumerals';
 import React, { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
@@ -34,6 +34,7 @@ export default function SignInRegisterPage() {
   const isDesktop = useIsDesktop();
   const router = useRouter();
   const t = useTranslations('SignIn');
+  const locale = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'signin' | 'register' | 'forgot'>('signin');
@@ -69,9 +70,11 @@ export default function SignInRegisterPage() {
   const [regHouse, setRegHouse] = useState('');
   const [regCity, setRegCity] = useState('');
   const [regGovernorate, setRegGovernorate] = useState('');
+  const [regLanguage, setRegLanguage] = useState<'en' | 'ar'>('en');
 
   // Field-specific errors
   const [regErrors, setRegErrors] = useState<Record<string, string>>({});
+  useEffect(() => { setRegLanguage(locale === 'ar' ? 'ar' : 'en'); }, [locale]);
 
   // Email OTP verification (runs before the account is created)
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -203,6 +206,7 @@ export default function SignInRegisterPage() {
           city: regCity,
           governorate: regGovernorate,
         },
+        language: regLanguage,
       });
       setToastMessage(t('register.created'));
       setToastVisible(true);
@@ -658,6 +662,30 @@ export default function SignInRegisterPage() {
                     disabled={loading || !regGovernorate}
                   />
                   {regErrors.city && <span className={fieldErrorClass}>{regErrors.city}</span>}
+                </div>
+
+                <div className="flex flex-col gap-[6px]">
+                  <span className={labelClass}>{t('register.language')}</span>
+                  <span className="font-dm text-[13px] leading-[19px] text-muted">{t('register.languageHint')}</span>
+                  <div className="mt-1 flex flex-row items-center" role="radiogroup" aria-label={t('register.language')}>
+                    {(['en', 'ar'] as const).map((code, i) => (
+                      <React.Fragment key={code}>
+                        {i > 0 && <span aria-hidden className="mx-4 h-[14px] w-px bg-border" />}
+                        <button
+                          type="button"
+                          role="radio"
+                          aria-checked={regLanguage === code}
+                          disabled={loading}
+                          onClick={() => setRegLanguage(code)}
+                          className={`py-1 font-dm text-[14px] outline-none ${
+                            regLanguage === code ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                          } ${loading ? 'opacity-60' : ''}`}
+                        >
+                          {code === 'en' ? 'English' : 'العربية'}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                  </div>
                 </div>
 
                 {regErrors.submit && <span className="mt-2 font-dm text-[13px] text-error">{regErrors.submit}</span>}

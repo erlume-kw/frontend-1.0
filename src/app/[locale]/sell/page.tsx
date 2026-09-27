@@ -9,21 +9,41 @@ import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import SellerBanner from '@/components/seller/SellerBanner';
 import { useIsDesktop } from '@/lib/useIsDesktop';
-import { openWhatsApp } from '@/lib/interactions';
+import { openWhatsAppWithPhotos } from '@/lib/sellerPhotos';
 
 export default function SellPage() {
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const t = useTranslations('Sell');
+  const tc = useTranslations('Common');
 
   const handleUpload = () => fileInputRef.current?.click();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setImageUri(URL.createObjectURL(file));
+    if (!file) return;
+    if (imageUri) URL.revokeObjectURL(imageUri);
+    setImageUri(URL.createObjectURL(file));
+    setImageFile(file);
+  };
+
+  const handleChat = async () => {
+    if (sending) return;
+    setSending(true);
+    try {
+      await openWhatsAppWithPhotos({
+        photos: imageFile ? [imageFile] : [],
+        message: link => (link ? `${t('wa')} ${tc('photosLink', { link })}` : t('wa')),
+        source: 'sell',
+      });
+    } finally {
+      setSending(false);
+    }
   };
 
   const headlineSize = isDesktop ? 60 : 32;
@@ -103,18 +123,13 @@ export default function SellPage() {
         />
 
         <button
-          className="flex flex-row items-center justify-center gap-5 overflow-hidden bg-secondary px-8"
+          className={`flex flex-row items-center justify-center gap-5 overflow-hidden bg-secondary px-8 ${sending ? 'opacity-60' : ''}`}
           style={{ width: btnW, height: btnH }}
-          onClick={() =>
-            openWhatsApp(
-              imageUri
-                ? t('waWithPhoto')
-                : t('wa')
-            )
-          }
+          onClick={handleChat}
+          disabled={sending}
         >
           <span className="font-clash font-medium leading-[30px] text-white" style={{ fontSize: btnFontSize }}>
-            {t('chat')}
+            {sending ? tc('sendingPhotos') : t('chat')}
           </span>
         </button>
       </div>

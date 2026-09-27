@@ -13,7 +13,9 @@
     "updatedDate": "September 2026",
     "scrollLeft": "Scroll left",
     "scrollRight": "Scroll right",
-    "closeDropdown": "Close dropdown"
+    "closeDropdown": "Close dropdown",
+    "photosLink": "My photos: {link}",
+    "sendingPhotos": "SENDING PHOTOS…"
   },
   "LanguageSwitcher": {
     "switchTo": "العربية",
@@ -631,7 +633,6 @@
     "tapChange": "Tap to change",
     "itemAlt": "Your item",
     "chat": "LET'S CHAT",
-    "waWithPhoto": "Hi, I'd like to sell an item with erlume. I've prepared a photo to share.",
     "wa": "Hi, I'd like to sell an item with erlume.",
     "steps": [
       {
@@ -936,5 +937,14 @@
     "title": "Page not found",
     "body": "The page you're looking for doesn't exist or may have moved.",
     "cta": "Back to erlume"
+  },
+  "SellerPhotos": {
+    "title": "Photos sent to erlume",
+    "body": "These photos were shared with erlume by someone who would like to sell this item. We reply on WhatsApp.",
+    "notFound": "This link has expired or does not exist.",
+    "metaTitle": "An item to sell with erlume",
+    "metaDescription": "Photos shared with erlume on WhatsApp.",
+    "photoAlt": "Photo {n}",
+    "backHome": "Go to erlume"
   }
 }

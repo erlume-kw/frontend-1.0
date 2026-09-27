@@ -9,7 +9,7 @@ import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
-import { openWhatsApp } from '@/lib/interactions';
+import { openWhatsAppWithPhotos } from '@/lib/sellerPhotos';
 import {
   identifyBagPhotos,
   estimateBagPrice,
@@ -63,6 +63,7 @@ const inputClass =
 export default function PricingEstimatorPage() {
   const isDesktop = useIsDesktop();
   const t = useTranslations('Estimator');
+  const tc = useTranslations('Common');
   const money = useMoney();
   const num = useNumerals();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -88,6 +89,24 @@ export default function PricingEstimatorPage() {
   const [estimateError, setEstimateError] = useState('');
   const [result, setResult] = useState<EstimateBagPriceResult | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [sendingPhotos, setSendingPhotos] = useState(false);
+
+  const handleWhatsApp = async () => {
+    if (sendingPhotos) return;
+    const text = year ? t('waMessageYear', { brand, year }) : t('waMessage', { brand });
+    setSendingPhotos(true);
+    try {
+      await openWhatsAppWithPhotos({
+        photos,
+        message: link => (link ? `${text} ${tc('photosLink', { link })}` : text),
+        source: 'estimator',
+        brand,
+        year,
+      });
+    } finally {
+      setSendingPhotos(false);
+    }
+  };
 
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
@@ -414,11 +433,12 @@ export default function PricingEstimatorPage() {
 
               {/* WhatsApp CTA */}
               <button
-                className="mt-2 flex h-[60px] items-center justify-center border-2 border-olive bg-[#38452D15]"
-                onClick={() => openWhatsApp(year ? t('waMessageYear', { brand, year }) : t('waMessage', { brand }))}
+                className={`mt-2 flex h-[60px] items-center justify-center border-2 border-olive bg-[#38452D15] ${sendingPhotos ? 'opacity-60' : ''}`}
+                onClick={handleWhatsApp}
+                disabled={sendingPhotos}
               >
                 <span className="font-clash font-medium text-[13px] uppercase tracking-[1px] text-olive">
-                  {t('whatsapp')}
+                  {sendingPhotos ? tc('sendingPhotos') : t('whatsapp')}
                 </span>
               </button>
 

@@ -487,6 +487,30 @@ export async function identifyBagPhotos(
   return data as BagIdentification;
 }
 
+// ─── Seller photo submissions ─────────────────────────────────────────────────
+
+/** Uploads a would-be seller's photos; returns the code for their share link (/sell/r/<code>). */
+export async function createSellerSubmission(
+  photos: Blob[],
+  meta: { source: 'sell' | 'estimator'; brand?: string; year?: string },
+): Promise<string> {
+  const formData = new FormData();
+  photos.forEach((photo, i) => formData.append('photos', photo, `photo-${i + 1}.jpg`));
+  formData.append('source', meta.source);
+  if (meta.brand) formData.append('brand', meta.brand);
+  if (meta.year) formData.append('year', meta.year);
+  formData.append('language', siteLanguage());
+
+  const res = await fetch(`${BASE_URL}/api/seller-submissions`, {
+    method: 'POST',
+    headers: { 'X-Site-Language': siteLanguage() },
+    body: formData,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error ?? `Request failed: ${res.status}`);
+  return data.code as string;
+}
+
 export type BagCondition = 'like-new' | 'gently-used' | 'fair-worn';
 export type PickupMethod = 'dropoff' | 'own-driver' | 'third-party';
 

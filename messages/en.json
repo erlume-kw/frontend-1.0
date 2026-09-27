@@ -361,7 +361,7 @@
       },
       {
         "title": "Collection",
-        "body": "We collect your items before the drop opens. Collection costs between 3 and 5 KWD."
+        "body": "We collect your items before the drop opens."
       },
       {
         "title": "Authentication & Verification",
@@ -381,7 +381,7 @@
       },
       {
         "title": "Pricing",
-        "body": "Prices are set by our valuation method — brand tier, age, condition and comparable sold prices — rather than negotiated per item."
+        "body": "Prices are set by our valuation method — brand tier, age, condition and prices of similar pieces — rather than negotiated per item."
       },
       {
         "title": "Payout",
@@ -413,7 +413,7 @@
         "title": "We collect",
         "items": [
           "Name, email, phone and address",
-          "Account details — username and password",
+          "Account details — email and password",
           "Order history, wishlist and reviews",
           "For sellers, payout and bank details",
           "Technical data — IP address, device type, operating system and browser analytics",
@@ -919,7 +919,7 @@
     "listingPrice": "Estimated Listing Price",
     "commission": "Erlume Commission",
     "youEarn": "You Earn",
-    "belowMin": "Based on these details, this item may be below our minimum listing threshold. Message us directly on WhatsApp and we'll take a closer look.",
+    "belowMin": "Based on these details, this item may not meet our listing requirements. Message us on WhatsApp and we'll take a closer look and explain the details.",
     "whatsapp": "START CHAT ON WHATSAPP",
     "another": "CALCULATE ANOTHER",
     "waMessage": "Hi! I'm interested in selling my {brand} bag.",

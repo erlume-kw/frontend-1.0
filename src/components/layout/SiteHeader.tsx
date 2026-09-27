@@ -73,7 +73,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
 
   if (isDesktop) {
     return (
-      <div className="sticky top-0 z-50 h-[98px] bg-white">
+      <div className="site-header sticky top-0 z-50 h-[98px] bg-white">
         <MaxWidthContainer>
           <div className="flex h-[98px] w-full flex-row items-center justify-between gap-10 px-16">
             {/* Left: Logo */}
@@ -124,7 +124,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
   }
 
   return (
-    <div className="sticky top-0 z-50 flex h-[76px] flex-row items-center justify-between bg-white px-4">
+    <div className="site-header sticky top-0 z-50 flex h-[76px] flex-row items-center justify-between bg-white px-4">
       <button onClick={onMenuPress} className="flex w-[30px] flex-col justify-center gap-[5px] py-2">
         <span className="block h-[2px] w-6 bg-primary" />
         <span className="block h-[2px] w-[18px] bg-primary" />

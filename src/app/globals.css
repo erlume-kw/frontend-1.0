@@ -65,3 +65,7 @@ html[lang='ar'] {
 html[lang='ar'] * {
   letter-spacing: normal !important;
 }
+/* Readex Pro reads heavier than Clash Display at the same weight, so the header links are lighter in Arabic */
+html[lang='ar'] .site-header span {
+  font-weight: 300;
+}

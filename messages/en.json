@@ -711,7 +711,7 @@
       "medium": "Medium",
       "large": "Large"
     },
-    "metaDescription": "Buy {name} for {price} at erlume — pre-loved luxury and vintage, Kuwait."
+    "metaDescription": "Buy {name} at erlume — pre-loved luxury and vintage, Kuwait."
   },
   "Checkout": {
     "loadAccountError": "Unable to load your account. Please refresh the page.",

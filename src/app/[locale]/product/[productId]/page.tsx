@@ -34,8 +34,7 @@ export async function generateMetadata({
 
   const t = await getTranslations({ locale, namespace: 'Product' });
   const name = `${item.brandName} ${item.itemModel ?? item.itemName}`;
-  const price = locale === 'ar' ? `${item.listingPrice} د.ك` : `KWD ${item.listingPrice}`;
-  const description = t('metaDescription', { name, price });
+  const description = t('metaDescription', { name });
   const image = item.imageUrls?.[0];
   const path = `/product/${productId}`;
 

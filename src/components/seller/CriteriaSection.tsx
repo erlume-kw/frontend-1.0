@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useIsDesktop } from '@/lib/useIsDesktop';
+import { isolateLtr } from '@/lib/bidi';
 
 // An item is either a plain bullet string, or a titled bullet (bold lead-in +
 // body) — the latter lets card-style content render in this same list layout.
@@ -32,7 +33,7 @@ export default function CriteriaSection({ title, subtitle, items }: CriteriaSect
             <span className="mt-[6px] block h-2 w-2 shrink-0 bg-secondary" />
             {typeof item === 'string' ? (
               <span className={`flex-1 font-dm leading-6 text-olive ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
-                {item}
+                {isolateLtr(item)}
               </span>
             ) : (
               <span className="flex flex-1 flex-col gap-1">
@@ -40,7 +41,7 @@ export default function CriteriaSection({ title, subtitle, items }: CriteriaSect
                   {item.title}
                 </span>
                 <span className={`font-dm leading-6 text-olive ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>
-                  {item.body}
+                  {isolateLtr(item.body)}
                 </span>
               </span>
             )}

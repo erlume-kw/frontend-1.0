@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Chevron, ARROW_LIGHT } from './Chevron';
 
 // A horizontally scrolling row (scrollbar hidden) with small arrow buttons on the edges
@@ -15,6 +16,7 @@ export default function ScrollRow({
   /** Distance of the arrows from the top of the row — aim it at the middle of the images. */
   arrowTop?: number;
 }) {
+  const tc = useTranslations('Common');
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -22,8 +24,14 @@ export default function ScrollRow({
   const update = useCallback(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 2);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
+    // In a right-to-left row the scroll starts at the right edge and scrollLeft goes negative,
+    // so measure the distance from the start edge and map it to the physical left/right arrows.
+    const rtl = getComputedStyle(el).direction === 'rtl';
+    const fromStart = rtl ? -el.scrollLeft : el.scrollLeft;
+    const moreAtStart = fromStart > 2;
+    const moreAtEnd = fromStart + el.clientWidth < el.scrollWidth - 2;
+    setCanScrollLeft(rtl ? moreAtEnd : moreAtStart);
+    setCanScrollRight(rtl ? moreAtStart : moreAtEnd);
   }, []);
 
   useEffect(() => {
@@ -57,7 +65,7 @@ export default function ScrollRow({
       {canScrollLeft && (
         <button
           type="button"
-          aria-label="Scroll left"
+          aria-label={tc('scrollLeft')}
           className={`${arrowClass} left-1`}
           style={{ top: arrowTop }}
           onClick={() => scrollByPage(-1)}
@@ -68,7 +76,7 @@ export default function ScrollRow({
       {canScrollRight && (
         <button
           type="button"
-          aria-label="Scroll right"
+          aria-label={tc('scrollRight')}
           className={`${arrowClass} right-1`}
           style={{ top: arrowTop }}
           onClick={() => scrollByPage(1)}

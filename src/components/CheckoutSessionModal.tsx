@@ -1,5 +1,7 @@
 'use client';
 
+import { useNumerals } from '@/lib/useNumerals';
+import { useTranslations } from 'next-intl';
 import React from 'react';
 
 interface CheckoutSessionModalProps {
@@ -17,18 +19,21 @@ export default function CheckoutSessionModal({
   onExtend,
   onLeave,
 }: CheckoutSessionModalProps) {
+  const t = useTranslations('CheckoutSession');
+  const num = useNumerals();
   if (!visible) return null;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50">
       <div className="flex w-[85%] max-w-[400px] flex-col gap-4 border border-border bg-white p-6">
         <span className="font-clash font-medium text-[18px] uppercase tracking-[1px] text-primary">
-          Still There?
+          {t('title')}
         </span>
         <span className="font-dm text-[14px] leading-[22px] text-muted">
-          Your checkout session expires in{' '}
-          <span className="font-medium text-primary">{secondsLeft}s</span>. Confirm to
-          keep your reservation, or leave to release the item.
+          {t.rich('body', {
+            seconds: num(secondsLeft),
+            n: chunks => <span className="font-medium text-primary">{chunks}</span>,
+          })}
         </span>
 
         <div className="mt-2 flex flex-row gap-3">
@@ -38,7 +43,7 @@ export default function CheckoutSessionModal({
             disabled={extending}
           >
             <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-primary">
-              LEAVE CHECKOUT
+              {t('leave')}
             </span>
           </button>
           <button
@@ -47,7 +52,7 @@ export default function CheckoutSessionModal({
             disabled={extending}
           >
             <span className="font-clash font-medium text-[12px] uppercase tracking-[1px] text-white">
-              {extending ? 'EXTENDING…' : "I'M STILL HERE"}
+              {extending ? t('extending') : t('stillHere')}
             </span>
           </button>
         </div>

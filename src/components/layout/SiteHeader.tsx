@@ -1,11 +1,14 @@
 'use client';
 
+import { useNumerals } from '@/lib/useNumerals';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from '@/i18n/navigation';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import MaxWidthContainer from './MaxWidthContainer';
+import LanguageSwitcher from './LanguageSwitcher';
 import HeartIcon from '../ui/HeartIcon';
 import { getAccessToken } from '@/services/api';
 
@@ -43,6 +46,8 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
   const isDesktop = useIsDesktop();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations('Header');
+  const num = useNumerals();
   const { count: wishlistCount } = useWishlist();
   const { count: cartCount } = useCart();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -80,36 +85,37 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             <div className="flex flex-1 items-center justify-center">
               <nav className="flex flex-row items-center gap-12">
                 <button onClick={() => go('/new')}>
-                  <span className="font-clash text-[16px] text-olive">new</span>
+                  <span className="font-clash text-[16px] text-olive">{t('new')}</span>
                 </button>
                 <button onClick={() => go('/drops')}>
-                  <span className="font-clash text-[16px] text-olive">drops</span>
+                  <span className="font-clash text-[16px] text-olive">{t('drops')}</span>
                 </button>
                 <button onClick={() => go('/sell')}>
-                  <span className="font-clash text-[16px] text-olive">sell</span>
+                  <span className="font-clash text-[16px] text-olive">{t('sell')}</span>
                 </button>
               </nav>
             </div>
 
             {/* Right: Wishlist, Cart, Profile/Sign-in */}
-            <div className="flex w-[280px] flex-row items-center justify-end gap-8">
+            <div className="flex min-w-[280px] shrink-0 flex-row items-center justify-end gap-8 whitespace-nowrap">
               <button onClick={() => go('/wishlist')}>
                 <span className="font-clash text-[16px] text-olive">
-                  wishlist{wishlistCount > 0 ? ` (${wishlistCount})` : ''}
+                  {t('wishlist')}{wishlistCount > 0 ? ` (${num(wishlistCount)})` : ''}
                 </span>
               </button>
               <button onClick={() => go('/cart')}>
-                <span className="font-clash text-[16px] text-olive">cart ({cartCount})</span>
+                <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
               </button>
               {isLoggedIn ? (
                 <button onClick={() => go('/profile')}>
-                  <span className="font-clash text-[16px] text-olive">profile</span>
+                  <span className="font-clash text-[16px] text-olive">{t('profile')}</span>
                 </button>
               ) : (
                 <button onClick={() => go('/sign-in')}>
-                  <span className="font-clash text-[16px] text-olive">sign in</span>
+                  <span className="font-clash text-[16px] text-olive">{t('signIn')}</span>
                 </button>
               )}
+              <LanguageSwitcher />
             </div>
           </div>
         </MaxWidthContainer>
@@ -133,20 +139,20 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
         <button onClick={() => go('/wishlist')} className="relative p-1">
           <HeartIcon size={22} color="#18230F" />
           {wishlistCount > 0 && (
-            <span className="absolute -right-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
-              <span className="font-dm font-medium text-[9px] leading-3 text-white">{wishlistCount}</span>
+            <span className="absolute -end-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
+              <span className="font-dm font-medium text-[9px] leading-3 text-white">{num(wishlistCount)}</span>
             </span>
           )}
         </button>
         <button
           onClick={() => go('/cart')}
           className="relative p-1"
-          aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+          aria-label={cartCount > 0 ? t('cartAriaWithCount', { count: num(cartCount) }) : t('cartAria')}
         >
           <ShoppingBagIcon />
           {cartCount > 0 && (
-            <span className="absolute -right-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
-              <span className="font-dm font-medium text-[9px] leading-3 text-white">{cartCount}</span>
+            <span className="absolute -end-[2px] -top-[2px] flex h-4 min-w-[16px] items-center justify-center rounded-full bg-secondary px-[3px]">
+              <span className="font-dm font-medium text-[9px] leading-3 text-white">{num(cartCount)}</span>
             </span>
           )}
         </button>

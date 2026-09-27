@@ -1,29 +1,11 @@
-import type { Metadata } from 'next';
-import { clashDisplay, dmSans, sarina } from './fonts';
-import Providers from './providers';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'erlume',
-  description: 'Buy & Sell Luxury Secondhand',
-  icons: {
-    // Theme-aware favicon: coral on light-mode devices, beige on dark-mode ones.
-    // Browsers pick by the media query on each <link>; the last entry (coral)
-    // also serves as the fallback for browsers that ignore prefers-color-scheme.
-    icon: [
-      { url: '/images/erlume-icon-beige.svg', media: '(prefers-color-scheme: dark)', type: 'image/svg+xml' },
-      { url: '/images/erlume-icon-coral.svg', media: '(prefers-color-scheme: light)', type: 'image/svg+xml' },
-      { url: '/images/erlume-icon-coral.svg', type: 'image/svg+xml' },
-    ],
-  },
-};
-
+// The true root layout — required by Next.js for every route to have one, but kept a pure
+// passthrough on purpose: [locale]/layout.tsx is the ONLY place that renders <html>/<body>
+// for every normal page (it needs the actual locale to set lang/dir, which this file has no
+// way to know). Adding <html>/<body> here too would double them up on every route.
+//
+// The one route that sits outside [locale] entirely — app/not-found.tsx, the fallback for a
+// URL that doesn't match anything — has no other ancestor to provide a document shell, so it
+// renders its own <html>/<body>. Nothing else should ever need to.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en" className={`${clashDisplay.variable} ${dmSans.variable} ${sarina.variable}`}>
-      <body>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+  return children;
 }

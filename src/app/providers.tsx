@@ -15,6 +15,24 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     enforceCanonicalHost();
   }, []);
 
+  // TEMPORARY — compare the two Arabic font candidates: open any page with ?font=plex or
+  // ?font=readex (the choice is remembered). Remove once one font is picked.
+  useEffect(() => {
+    try {
+      const requested = new URLSearchParams(window.location.search).get('font');
+      if (requested === 'plex' || requested === 'readex') {
+        window.localStorage.setItem('erlume_ar_font', requested);
+      }
+      if (window.localStorage.getItem('erlume_ar_font') === 'plex') {
+        document.documentElement.dataset.arabicFont = 'plex';
+      } else {
+        delete document.documentElement.dataset.arabicFont;
+      }
+    } catch {
+      // storage unavailable — keep the default font
+    }
+  }, []);
+
   return (
     <ClientOnly>
       <AuthWatcher />

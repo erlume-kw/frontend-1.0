@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
 import { fetchGovernorateCities } from '@/services/api';
 import { KUWAIT_AREAS as STATIC_AREAS } from '@/lib/kuwait';
+import { PLACE_AR } from '@/lib/kuwaitArabic';
 
 // Shared source of truth for Kuwait governorates + their cities.
 // Fetched once from the backend enum endpoint and cached at module scope so the
@@ -31,6 +33,10 @@ async function load(): Promise<Areas> {
   return inflight;
 }
 
+// Arabic alphabetical order ignores the leading "ال" (so الجهراء sorts under ج, not ا)
+const arabicSortKey = (value: string) => (PLACE_AR[value] ?? value).replace(/^ال(?=\S)/, '');
+const byArabicName = (a: string, b: string) => arabicSortKey(a).localeCompare(arabicSortKey(b), 'ar');
+
 export function useKuwaitAreas() {
   const [areas, setAreas] = useState<Areas>(cache ?? STATIC_AREAS);
   const [loading, setLoading] = useState(!cache);
@@ -44,5 +50,20 @@ export function useKuwaitAreas() {
     return () => { cancelled = true; };
   }, []);
 
-  return { areas, governorates: Object.keys(areas), loading };
+  // Values stay in English (that is what is saved); only the label changes on Arabic pages,
+  // where the lists are also sorted alphabetically in Arabic.
+  const locale = useLocale();
+  const isArabic = locale === 'ar';
+  const placeLabel = (value: string) => (isArabic ? PLACE_AR[value] ?? value : value);
+
+  const shown = useMemo(() => {
+    if (!isArabic) return areas;
+    return Object.fromEntries(Object.entries(areas).map(([gov, list]) => [gov, [...list].sort(byArabicName)]));
+  }, [areas, isArabic]);
+  const governorates = useMemo(() => {
+    const keys = Object.keys(areas);
+    return isArabic ? keys.sort(byArabicName) : keys;
+  }, [areas, isArabic]);
+
+  return { areas: shown, governorates, loading, placeLabel };
 }

@@ -163,7 +163,7 @@ function FaqList({ category, items, isDesktop }: { category: string; items: Poli
                 type="button"
                 onClick={() => toggle(i)}
                 aria-expanded={isOpen}
-                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200 ease-out hover:bg-[#ECEAE6]"
+                className="flex w-full items-center justify-between gap-4 px-5 py-4 text-start transition-colors duration-200 ease-out hover:bg-[#ECEAE6]"
               >
                 <span className="font-clash font-semibold text-[16px] text-primary">{item.title}</span>
                 {/* + / − icon: the vertical bar collapses when open */}

@@ -953,7 +953,7 @@ export default function CheckoutPage() {
                       aria-checked={guestLanguage === code}
                       onClick={() => setGuestLanguage(code)}
                       className={`py-1 font-dm text-[14px] outline-none ${
-                        guestLanguage === code ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                        guestLanguage === code ? 'font-medium text-secondary' : 'text-muted'
                       }`}
                     >
                       {code === 'en' ? 'English' : 'العربية'}

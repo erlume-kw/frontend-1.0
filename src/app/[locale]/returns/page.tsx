@@ -26,7 +26,7 @@ export default function ReturnsPage() {
       <MaxWidthContainer>
         {/* Hero */}
         <div className={`flex flex-col gap-2 pb-8 pt-10 ${isDesktop ? 'px-16' : 'px-4'}`}>
-          <h1 className={`font-clash font-medium leading-10 text-primary ${isDesktop ? 'text-[56px]' : 'text-[36px]'}`}>
+          <h1 className={`font-clash font-medium leading-[1.25] text-primary ${isDesktop ? 'text-[56px]' : 'text-[36px]'}`}>
             {t('title')}
           </h1>
           <span className="font-dm text-[13px] text-muted">{tc('lastUpdated', { date: tc('updatedDate') })}</span>

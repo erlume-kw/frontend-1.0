@@ -8,6 +8,7 @@ import SiteHeader from '@/components/layout/SiteHeader';
 import PageLayout from '@/components/layout/PageLayout';
 import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
+import ErrorModal from '@/components/ErrorModal';
 import LogoutConfirmModal from '@/components/LogoutConfirmModal';
 import VerifyEmailModal from '@/components/VerifyEmailModal';
 import SelectField from '@/components/ui/SelectField';
@@ -531,7 +532,7 @@ export default function ProfilePage() {
                             disabled={langSaving}
                             onClick={() => handleChangeLanguage(code)}
                             className={`py-1 font-dm text-[14px] outline-none ${
-                              active ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                              active ? 'font-medium text-secondary' : 'text-muted'
                             } ${langSaving ? 'opacity-60' : ''}`}
                           >
                             {code === 'en' ? 'English' : 'العربية'}
@@ -540,7 +541,6 @@ export default function ProfilePage() {
                       );
                     })}
                   </div>
-                  {langSaved && <span className="font-dm text-[13px] text-olive">{t('commLanguageSaved')}</span>}
                   {!!langError && <span className="font-dm text-[13px] text-error">{langError}</span>}
                 </div>
               </div>
@@ -730,6 +730,14 @@ export default function ProfilePage() {
           </div>
         )}
       </MaxWidthContainer>
+
+      <ErrorModal
+        visible={langSaved}
+        title={t('commLanguage')}
+        message={t('commLanguageSaved')}
+        onClose={() => setLangSaved(false)}
+        compact
+      />
 
       <LogoutConfirmModal
         visible={showLogoutConfirm}

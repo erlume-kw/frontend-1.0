@@ -678,7 +678,7 @@ export default function SignInRegisterPage() {
                           disabled={loading}
                           onClick={() => setRegLanguage(code)}
                           className={`py-1 font-dm text-[14px] outline-none ${
-                            regLanguage === code ? 'font-medium text-secondary underline underline-offset-[6px]' : 'text-muted'
+                            regLanguage === code ? 'font-medium text-secondary' : 'text-muted'
                           } ${loading ? 'opacity-60' : ''}`}
                         >
                           {code === 'en' ? 'English' : 'العربية'}

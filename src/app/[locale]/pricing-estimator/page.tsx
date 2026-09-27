@@ -178,7 +178,7 @@ export default function PricingEstimatorPage() {
       <MaxWidthContainer>
         {/* Page Title */}
         <div className={`flex flex-col gap-3 pb-8 pt-10 ${isDesktop ? 'px-16' : 'px-8'}`}>
-          <h1 className={`font-clash font-medium leading-10 text-primary ${isDesktop ? 'text-[56px]' : 'text-[36px]'}`}>
+          <h1 className={`font-clash font-medium leading-[1.25] text-primary ${isDesktop ? 'text-[56px]' : 'text-[36px]'}`}>
             {t('title')}
           </h1>
           <p className={`font-dm leading-6 text-muted ${isDesktop ? 'text-[16px]' : 'text-[15px]'}`}>

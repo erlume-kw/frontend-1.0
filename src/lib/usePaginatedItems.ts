@@ -17,7 +17,13 @@ export function usePaginatedItems(
   fetchPage: (limit: number) => Promise<ItemsPage>,
   pageSize: number,
   deps: unknown[],
+  // When set, how many items were loaded is remembered for this tab session, so
+  // returning to the list (e.g. after opening a product) restores the shopper's
+  // progress instead of collapsing back to the first page.
+  persistKey?: string,
 ) {
+  const countKey = persistKey ? `paginated:${persistKey}:count` : null;
+
   const [items, setItems] = useState<Item[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -35,17 +41,28 @@ export function usePaginatedItems(
         setItems(fetched);
         setTotalCount(tc);
         loadedRef.current = Math.max(limit, fetched.length);
+        if (countKey) {
+          try { sessionStorage.setItem(countKey, String(loadedRef.current)); } catch { /* storage blocked */ }
+        }
       })
       .catch(e => console.error('usePaginatedItems fetch error:', e))
       .finally(() => {
         if (phase === 'initial') setLoading(false);
         if (phase === 'more') setLoadingMore(false);
       });
-  }, []);
+  }, [countKey]);
 
   useEffect(() => {
-    loadedRef.current = pageSize;
-    void load(pageSize, 'initial');
+    // Resume the previously loaded count for this list, if any (same tab session).
+    let limit = pageSize;
+    if (countKey) {
+      try {
+        const saved = Number(sessionStorage.getItem(countKey));
+        if (Number.isFinite(saved) && saved >= pageSize) limit = saved;
+      } catch { /* storage blocked */ }
+    }
+    loadedRef.current = limit;
+    void load(limit, 'initial');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 

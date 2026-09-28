@@ -1,7 +1,7 @@
 'use client';
 
 import { useMoney } from '@/lib/useMoney';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -55,7 +55,29 @@ export default function NewArrivalsPage() {
     fetchActiveDropItems,
     PAGE_SIZE,
     [],
+    'new',
   );
+
+  // Restore the scroll position once, after the list (restored to its previous
+  // length) has rendered — so returning from a product lands where you left off.
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (loading || scrollRestored.current) return;
+    scrollRestored.current = true;
+    try {
+      const y = sessionStorage.getItem('paginated:new:scroll');
+      if (y) {
+        sessionStorage.removeItem('paginated:new:scroll');
+        requestAnimationFrame(() => window.scrollTo(0, Number(y)));
+      }
+    } catch { /* storage blocked */ }
+  }, [loading]);
+
+  // Opening a product saves where the shopper was, so Back returns them there.
+  const openProduct = (id: string) => {
+    try { sessionStorage.setItem('paginated:new:scroll', String(window.scrollY)); } catch { /* storage blocked */ }
+    router.push(`/product/${id}`);
+  };
 
   // Re-fetch whenever the user navigates back to this tab, same as the drop
   // detail page, so the grid reflects the latest inventory.
@@ -114,7 +136,7 @@ export default function NewArrivalsPage() {
                       cardWidth={cardWidth}
                       isWishlisted={isInWishlist(item._id)}
                       onWishlistPress={() => toggleWishlist({ id: item._id, brand: item.brandName, sub: item.itemName, price: `${item.listingPrice} KWD`, imageUri: item.imageUrls?.[0] })}
-                      onPress={() => router.push(`/product/${item._id}`)}
+                      onPress={() => openProduct(item._id)}
                     />
                   ))}
             </div>

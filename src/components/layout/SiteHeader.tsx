@@ -96,16 +96,9 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
               </nav>
             </div>
 
-            {/* Right: Wishlist, Cart, Profile/Sign-in */}
+            {/* Right: language globe, Sign-in/Profile, Wishlist, Cart */}
             <div className="flex min-w-[280px] shrink-0 flex-row items-center justify-end gap-8 whitespace-nowrap">
-              <button onClick={() => go('/wishlist')}>
-                <span className="font-clash text-[16px] text-olive">
-                  {t('wishlist')}{wishlistCount > 0 ? ` (${num(wishlistCount)})` : ''}
-                </span>
-              </button>
-              <button onClick={() => go('/cart')}>
-                <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
-              </button>
+              <LanguageSwitcher variant="globe" />
               {isLoggedIn ? (
                 <button onClick={() => go('/profile')}>
                   <span className="font-clash text-[16px] text-olive">{t('profile')}</span>
@@ -115,7 +108,14 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
                   <span className="font-clash text-[16px] text-olive">{t('signIn')}</span>
                 </button>
               )}
-              <LanguageSwitcher />
+              <button onClick={() => go('/wishlist')}>
+                <span className="font-clash text-[16px] text-olive">
+                  {t('wishlist')}{wishlistCount > 0 ? ` (${num(wishlistCount)})` : ''}
+                </span>
+              </button>
+              <button onClick={() => go('/cart')}>
+                <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
+              </button>
             </div>
           </div>
         </MaxWidthContainer>

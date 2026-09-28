@@ -4,7 +4,7 @@ import { useNumerals } from '@/lib/useNumerals';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from '@/i18n/navigation';
-import { useIsDesktop } from '@/lib/useIsDesktop';
+import { useMinWidth } from '@/lib/useMinWidth';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import MaxWidthContainer from './MaxWidthContainer';
@@ -43,7 +43,10 @@ function ShoppingBagIcon({ size = 22, color = '#18230F' }: { size?: number; colo
 }
 
 export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps) {
-  const isDesktop = useIsDesktop();
+  // The header needs more room than the app-wide 768px cutoff to lay out the full
+  // nav without cramping, so it uses its own 1024px breakpoint: below that, the
+  // clean hamburger header (its menu holds every link) shows on tablets too.
+  const isDesktop = useMinWidth(1024);
   const router = useRouter();
   const pathname = usePathname();
   const t = useTranslations('Header');

@@ -41,10 +41,15 @@ export default function LanguageSwitcher({
         className="flex items-center gap-[7px]"
       >
         <GlobeIcon size={16} color="#38452D" />
-        {/* Latin code ("EN"/"AR"). Turn off the Arabic page's font-size-adjust
-            (tuned for Arabic glyphs) so the Latin renders at its true 16px. */}
-        <span className="font-clash text-[16px] text-olive" style={{ fontSizeAdjust: 'none' }}>
-          {/* Lowercase to match the header's lowercase tabs (new, drops, sell…). */}
+        {/* Latin code, matched to each language's header:
+            - English tabs are lowercase → lowercase "ar" at 16px.
+            - Arabic script is tall; lowercase Latin looks tiny beside it, so use
+              uppercase "EN" at 17px to sit level. font-size-adjust off so the
+              Arabic page's Arabic-tuned adjust doesn't shrink the Latin. */}
+        <span
+          className="font-clash text-olive"
+          style={{ fontSizeAdjust: 'none', fontSize: locale === 'ar' ? '17px' : '16px' }}
+        >
           {CODE[next].toLowerCase()}
         </span>
       </button>

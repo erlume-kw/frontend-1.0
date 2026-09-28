@@ -6,22 +6,34 @@ import DropPageClient from './DropPageClient';
 // Server-side only — mirrors the client page's own fetch for the interactive UI. The drop's
 // real identity is the ?dropId= query param (the path segment is just the drop's name, kept
 // for a readable URL — see SiteFooter.dropHref / drops/page.tsx), so metadata needs it too.
-async function fetchDropForMetadata(dropId: string) {
-  try {
-    const res = await fetch(`${API_URL}/api/drops/${dropId}`, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.data as {
-      name: string;
-      nameAr?: string;
-      description: string;
-      descriptionAr?: string;
-      status: 'upcoming' | 'active' | 'ended' | 'hidden';
-      bannerImageUrl?: string;
-    } | null;
-  } catch {
-    return null;
+type DropMeta = {
+  name: string;
+  nameAr?: string;
+  description: string;
+  descriptionAr?: string;
+  status: 'upcoming' | 'active' | 'ended' | 'hidden';
+  bannerImageUrl?: string;
+};
+
+// Resilient like the product metadata fetch: the backend may be waking (Render
+// cold start) when a crawler hits this, so retry once fresh before giving up.
+// No branded fallback here — a failed load must read as blank, same as a hidden
+// drop, so the preview never leaks a drop the site deliberately hides.
+async function fetchDropForMetadata(dropId: string): Promise<DropMeta | null> {
+  const url = `${API_URL}/api/drops/${dropId}`;
+  const attempts: RequestInit[] = [{ next: { revalidate: 3600 } } as RequestInit, { cache: 'no-store' }];
+  for (const opts of attempts) {
+    try {
+      const res = await fetch(url, { ...opts, signal: AbortSignal.timeout(9000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.data) return data.data as DropMeta;
+      }
+    } catch {
+      // try the next attempt
+    }
   }
+  return null;
 }
 
 export async function generateMetadata({

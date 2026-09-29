@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { API_URL, SITE_URL } from '@/lib/config';
-import { capPreviewImage } from '@/lib/ogImage';
 import DropPageClient from './DropPageClient';
 
 // Server-side only — mirrors the client page's own fetch for the interactive UI. The drop's
@@ -69,7 +68,7 @@ export async function generateMetadata({
     openGraph: {
       title: name,
       description,
-      images: drop.bannerImageUrl ? [{ url: capPreviewImage(drop.bannerImageUrl), alt: name }] : undefined,
+      images: drop.bannerImageUrl ? [{ url: drop.bannerImageUrl, alt: name }] : undefined,
     },
   };
 }

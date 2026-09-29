@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { API_URL, SITE_URL } from '@/lib/config';
-import { capPreviewImage } from '@/lib/ogImage';
 import ProductPageClient from './ProductPageClient';
 
 type ItemMeta = {
@@ -58,11 +57,8 @@ export async function generateMetadata({
   const description = t('metaDescription', { name });
   // The item's own photo when there is one, otherwise inherit the branded default
   // (opengraph-image.tsx) — never the raw wordmark PNG, which is the wrong shape
-  // for a link preview (300x65, far from the ~1.91:1 platforms expect). Capped to a
-  // reasonable size — an original upload can be 2MB+, which WhatsApp's iOS crawler
-  // simply refuses to fetch (desktop is more lenient, which is why it worked there
-  // but not on iPhone).
-  const itemImage = item.imageUrls?.[0] ? capPreviewImage(item.imageUrls[0]) : undefined;
+  // for a link preview (300x65, far from the ~1.91:1 platforms expect).
+  const itemImage = item.imageUrls?.[0];
 
   return {
     title: name,

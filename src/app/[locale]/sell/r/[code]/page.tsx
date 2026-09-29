@@ -39,7 +39,7 @@ export async function generateMetadata({
     openGraph: {
       title: t('metaTitle'),
       description: t('metaDescription'),
-      images: photos ? [{ url: previewImage(photos[0]) }] : undefined,
+      images: photos ? [{ url: previewImage(photos[0]), alt: t('metaTitle') }] : undefined,
     },
   };
 }

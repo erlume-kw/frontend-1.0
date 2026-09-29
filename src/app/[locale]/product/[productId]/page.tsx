@@ -3,10 +3,6 @@ import { getTranslations } from 'next-intl/server';
 import { API_URL, SITE_URL } from '@/lib/config';
 import ProductPageClient from './ProductPageClient';
 
-// Branded fallback shown in the link preview when the item itself can't be
-// loaded — so a shared product link never renders with a blank/no image.
-const FALLBACK_OG_IMAGE = `${SITE_URL}/images/erlume-logo-green.png`;
-
 type ItemMeta = {
   itemName: string;
   itemModel?: string;
@@ -50,17 +46,19 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: 'Product' });
   const path = `/product/${productId}`;
 
-  // Backend unreachable: still return a branded preview (never a bare link).
+  // Backend unreachable: fall back to the site-wide branded preview image
+  // (opengraph-image.tsx) rather than a bare/broken link — just leave openGraph.images
+  // unset so it inherits that default instead of duplicating it here.
   if (!item) {
-    return {
-      openGraph: { title: 'erlume', images: [{ url: FALLBACK_OG_IMAGE }] },
-    };
+    return { openGraph: { title: 'erlume' } };
   }
 
   const name = `${item.brandName} ${item.itemModel ?? item.itemName}`;
   const description = t('metaDescription', { name });
-  // Always ship an image: the item photo, or the branded fallback.
-  const image = item.imageUrls?.[0] ?? FALLBACK_OG_IMAGE;
+  // The item's own photo when there is one, otherwise inherit the branded default
+  // (opengraph-image.tsx) — never the raw wordmark PNG, which is the wrong shape
+  // for a link preview (300x65, far from the ~1.91:1 platforms expect).
+  const itemImage = item.imageUrls?.[0];
 
   return {
     title: name,
@@ -71,7 +69,7 @@ export async function generateMetadata({
     openGraph: {
       title: name,
       description,
-      images: [{ url: image }],
+      images: itemImage ? [{ url: itemImage, alt: name }] : undefined,
     },
   };
 }

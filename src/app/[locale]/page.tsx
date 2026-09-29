@@ -2,7 +2,7 @@
 
 import { useNumerals } from '@/lib/useNumerals';
 import { useLocale, useTranslations } from 'next-intl';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -192,6 +192,31 @@ export default function HomePage() {
     })();
   }, []);
 
+  // Restore the scroll position once, after the page's content has rendered — so
+  // coming back from a product (via the app's back nav) lands where the shopper
+  // left off instead of resetting to the top.
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (loading || scrollRestored.current) return;
+    scrollRestored.current = true;
+    try {
+      const y = sessionStorage.getItem('scroll:home');
+      if (y) {
+        sessionStorage.removeItem('scroll:home');
+        // Called directly (not via requestAnimationFrame) — the items are already in
+        // this same render, so layout is ready, and rAF never fires for a tab that's
+        // restored while backgrounded/hidden, which would silently drop the restore.
+        window.scrollTo(0, Number(y));
+      }
+    } catch { /* storage blocked */ }
+  }, [loading]);
+
+  // Opening a product saves where the shopper was, so Back returns them there.
+  const openProduct = (id: string) => {
+    try { sessionStorage.setItem('scroll:home', String(window.scrollY)); } catch { /* storage blocked */ }
+    router.push(`/product/${id}`);
+  };
+
   const handleBannerCta = (url: string) => {
     if (!url) return;
     if (/^https?:\/\//i.test(url)) {
@@ -282,7 +307,7 @@ export default function HomePage() {
                             imageUri: item.imageUrls?.[0],
                           })
                   }
-                  onPress={() => router.push(`/product/${item._id}`)}
+                  onPress={() => openProduct(item._id)}
                 />
               </div>
             ))}
@@ -298,7 +323,7 @@ export default function HomePage() {
                 imageUri={item.imageUrls?.[0]}
                 cardWidth={cardW}
                 sold={item.itemStatus === 'sold'}
-                onPress={() => router.push(`/product/${item._id}`)}
+                onPress={() => openProduct(item._id)}
               />
             ))}
           </div>

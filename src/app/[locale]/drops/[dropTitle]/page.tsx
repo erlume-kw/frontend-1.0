@@ -68,7 +68,7 @@ export async function generateMetadata({
     openGraph: {
       title: name,
       description,
-      images: drop.bannerImageUrl ? [{ url: drop.bannerImageUrl }] : undefined,
+      images: drop.bannerImageUrl ? [{ url: drop.bannerImageUrl, alt: name }] : undefined,
     },
   };
 }

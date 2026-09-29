@@ -69,17 +69,27 @@ export default function DropPageClient() {
     if (!dropId) { setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
-    loadedRef.current = PAGE_SIZE;
+
+    // Resume however many items were already loaded for this drop (same tab
+    // session), so returning from a product doesn't collapse progress back
+    // to the first page.
+    let initialLimit = PAGE_SIZE;
+    try {
+      const saved = Number(sessionStorage.getItem(`paginated:drop:${dropId}:count`));
+      if (Number.isFinite(saved) && saved >= PAGE_SIZE) initialLimit = saved;
+    } catch { /* storage blocked */ }
+    loadedRef.current = initialLimit;
 
     fetchDropById(dropId)
       .then(async (d) => {
         if (cancelled) return;
         setDrop(d);
-        const { items: fetched, totalCount: tc } = await fetchDropItemsPage(dropId, statusFilterFor(d), PAGE_SIZE);
+        const { items: fetched, totalCount: tc } = await fetchDropItemsPage(dropId, statusFilterFor(d), initialLimit);
         if (cancelled) return;
         setItems(fetched);
         setTotalCount(tc);
-        loadedRef.current = Math.max(PAGE_SIZE, fetched.length);
+        loadedRef.current = Math.max(initialLimit, fetched.length);
+        try { sessionStorage.setItem(`paginated:drop:${dropId}:count`, String(loadedRef.current)); } catch { /* storage blocked */ }
       })
       .catch(e => console.error('DropDetailPage fetch error:', e))
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -96,6 +106,7 @@ export default function DropPageClient() {
         setItems(fetched);
         setTotalCount(tc);
         loadedRef.current = Math.max(nextLimit, fetched.length);
+        try { sessionStorage.setItem(`paginated:drop:${dropId}:count`, String(loadedRef.current)); } catch { /* storage blocked */ }
       })
       .catch(e => console.error('DropDetailPage loadMore error:', e))
       .finally(() => setLoadingMore(false));
@@ -121,6 +132,31 @@ export default function DropPageClient() {
 
   const cardWidth = useCardWidth(isDesktop, width);
   const { toggleWishlist, isInWishlist } = useWishlist();
+
+  // Restore the scroll position once, after the list (restored to its previous
+  // length) has rendered — so returning from a product lands where you left off.
+  const scrollRestored = useRef(false);
+  useEffect(() => {
+    if (loading || scrollRestored.current || !dropId) return;
+    scrollRestored.current = true;
+    try {
+      const key = `paginated:drop:${dropId}:scroll`;
+      const y = sessionStorage.getItem(key);
+      if (y) {
+        sessionStorage.removeItem(key);
+        // Called directly (not via requestAnimationFrame) — the items are already in
+        // this same render, so layout is ready, and rAF never fires for a tab that's
+        // restored while backgrounded/hidden, which would silently drop the restore.
+        window.scrollTo(0, Number(y));
+      }
+    } catch { /* storage blocked */ }
+  }, [loading, dropId]);
+
+  // Opening a product saves where the shopper was, so Back returns them there.
+  const openProduct = (id: string) => {
+    try { sessionStorage.setItem(`paginated:drop:${dropId}:scroll`, String(window.scrollY)); } catch { /* storage blocked */ }
+    router.push(`/product/${id}`);
+  };
 
   // Only active and upcoming drops are public. Hidden/ended drops (and anything that
   // failed to load, e.g. a stale/bad link) read as a plain "not found" — no name, no
@@ -198,7 +234,7 @@ export default function DropPageClient() {
                                   imageUri: item.imageUrls?.[0],
                                 })
                         }
-                        onPress={isUpcoming ? undefined : () => router.push(`/product/${item._id}`)}
+                        onPress={isUpcoming ? undefined : () => openProduct(item._id)}
                       />
                       );
                     })}

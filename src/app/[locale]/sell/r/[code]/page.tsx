@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { API_URL } from '@/lib/config';
+import { capPreviewImage } from '@/lib/ogImage';
 import SellerPhotosView from './SellerPhotosView';
 
 // The page behind the link in a seller's WhatsApp message (see lib/sellerPhotos.ts).
@@ -20,9 +21,6 @@ async function fetchSubmission(code: string): Promise<string[] | null> {
   }
 }
 
-// A smaller copy for the preview card — WhatsApp skips images that are too heavy
-const previewImage = (url: string) => url.replace('/upload/', '/upload/w_1200,h_1200,c_limit,q_auto/');
-
 export async function generateMetadata({
   params,
 }: {
@@ -39,7 +37,7 @@ export async function generateMetadata({
     openGraph: {
       title: t('metaTitle'),
       description: t('metaDescription'),
-      images: photos ? [{ url: previewImage(photos[0]), alt: t('metaTitle') }] : undefined,
+      images: photos ? [{ url: capPreviewImage(photos[0]), alt: t('metaTitle') }] : undefined,
     },
   };
 }

@@ -150,6 +150,9 @@ export default function CheckoutPage() {
   const sessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const extCountRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const cancelCheckoutRef = useRef<(targetUrl?: string) => void>(() => {});
+  // Set when payError is showing "session expired" specifically — dismissing that
+  // particular error should send the shopper home, unlike other payment errors.
+  const sessionExpiredRef = useRef(false);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [extSeconds, setExtSeconds] = useState(EXTENSION_S);
@@ -475,7 +478,13 @@ export default function CheckoutPage() {
       setIsExtending(false);
       const s = e?.status as number | undefined;
       if (s === 409 || s === 404 || (s !== undefined && s >= 500)) clearStoredOrder();
-      handleCancelCheckout();
+      // The hold usually already expired server-side by the time this fails — most often
+      // on mobile, where a backgrounded/locked tab throttles our own countdown timers so
+      // the shopper sees "Still here?" later than the real deadline. Explain why, instead
+      // of silently bouncing to the home page (which read as a random redirect/bug).
+      setShowSessionModal(false);
+      sessionExpiredRef.current = true;
+      setPayError(t('sessionExpired'));
     }
   };
 
@@ -1157,7 +1166,13 @@ export default function CheckoutPage() {
       <ErrorModal
         visible={!!payError}
         message={payError}
-        onClose={() => setPayError('')}
+        onClose={() => {
+          setPayError('');
+          if (sessionExpiredRef.current) {
+            sessionExpiredRef.current = false;
+            handleCancelCheckout();
+          }
+        }}
       />
       <ErrorModal
         visible={verifyPrompt}

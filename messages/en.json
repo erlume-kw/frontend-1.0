@@ -721,6 +721,7 @@
     "notSuccessful": "Payment was not successful.",
     "verificationFailed": "Payment verification failed.",
     "couldNotRestart": "Could not restart payment.",
+    "sessionExpired": "Your checkout session has expired and the item has been released. Please start again.",
     "errGovernorate": "Governorate is required",
     "errArea": "Area is required",
     "errBlock": "Block is required",

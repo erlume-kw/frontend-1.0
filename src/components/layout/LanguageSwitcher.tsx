@@ -3,10 +3,9 @@
 import React from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
-import GlobeIcon from '@/components/ui/GlobeIcon';
 
-// Compact two-letter codes for the header globe; the mobile menu still uses the
-// full language name via the "text" variant below.
+// Compact two-letter code for the desktop header; the mobile menu uses the full
+// language name via the "text" variant below.
 const CODE: Record<string, string> = { en: 'EN', ar: 'AR' };
 
 export default function LanguageSwitcher({
@@ -33,19 +32,10 @@ export default function LanguageSwitcher({
 
   if (variant === 'globe') {
     return (
-      <button
-        type="button"
-        onClick={switchLanguage}
-        aria-label={t('switchToLabel')}
-        lang={next}
-        className="flex items-center gap-[7px]"
-      >
-        <GlobeIcon size={16} color="#38452D" />
-        {/* Latin code, matched to each language's header:
-            - English tabs are lowercase → lowercase "ar" at 16px.
-            - Arabic script is tall; lowercase Latin looks tiny beside it, so use
-              uppercase "EN" at 17px to sit level. font-size-adjust off so the
-              Arabic page's Arabic-tuned adjust doesn't shrink the Latin. */}
+      <button type="button" onClick={switchLanguage} aria-label={t('switchToLabel')} lang={next} className="flex items-center">
+        {/* Just the lowercase code ("ar"/"en"). font-size-adjust off so the Arabic
+            page's Arabic-tuned adjust doesn't shrink the Latin; a touch larger on
+            Arabic so it sits level with the taller Arabic nav. */}
         <span
           className="font-clash text-olive"
           style={{ fontSizeAdjust: 'none', fontSize: locale === 'ar' ? '17px' : '16px' }}

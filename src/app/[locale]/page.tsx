@@ -2,7 +2,7 @@
 
 import { useNumerals } from '@/lib/useNumerals';
 import { useLocale, useTranslations } from 'next-intl';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -26,8 +26,18 @@ import {
   type Banner,
 } from '@/services/api';
 
-// Update to real drop date/time (UTC)
-const DROP_DATE = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 60 * 1000);
+/** The upcoming drop releasing soonest (release date still in the future), if any. */
+function nextUpcomingDrop(drops: Drop[]): Drop | null {
+  const now = Date.now();
+  return (
+    drops
+      .filter(d => {
+        const t = new Date(d.releaseDate).getTime();
+        return !Number.isNaN(t) && t > now;
+      })
+      .sort((a, b) => new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime())[0] ?? null
+  );
+}
 
 function getTimeRemaining(target: Date) {
   const diff = Math.max(0, target.getTime() - Date.now());
@@ -35,6 +45,7 @@ function getTimeRemaining(target: Date) {
     days: Math.floor(diff / (1000 * 60 * 60 * 24)),
     hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
     minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+    seconds: Math.floor((diff % (1000 * 60)) / 1000),
   };
 }
 
@@ -47,10 +58,10 @@ function useCountdown(target: Date) {
   return remaining;
 }
 
-function CountdownHero({ isDesktop }: { isDesktop: boolean }) {
+function CountdownHero({ isDesktop, target }: { isDesktop: boolean; target: Date }) {
   const t = useTranslations('Home');
   const num = useNumerals();
-  const { days, hours, minutes } = useCountdown(DROP_DATE);
+  const { days, hours, minutes, seconds } = useCountdown(target);
   const pad = (n: number) => num(String(n).padStart(2, '0'));
   const labelSize = isDesktop ? 60 : 20;
   const numSize = isDesktop ? 150 : 60;
@@ -74,6 +85,7 @@ function CountdownHero({ isDesktop }: { isDesktop: boolean }) {
         { num: pad(days), label: t('days') },
         { num: pad(hours), label: t('hours') },
         { num: pad(minutes), label: t('mins') },
+        { num: pad(seconds), label: t('secs') },
       ].map(({ num, label }) => (
         <div key={label} className="flex flex-row items-baseline">
           <span className="font-clash font-semibold text-black" style={{ fontSize: numSize, lineHeight }}>
@@ -155,6 +167,9 @@ export default function HomePage() {
   const router = useRouter();
   const [items, setItems] = useState<Item[]>([]);
   const [activeDrop, setActiveDrop] = useState<Drop | null>(null);
+  // Drives the "Next drop in" countdown — hidden when no upcoming drop is scheduled.
+  const [nextDrop, setNextDrop] = useState<Drop | null>(null);
+  const nextDropDate = useMemo(() => (nextDrop ? new Date(nextDrop.releaseDate) : null), [nextDrop]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -162,14 +177,19 @@ export default function HomePage() {
   useEffect(() => {
     (async () => {
       try {
-        const [drops, homeBanners] = await Promise.all([
+        const [drops, homeBanners, upcomingDrops] = await Promise.all([
           fetchDrops('active'),
           fetchBanners().catch(e => {
             console.error('HomePage banners fetch error:', e);
             return [] as Banner[];
           }),
+          fetchDrops('upcoming').catch(e => {
+            console.error('HomePage upcoming drops fetch error:', e);
+            return [] as Drop[];
+          }),
         ]);
         setBanners(homeBanners);
+        setNextDrop(nextUpcomingDrop(upcomingDrops));
         const drop = drops[0] ?? null;
         setActiveDrop(drop);
         if (drop) {
@@ -237,7 +257,7 @@ export default function HomePage() {
       header={<SiteHeader onMenuPress={() => setMenuOpen(true)} />}
     >
       {/* Countdown banner */}
-      <CountdownHero isDesktop={isDesktop} />
+      {nextDropDate && <CountdownHero isDesktop={isDesktop} target={nextDropDate} />}
 
       {/* Shop previous drops link */}
       <div className="flex flex-col items-center bg-white py-5">

@@ -654,6 +654,7 @@
     "days": " DAYS",
     "hours": " HOURS",
     "mins": " MINS",
+    "secs": " SECS",
     "previousDrops": "SHOP PREVIOUS DROPS HERE",
     "latestDrop": "Our Latest Drop",
     "shopAll": "Shop all"

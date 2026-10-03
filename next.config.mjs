@@ -22,7 +22,7 @@ const csp = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'self'",
-  "img-src 'self' data: blob: https://res.cloudinary.com https://*.airtable.com https://dl.airtableusercontent.com",
+  "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   `script-src 'self' 'unsafe-inline'${devEval} https://*.myfatoorah.com https://applepay.cdn-apple.com`,

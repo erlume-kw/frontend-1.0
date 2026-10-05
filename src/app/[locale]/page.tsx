@@ -63,10 +63,10 @@ function CountdownHero({ isDesktop, target }: { isDesktop: boolean; target: Date
   const num = useNumerals();
   const { days, hours, minutes, seconds } = useCountdown(target);
   const pad = (n: number) => num(String(n).padStart(2, '0'));
-  const labelSize = isDesktop ? 60 : 20;
-  const numSize = isDesktop ? 150 : 60;
-  const lineHeight = isDesktop ? '120px' : '56px';
-  const heroHeight = isDesktop ? 680 : 388;
+  const labelSize = isDesktop ? 42 : 16;
+  const numSize = isDesktop ? 140 : 56;
+  const lineHeight = isDesktop ? '112px' : '52px';
+  const heroHeight = isDesktop ? 640 : 348;
   // Spacing between "NEXT DROP IN" label and the first countdown row
   const labelSpacing = isDesktop ? 12 : 6;
 
@@ -88,10 +88,10 @@ function CountdownHero({ isDesktop, target }: { isDesktop: boolean; target: Date
         { num: pad(seconds), label: t('secs') },
       ].map(({ num, label }) => (
         <div key={label} className="flex flex-row items-baseline">
-          <span className="font-clash font-semibold text-black" style={{ fontSize: numSize, lineHeight }}>
+          <span className="font-clash font-semibold text-secondary" style={{ fontSize: numSize, lineHeight }}>
             {num}
           </span>
-          <span className="whitespace-pre font-clash font-medium text-black" style={{ fontSize: numSize, lineHeight }}>
+          <span className="whitespace-pre font-clash font-medium text-secondary/45" style={{ fontSize: numSize, lineHeight }}>
             {label}
           </span>
         </div>

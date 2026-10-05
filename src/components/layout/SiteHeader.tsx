@@ -78,29 +78,27 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
     return (
       <div className="site-header sticky top-0 z-50 h-[98px] bg-white">
         <MaxWidthContainer>
-          <div className="flex h-[98px] w-full flex-row items-center justify-between gap-10 px-16">
-            {/* Left: Logo */}
-            <button onClick={() => go('/')} className="flex w-[180px] justify-start">
+          <div className="relative flex h-[98px] w-full flex-row items-center justify-between px-16">
+            {/* Logo stays on the start side; it does not participate in centering the nav. */}
+            <button onClick={() => go('/')} className="relative z-10 flex shrink-0 justify-start">
               <ErlumeLogo height={32} />
             </button>
 
-            {/* Center: Navigation */}
-            <div className="flex flex-1 items-center justify-center">
-              <nav className="flex flex-row items-center gap-12">
-                <button onClick={() => go('/new')}>
-                  <span className="font-clash text-[16px] text-olive">{t('new')}</span>
-                </button>
-                <button onClick={() => go('/drops')}>
-                  <span className="font-clash text-[16px] text-olive">{t('drops')}</span>
-                </button>
-                <button onClick={() => go('/sell')}>
-                  <span className="font-clash text-[16px] text-olive">{t('sell')}</span>
-                </button>
-              </nav>
-            </div>
+            {/* Centered on the header itself, so label-length changes on either side cannot shift it. */}
+            <nav className="absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 flex-row items-center gap-12">
+              <button onClick={() => go('/new')}>
+                <span className="font-clash text-[16px] text-olive">{t('new')}</span>
+              </button>
+              <button onClick={() => go('/drops')}>
+                <span className="font-clash text-[16px] text-olive">{t('drops')}</span>
+              </button>
+              <button onClick={() => go('/sell')}>
+                <span className="font-clash text-[16px] text-olive">{t('sell')}</span>
+              </button>
+            </nav>
 
-            {/* Right: language globe, Sign-in/Profile, Wishlist, Cart */}
-            <div className="flex min-w-[280px] shrink-0 flex-row items-center justify-end gap-8 whitespace-nowrap">
+            {/* Language, account, wishlist, cart — end side, width can change with the locale. */}
+            <div className="relative z-10 flex shrink-0 flex-row items-center justify-end gap-8 whitespace-nowrap">
               <LanguageSwitcher variant="globe" />
               {isLoggedIn ? (
                 <button onClick={() => go('/profile')}>
@@ -128,17 +126,18 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
 
   return (
     <div className="site-header sticky top-0 z-50 flex h-[76px] flex-row items-center justify-between bg-white px-4">
-      <button onClick={onMenuPress} className="flex w-[30px] flex-col justify-center gap-[5px] py-2">
+      <button onClick={onMenuPress} className="relative z-10 flex w-[30px] flex-col justify-center gap-[5px] py-2">
         <span className="block h-[2px] w-6 bg-primary" />
         <span className="block h-[2px] w-[18px] bg-primary" />
         <span className="block h-[2px] w-6 bg-primary" />
       </button>
 
-      <button onClick={() => go('/')} className="flex flex-1 justify-center">
+      {/* Centered on the header, not in the gap between the menu and the icons. */}
+      <button onClick={() => go('/')} className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
         <ErlumeLogo height={28} />
       </button>
 
-      <div className="flex flex-row items-center gap-4">
+      <div className="relative z-10 flex flex-row items-center gap-4">
         <button onClick={() => go('/wishlist')} className="relative p-1">
           <HeartIcon size={22} color="#18230F" />
           {wishlistCount > 0 && (

@@ -66,9 +66,9 @@ function CountdownHero({ isDesktop, target }: { isDesktop: boolean; target: Date
   const labelSize = isDesktop ? 60 : 20;
   const numSize = isDesktop ? 150 : 60;
   const lineHeight = isDesktop ? '120px' : '56px';
-  const heroHeight = isDesktop ? 640 : 348;
+  const heroHeight = isDesktop ? 680 : 388;
   // Spacing between "NEXT DROP IN" label and the first countdown row
-  const labelSpacing = isDesktop ? 40 : 16;
+  const labelSpacing = isDesktop ? 12 : 6;
 
   return (
     <div

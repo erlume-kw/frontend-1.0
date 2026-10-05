@@ -45,17 +45,14 @@
 }
 
 /* ─── Arabic ─────────────────────────────────────────────────────────────────
-   Arabic pages use an Arabic-capable family for both the "clash" (display) and
-   "dm" (body) fonts, so every existing font-clash / font-dm class just works. */
+   Arabic pages use Montserrat Arabic (Alexandria) for both the "clash" (display)
+   and "dm" (body) fonts, so every existing font-clash / font-dm class just works. */
 html[lang='ar'] {
-  --font-arabic: var(--font-readex);
+  --font-arabic: var(--font-montserrat-ar);
   --font-clash: var(--font-arabic);
   --font-dm: var(--font-arabic);
 }
-html[lang='ar'][data-arabic-font='plex'] {
-  --font-arabic: var(--font-plex-ar);
-}
-/* The Arabic fonts have larger letters than DM Sans / Clash Display at the same size, so
+/* Montserrat Arabic has larger letters than DM Sans / Clash Display at the same size, so
    every Arabic page is scaled down to match. One number controls it: the x-height as a
    fraction of the font size (0.52 = no change; lower = smaller text). */
 html[lang='ar'] {
@@ -64,8 +61,4 @@ html[lang='ar'] {
 /* Letter-spacing breaks Arabic letters apart (they join), so it is switched off */
 html[lang='ar'] * {
   letter-spacing: normal !important;
-}
-/* Readex Pro reads heavier than Clash Display at the same weight, so the header links are lighter in Arabic */
-html[lang='ar'] .site-header span {
-  font-weight: 300;
 }

@@ -4,7 +4,7 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing, isRTL } from '@/i18n/routing';
 import { SITE_URL } from '@/lib/config';
-import { clashDisplay, dmSans, sarina, readexPro, plexArabic } from '../fonts';
+import { clashDisplay, dmSans, sarina, montserratArabic } from '../fonts';
 import Providers from '../providers';
 import '../globals.css';
 
@@ -73,7 +73,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={isRTL(locale) ? 'rtl' : 'ltr'}
-      className={`${clashDisplay.variable} ${dmSans.variable} ${sarina.variable} ${readexPro.variable} ${plexArabic.variable}`}
+      className={`${clashDisplay.variable} ${dmSans.variable} ${sarina.variable} ${montserratArabic.variable}`}
     >
       <body>
         <NextIntlClientProvider messages={messages}>

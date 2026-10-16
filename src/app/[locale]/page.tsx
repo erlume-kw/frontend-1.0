@@ -1,7 +1,7 @@
 'use client';
 
 import { useNumerals } from '@/lib/useNumerals';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -110,10 +110,7 @@ function HomeBanner({
   onCta: (url: string) => void;
 }) {
   const { bannerDescription, bannerCtaLabel } = useBannerText();
-  // "left" / "right" is where the text sits on the picture, so it is a physical side. On Arabic
-  // pages the layout is mirrored, so flip it to keep the text on the same side of the image.
-  const isRtl = useLocale() === 'ar';
-  const alignLeft = (banner.contentAlign === 'left') !== isRtl;
+  // Text follows the reading direction: left on English pages, right on Arabic (RTL) pages.
 
   return (
     <div
@@ -128,15 +125,11 @@ function HomeBanner({
         onError={e => { e.currentTarget.style.display = 'none'; }}
       />
       <div
-        className={`absolute inset-0 flex flex-col justify-end bg-black/50 p-8 ${
-          alignLeft ? 'items-start' : 'items-end'
-        }`}
+        className="absolute inset-0 flex flex-col items-start justify-end bg-black/50 p-8"
       >
         {!!bannerDescription(banner) && (
           <span
-            className={`mb-2 font-clash font-light text-white ${
-              alignLeft ? 'text-start' : 'text-end'
-            } ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
+            className={`mb-2 text-start font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
           >
             {bannerDescription(banner)}
           </span>
@@ -144,9 +137,7 @@ function HomeBanner({
         {banner.showCta && !!bannerCtaLabel(banner) && (
           <button type="button" onClick={() => onCta(banner.ctaUrl)}>
             <span
-              className={`font-clash text-white underline ${
-                alignLeft ? 'text-start' : 'text-end'
-              } ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
+              className={`text-start font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
             >
               {bannerCtaLabel(banner)}
             </span>

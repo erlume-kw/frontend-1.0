@@ -1,5 +1,7 @@
 'use client';
 
+import { SHOP_ENABLED } from '@/lib/config';
+import ShopClosedRedirect from '@/components/ShopClosedRedirect';
 import { useTranslations } from 'next-intl';
 import { useMoney } from '@/lib/useMoney';
 import { useNumerals } from '@/lib/useNumerals';
@@ -16,6 +18,10 @@ import { useCart } from '@/contexts/CartContext';
 // import { validateDiscountCode } from '@/services/api';
 
 export default function CartPage() {
+  return SHOP_ENABLED ? <CartPageInner /> : <ShopClosedRedirect />;
+}
+
+function CartPageInner() {
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();

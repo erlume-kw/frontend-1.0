@@ -41,8 +41,8 @@ export default function AllDropsPage() {
 
   useEffect(() => {
     fetchDrops()
-      // Only active and upcoming drops are public; hidden and ended ones never appear.
-      .then(data => setDrops(data.filter(drop => drop.status === 'active' || drop.status === 'upcoming')))
+      // Active, upcoming and ended drops are public (ended = view-only); hidden ones never appear.
+      .then(data => setDrops(data.filter(drop => drop.status === 'active' || drop.status === 'upcoming' || drop.status === 'ended')))
       .catch(e => console.error('AllDropsPage fetch error:', e))
       .finally(() => setLoading(false));
   }, []);

@@ -16,6 +16,7 @@ import SignInPromptModal from '@/components/SignInPromptModal';
 import { SkeletonProductDetail } from '@/components/ui/Skeleton';
 import { useWishlist, type WishlistItem } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
+import { SHOP_ENABLED } from '@/lib/config';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { useWindowWidth } from '@/lib/useWindowWidth';
 import { useMoney } from '@/lib/useMoney';
@@ -441,6 +442,13 @@ export default function ProductPageClient() {
       {isSold ? (
         <div className="flex flex-1 items-center justify-center bg-[rgba(197,112,93,0.5)]">
           <span className="font-clash font-semibold text-[16px] text-white">{tc('sold')}</span>
+        </div>
+      ) : !SHOP_ENABLED || item.purchasable === false ? (
+        // View-only: shop switched off, or the item's drop has ended
+        <div className="flex flex-1 items-center justify-center bg-[rgba(197,112,93,0.5)] px-2" aria-disabled="true">
+          <span className="whitespace-nowrap font-clash font-semibold text-[15px] tracking-[1px] text-white sm:text-[16px]">
+            {item.purchasable === false ? t('notAvailable') : t('comingSoon')}
+          </span>
         </div>
       ) : (
         <button className="flex flex-1 items-center justify-center bg-secondary px-2" onClick={handleAddToCart}>

@@ -1,5 +1,7 @@
 'use client';
 
+import { SHOP_ENABLED } from '@/lib/config';
+import ShopClosedRedirect from '@/components/ShopClosedRedirect';
 import { toWesternDigits, useNumerals } from '@/lib/useNumerals';
 import { useLocale, useTranslations } from 'next-intl';
 import { useMoney } from '@/lib/useMoney';
@@ -84,6 +86,10 @@ function hasActiveReservation(orderId: string | null, phase: PaymentPhase): bool
 
 // ─── Main page ─────────────────────────────────────────────────────────────────
 export default function CheckoutPage() {
+  return SHOP_ENABLED ? <CheckoutPageInner /> : <ShopClosedRedirect />;
+}
+
+function CheckoutPageInner() {
   const isDesktop = useIsDesktop();
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();

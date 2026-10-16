@@ -52,7 +52,7 @@ export async function generateMetadata({
   // Hidden/ended drops (and anything that failed to load) read as plain "not found" on the
   // page itself — metadata must stay just as blank, or a search engine/link preview would
   // reveal the name of a drop the site deliberately hides.
-  if (!drop || (drop.status !== 'active' && drop.status !== 'upcoming')) return {};
+  if (!drop || (drop.status !== 'active' && drop.status !== 'upcoming' && drop.status !== 'ended')) return {};
 
   const isArabic = locale === 'ar';
   const name = (isArabic && drop.nameAr?.trim()) ? drop.nameAr : drop.name;

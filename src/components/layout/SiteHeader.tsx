@@ -7,6 +7,7 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { useMinWidth } from '@/lib/useMinWidth';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
+import { SHOP_ENABLED } from '@/lib/config';
 import MaxWidthContainer from './MaxWidthContainer';
 import LanguageSwitcher from './LanguageSwitcher';
 import HeartIcon from '../ui/HeartIcon';
@@ -114,9 +115,11 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
                   {t('wishlist')}{wishlistCount > 0 ? ` (${num(wishlistCount)})` : ''}
                 </span>
               </button>
-              <button onClick={() => go('/cart')}>
-                <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
-              </button>
+              {SHOP_ENABLED && (
+                <button onClick={() => go('/cart')}>
+                  <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
+                </button>
+              )}
             </div>
           </div>
         </MaxWidthContainer>
@@ -146,6 +149,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             </span>
           )}
         </button>
+        {SHOP_ENABLED && (
         <button
           onClick={() => go('/cart')}
           className="relative p-1"
@@ -158,6 +162,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             </span>
           )}
         </button>
+        )}
       </div>
     </div>
   );

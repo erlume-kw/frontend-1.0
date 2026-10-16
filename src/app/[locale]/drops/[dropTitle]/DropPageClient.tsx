@@ -161,7 +161,7 @@ export default function DropPageClient() {
   // Only active and upcoming drops are public. Hidden/ended drops (and anything that
   // failed to load, e.g. a stale/bad link) read as a plain "not found" — no name, no
   // description, nothing revealed.
-  const notFound = !loading && (!drop || (drop.status !== 'active' && drop.status !== 'upcoming'));
+  const notFound = !loading && (!drop || (drop.status !== 'active' && drop.status !== 'upcoming' && drop.status !== 'ended'));
   const isUpcoming = drop?.status === 'upcoming';
   const hasMore = items.length < totalCount;
 

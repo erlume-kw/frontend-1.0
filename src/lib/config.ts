@@ -34,3 +34,8 @@ export function enforceCanonicalHost(): void {
     );
   }
 }
+
+// View-only launch switch. NEXT_PUBLIC_SHOP_ENABLED=false → the site can be browsed
+// (drops, products, wishlist) but Add to cart, the cart and checkout are off.
+// Unset → shop is on. Baked in at build time, so redeploy after changing it.
+export const SHOP_ENABLED = process.env.NEXT_PUBLIC_SHOP_ENABLED?.trim().toLowerCase() !== 'false';

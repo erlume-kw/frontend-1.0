@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { getAccessToken } from '@/services/api';
 import { useCart } from '@/contexts/CartContext';
+import { SHOP_ENABLED } from '@/lib/config';
 import LanguageSwitcher from './LanguageSwitcher';
 
 interface SideMenuProps {
@@ -76,9 +77,11 @@ export default function SideMenu({ visible, onClose, onNavigate }: SideMenuProps
               <span className="font-clash font-medium text-[16px] leading-5 text-white">{t(label)}</span>
             </button>
           ))}
-          <button onClick={() => handleNav('/cart')}>
-            <span className="font-clash font-medium text-[16px] leading-5 text-white">{t('cart')} ({num(cartCount)})</span>
-          </button>
+          {SHOP_ENABLED && (
+            <button onClick={() => handleNav('/cart')}>
+              <span className="font-clash font-medium text-[16px] leading-5 text-white">{t('cart')} ({num(cartCount)})</span>
+            </button>
+          )}
         </div>
 
         {isLoggedIn ? (

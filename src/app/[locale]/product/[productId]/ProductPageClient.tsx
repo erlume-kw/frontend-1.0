@@ -444,10 +444,10 @@ export default function ProductPageClient() {
           <span className="font-clash font-semibold text-[16px] text-white">{tc('sold')}</span>
         </div>
       ) : !SHOP_ENABLED || item.purchasable === false ? (
-        // View-only: shop switched off, or the item's drop has ended
+        // View-only: shop switched off, the drop hasn't opened yet, or it has ended
         <div className="flex flex-1 items-center justify-center bg-[rgba(197,112,93,0.5)] px-2" aria-disabled="true">
           <span className="whitespace-nowrap font-clash font-semibold text-[15px] tracking-[1px] text-white sm:text-[16px]">
-            {item.purchasable === false ? t('notAvailable') : t('comingSoon')}
+            {item.purchasable === false && item.dropStatus !== 'upcoming' ? t('notAvailable') : t('comingSoon')}
           </span>
         </div>
       ) : (

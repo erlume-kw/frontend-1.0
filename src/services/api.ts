@@ -198,8 +198,10 @@ export interface Item {
   basePrice: string;
   condition: string;
   itemStatus: 'pending' | 'approved' | 'available' | 'sold' | 'returned' | 'rejected';
-  /** From GET /api/items/:id — false when the item's drop has ended (view-only, can't be bought). */
+  /** From GET /api/items/:id — false when it can't be bought yet/anymore (upcoming or ended drop). */
   purchasable?: boolean;
+  /** From GET /api/items/:id — status of the item's drop, if it's in one. */
+  dropStatus?: 'upcoming' | 'active' | 'ended' | 'hidden' | null;
   color: string;
   size: string;
   year?: string;

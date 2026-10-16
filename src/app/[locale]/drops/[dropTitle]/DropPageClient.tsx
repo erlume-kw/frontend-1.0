@@ -30,10 +30,12 @@ function useCardWidth(isDesktop: boolean, viewportWidth: number) {
 const PAGE_SIZE = 20;
 
 // Active drops show what's still for sale plus sold pieces (greyed in the UI).
-// Upcoming drops preview their (not-yet-purchasable) items instead — items
-// added to an upcoming drop are always "pending" on the backend, never "available".
+// Upcoming drops preview their (not-yet-purchasable) items — those are "pending" on
+// the backend. Ended drops are an archive and may hold any of the three.
 function statusFilterFor(drop: Drop | null): string {
-  return drop?.status === 'upcoming' ? 'pending' : 'available,sold';
+  if (drop?.status === 'upcoming') return 'pending';
+  if (drop?.status === 'ended') return 'available,sold,pending';
+  return 'available,sold';
 }
 
 export default function DropPageClient() {
@@ -162,7 +164,6 @@ export default function DropPageClient() {
   // failed to load, e.g. a stale/bad link) read as a plain "not found" — no name, no
   // description, nothing revealed.
   const notFound = !loading && (!drop || (drop.status !== 'active' && drop.status !== 'upcoming' && drop.status !== 'ended'));
-  const isUpcoming = drop?.status === 'upcoming';
   const hasMore = items.length < totalCount;
 
   return (
@@ -197,7 +198,8 @@ export default function DropPageClient() {
               ) : null}
             </div>
 
-            {/* Active and upcoming drops both show items — upcoming ones dimmed and inert. */}
+            {/* Every public drop's pieces open their product page and can be wishlisted;
+                buying is only possible while the drop is active (the product page says so). */}
             <>
               <div
                 className={`flex flex-row flex-wrap justify-start ${
@@ -219,11 +221,10 @@ export default function DropPageClient() {
                         price={money(item.listingPrice)}
                         imageUri={item.imageUrls?.[0]}
                         cardWidth={cardWidth}
-                        disabled={isUpcoming}
                         sold={isSold}
                         isWishlisted={isInWishlist(item._id)}
                         onWishlistPress={
-                          isUpcoming || isSold
+                          isSold
                             ? undefined
                             : () =>
                                 toggleWishlist({
@@ -234,7 +235,7 @@ export default function DropPageClient() {
                                   imageUri: item.imageUrls?.[0],
                                 })
                         }
-                        onPress={isUpcoming ? undefined : () => openProduct(item._id)}
+                        onPress={() => openProduct(item._id)}
                       />
                       );
                     })}

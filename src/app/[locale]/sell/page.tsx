@@ -10,6 +10,7 @@ import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import SellerBanner from '@/components/seller/SellerBanner';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { openWhatsAppWithPhotos } from '@/lib/sellerPhotos';
+import { prepareTurnstileToken } from '@/lib/turnstile';
 
 export default function SellPage() {
   const isDesktop = useIsDesktop();
@@ -30,6 +31,7 @@ export default function SellPage() {
     if (imageUri) URL.revokeObjectURL(imageUri);
     setImageUri(URL.createObjectURL(file));
     setImageFile(file);
+    prepareTurnstileToken();
   };
 
   const handleChat = async () => {

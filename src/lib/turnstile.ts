@@ -39,12 +39,39 @@ function loadScript(): Promise<TurnstileApi> {
   return scriptPromise;
 }
 
+// Tokens are single-use and valid for 300 s; reuse a prepared one only while it's
+// comfortably inside that window.
+const TOKEN_MAX_AGE_MS = 240_000;
+let prepared: { promise: Promise<string | undefined>; at: number } | null = null;
+
 /**
- * Returns a fresh, single-use Turnstile token, or undefined when no site key is
- * configured. Most visitors never see anything; if Cloudflare wants a click,
- * the checkbox appears at the bottom of the screen until it's solved.
+ * Starts the bot check early — call it when the visitor picks their photos, while
+ * they're still on the page. If Cloudflare wants a click, the checkbox shows up
+ * then, instead of behind the WhatsApp tab that opens on submit.
+ */
+export function prepareTurnstileToken(): void {
+  if (!SITE_KEY || typeof window === 'undefined') return;
+  if (prepared && Date.now() - prepared.at < TOKEN_MAX_AGE_MS) return;
+  const promise = solveTurnstile().catch(err => {
+    if (prepared?.promise === promise) prepared = null;
+    throw err;
+  });
+  promise.catch(() => {}); // no unhandled rejection while nobody is waiting on it yet
+  prepared = { promise, at: Date.now() };
+}
+
+/**
+ * Returns a single-use Turnstile token (the prepared one if still fresh, else a
+ * new one), or undefined when no site key is configured.
  */
 export async function getTurnstileToken(): Promise<string | undefined> {
+  if (!SITE_KEY || typeof window === 'undefined') return undefined;
+  const p = prepared && Date.now() - prepared.at < TOKEN_MAX_AGE_MS ? prepared.promise : solveTurnstile();
+  prepared = null; // single-use
+  return p;
+}
+
+async function solveTurnstile(): Promise<string | undefined> {
   if (!SITE_KEY || typeof window === 'undefined') return undefined;
 
   const turnstile = await loadScript();

@@ -23,6 +23,27 @@ export async function shrinkPhoto(file: File): Promise<Blob> {
   }
 }
 
+/** Fills the blank tab with a small branded "sending your photos" screen while the upload runs. */
+function showLoading(tab: Window): void {
+  const ar = document.documentElement.lang === 'ar';
+  const text = ar ? 'جارٍ إرسال صورك… سنفتح واتساب خلال لحظات' : 'Sending your photos… opening WhatsApp in a moment';
+  try {
+    tab.document.write(`<!doctype html><html lang="${ar ? 'ar' : 'en'}" dir="${ar ? 'rtl' : 'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>erlume</title><style>
+html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:#fff;color:#2f3a2b;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center;padding:0 24px}
+.logo{font-family:Georgia,"Times New Roman",serif;font-size:44px;letter-spacing:1px;color:#2f3a2b}
+.dots{display:flex;gap:8px}
+.dots span{width:8px;height:8px;border-radius:50%;background:#c4705a;animation:b 1.2s infinite ease-in-out}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+p{margin:0;font-size:15px;color:#6b6b6b}
+</style></head><body><div class="logo">erlume</div><div class="dots"><span></span><span></span><span></span></div><p>${text}</p></body></html>`);
+    tab.document.close();
+  } catch {
+    // Some browsers don't allow writing to the new tab — it just stays blank until WhatsApp loads.
+  }
+}
+
 /**
  * Opens the erlume WhatsApp chat with a pre-filled message. When the seller picked photos,
  * they are uploaded first and the message carries a link to them (WhatsApp shows the photo
@@ -51,7 +72,10 @@ export async function openWhatsAppWithPhotos({
 
   // Open the tab now, while we still have the user's tap — browsers block window.open after an await
   const tab = window.open('', '_blank');
-  if (tab) tab.opener = null;
+  if (tab) {
+    showLoading(tab);
+    tab.opener = null;
+  }
 
   let text = message();
   try {

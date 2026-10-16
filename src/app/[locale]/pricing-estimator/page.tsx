@@ -10,6 +10,7 @@ import SideMenu from '@/components/layout/SideMenu';
 import MaxWidthContainer from '@/components/layout/MaxWidthContainer';
 import { useIsDesktop } from '@/lib/useIsDesktop';
 import { openWhatsAppWithPhotos } from '@/lib/sellerPhotos';
+import { prepareTurnstileToken } from '@/lib/turnstile';
 import {
   identifyBagPhotos,
   estimateBagPrice,
@@ -122,6 +123,7 @@ export default function PricingEstimatorPage() {
     setPhotoPreviews(files.map(f => URL.createObjectURL(f)));
     setIdentifyNotice('');
     setIdentifyError('');
+    prepareTurnstileToken();
   };
 
   const handleIdentify = async () => {
@@ -144,6 +146,7 @@ export default function PricingEstimatorPage() {
       setIdentifyError(err?.message || t('identifyFailed'));
     } finally {
       setIdentifying(false);
+      prepareTurnstileToken(); // identify used the token — get the next one ready for WhatsApp
     }
   };
 

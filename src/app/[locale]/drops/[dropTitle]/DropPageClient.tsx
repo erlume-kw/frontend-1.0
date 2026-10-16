@@ -222,9 +222,10 @@ export default function DropPageClient() {
                         imageUri={item.imageUrls?.[0]}
                         cardWidth={cardWidth}
                         sold={isSold}
+                        wishlistDisabled={drop?.status === 'ended'}
                         isWishlisted={isInWishlist(item._id)}
                         onWishlistPress={
-                          isSold
+                          isSold || drop?.status === 'ended'
                             ? undefined
                             : () =>
                                 toggleWishlist({

@@ -334,6 +334,19 @@ export default function HomePage() {
                 imageUri={item.imageUrls?.[0]}
                 cardWidth={cardW}
                 sold={item.itemStatus === 'sold'}
+                isWishlisted={isInWishlist(item._id)}
+                onWishlistPress={
+                  item.itemStatus === 'sold'
+                    ? undefined
+                    : () =>
+                        toggleWishlist({
+                          id: item._id,
+                          brand: item.brandName,
+                          sub: item.itemName,
+                          price: `${item.listingPrice} KWD`,
+                          imageUri: item.imageUrls?.[0],
+                        })
+                }
                 onPress={() => openProduct(item._id)}
               />
             ))}

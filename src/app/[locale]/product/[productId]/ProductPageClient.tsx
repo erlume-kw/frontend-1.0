@@ -429,14 +429,22 @@ export default function ProductPageClient() {
     </div>
   );
 
+  // Ended drops are an archive — nothing to wait for, so the heart is shown greyed out and inert
+  const wishlistDisabled = item.dropStatus === 'ended';
   const ctaRow = (
     <div className="flex h-[75px] flex-row">
       {!isSold && (
         <button
-          className="flex w-[75px] items-center justify-center bg-lightGrey"
-          onClick={() => handleWishlistPress(productItem)}
+          className={`flex w-[75px] items-center justify-center bg-lightGrey ${wishlistDisabled ? 'cursor-default opacity-50' : ''}`}
+          onClick={wishlistDisabled ? undefined : () => handleWishlistPress(productItem)}
+          disabled={wishlistDisabled}
+          aria-disabled={wishlistDisabled || undefined}
         >
-          <HeartIcon size={28} color={inWishlist ? '#C5705D' : '#7A7060'} filled={inWishlist} />
+          <HeartIcon
+            size={28}
+            color={wishlistDisabled ? '#929292' : inWishlist ? '#C5705D' : '#7A7060'}
+            filled={inWishlist && !wishlistDisabled}
+          />
         </button>
       )}
       {isSold ? (

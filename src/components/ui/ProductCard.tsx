@@ -24,6 +24,8 @@ interface ProductCardProps {
   disabled?: boolean;
   /** Sold items stay in the grid, greyed with a SOLD label in place of the price. */
   sold?: boolean;
+  /** Show the heart greyed out and not clickable (e.g. an ended drop's pieces). */
+  wishlistDisabled?: boolean;
 }
 
 export default function ProductCard({
@@ -37,6 +39,7 @@ export default function ProductCard({
   cardWidth,
   disabled = false,
   sold = false,
+  wishlistDisabled = false,
 }: ProductCardProps) {
   const isDesktop = useIsDesktop();
   const t = useTranslations('Common');
@@ -90,15 +93,18 @@ export default function ProductCard({
         </span>
       </div>
 
-      {/* Wishlist heart — top corner (end side) of image area. Hidden for preview-only / sold cards. */}
+      {/* Wishlist heart — top corner (end side) of image area. Hidden for preview-only / sold cards;
+          greyed out and inert when wishlisting isn't possible (e.g. an ended drop). */}
       {disabled || sold ? null : (
         <button
-          className="absolute flex items-center justify-center p-2 -m-2"
+          className={`absolute flex items-center justify-center p-2 -m-2 ${wishlistDisabled ? 'cursor-default opacity-50' : ''}`}
           style={{ top: Math.round(10 * scale), insetInlineEnd: Math.round(10 * scale), width: heartSize, height: heartSize, boxSizing: 'content-box' }}
-          onClick={e => { e.stopPropagation(); onWishlistPress?.(); }}
+          onClick={e => { e.stopPropagation(); if (!wishlistDisabled) onWishlistPress?.(); }}
+          disabled={wishlistDisabled}
+          aria-disabled={wishlistDisabled || undefined}
           aria-label={isWishlisted ? t('removeFromWishlist') : t('addToWishlist')}
         >
-          <HeartIcon size={heartSize} color="#C5705D" filled={isWishlisted} />
+          <HeartIcon size={heartSize} color={wishlistDisabled ? '#929292' : '#C5705D'} filled={isWishlisted && !wishlistDisabled} />
         </button>
       )}
     </div>

@@ -3,8 +3,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 // Content-Security-Policy for the storefront. Scoped to what the site actually
-// loads: self-hosted assets, Cloudinary/Airtable item images, and the MyFatoorah
-// embedded payment widget (script + iframe + its API). 'unsafe-inline' is required
+// loads: self-hosted assets, Cloudinary/Airtable item images, the MyFatoorah
+// embedded payment widget (script + iframe + its API), and the Cloudflare
+// Turnstile captcha on photo uploads (script + iframe). 'unsafe-inline' is required
 // because Next.js App Router injects inline hydration scripts/styles and is not
 // wired for nonces here — so this CSP is defense-in-depth (clickjacking, base-uri,
 // object-src, source allow-listing), not a full XSS guard.
@@ -25,9 +26,9 @@ const csp = [
   "img-src 'self' data: blob: https://res.cloudinary.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
-  `script-src 'self' 'unsafe-inline'${devEval} https://*.myfatoorah.com https://applepay.cdn-apple.com`,
+  `script-src 'self' 'unsafe-inline'${devEval} https://*.myfatoorah.com https://applepay.cdn-apple.com https://challenges.cloudflare.com`,
   `connect-src 'self' https://*.erlume.com.kw https://*.myfatoorah.com${devConnect}`,
-  "frame-src 'self' https://*.myfatoorah.com",
+  "frame-src 'self' https://*.myfatoorah.com https://challenges.cloudflare.com",
   "form-action 'self' https://*.myfatoorah.com",
   'upgrade-insecure-requests',
 ].join('; ');

@@ -1,6 +1,7 @@
 'use client';
 
 import { API_URL } from '@/lib/config';
+import { turnstileHeader } from '@/lib/turnstile';
 
 const BASE_URL = API_URL;
 
@@ -479,7 +480,7 @@ export async function identifyBagPhotos(
 
   const res = await fetch(`${BASE_URL}/api/pricing-estimator/identify`, {
     method: 'POST',
-    headers: { 'X-Site-Language': siteLanguage() },
+    headers: { 'X-Site-Language': siteLanguage(), ...(await turnstileHeader()) },
     body: formData,
   });
   const data = await res.json();
@@ -503,7 +504,7 @@ export async function createSellerSubmission(
 
   const res = await fetch(`${BASE_URL}/api/seller-submissions`, {
     method: 'POST',
-    headers: { 'X-Site-Language': siteLanguage() },
+    headers: { 'X-Site-Language': siteLanguage(), ...(await turnstileHeader()) },
     body: formData,
   });
   const data = await res.json();

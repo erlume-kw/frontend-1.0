@@ -9,8 +9,11 @@ import SellerPhotosView from './SellerPhotosView';
 // shows up right in the chat. Never indexed — but deliberately NOT blocked in robots.txt,
 // because WhatsApp's preview crawler needs to be able to fetch it.
 
-async function fetchSubmission(code: string): Promise<string[] | null> {
-  if (!/^[A-Za-z0-9]{8}$/.test(code)) return null;
+// Codes are 8 characters. Anything after that is ignored, because sellers sometimes
+// type right after the link in WhatsApp ("…/sell/r/79Z35AEDHi") and it sticks to the URL.
+async function fetchSubmission(rawCode: string): Promise<string[] | null> {
+  const code = rawCode.match(/^[A-Za-z0-9]{8}/)?.[0];
+  if (!code) return null;
   try {
     const res = await fetch(`${API_URL}/api/seller-submissions/${code}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;

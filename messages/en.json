@@ -943,6 +943,8 @@
     "cta": "Back to erlume"
   },
   "SellerPhotos": {
+    "sendingTitle": "Sending your photos",
+    "sendingBody": "WhatsApp will open in a moment.",
     "title": "Photos sent to erlume",
     "body": "These photos were shared with erlume by someone who would like to sell this item. We reply on WhatsApp.",
     "notFound": "This link has expired or does not exist.",

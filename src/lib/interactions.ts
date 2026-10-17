@@ -1,9 +1,9 @@
 import { FOOTER_DATA } from './brand';
 
 export const SOCIAL_URLS = {
-  instagram: 'https://instagram.com',
+  instagram: 'https://www.instagram.com/erlumekw',
   whatsapp: `https://wa.me/${FOOTER_DATA.contact.phone.replace(/\D/g, '')}`,
-  tiktok: 'https://tiktok.com',
+  tiktok: 'https://www.tiktok.com/@erlumekw',
 } as const;
 
 const DROP_NAV: Record<string, { dropId: string; dropTitle: string }> = {

@@ -171,6 +171,9 @@
     "empty": "Nothing new just yet — check back soon."
   },
   "Drops": {
+    "emptyUpcomingTitle": "Pieces revealed soon",
+    "emptyUpcomingBody": "We're putting this drop together — check back closer to the release date.",
+    "emptyTitle": "No pieces in this drop yet",
     "seasonLabel": "{season} {year}",
     "seasons": {
       "spring": "spring",

@@ -171,6 +171,9 @@
     "empty": "لا جديد حتى الآن — عاود الزيارة قريبًا."
   },
   "Drops": {
+    "emptyUpcomingTitle": "القطع بتنكشف قريب",
+    "emptyUpcomingBody": "قاعدين نجهّز هالدروب — خلّكم متابعين ويانا لين يقرب موعد الإطلاق.",
+    "emptyTitle": "لا توجد قطع في هذا الدروب بعد",
     "seasonLabel": "{season} {year}",
     "seasons": {
       "spring": "ربيع",

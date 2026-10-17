@@ -248,9 +248,6 @@ export default function DropPageClient() {
                   <p className="font-clash font-medium text-[20px] leading-7 text-primary">
                     {drop?.status === 'upcoming' ? t('emptyUpcomingTitle') : t('emptyTitle')}
                   </p>
-                  {drop?.status === 'upcoming' && (
-                    <p className="mt-2 font-dm text-[14px] leading-[22px] text-muted">{t('emptyUpcomingBody')}</p>
-                  )}
                 </div>
               )}
 

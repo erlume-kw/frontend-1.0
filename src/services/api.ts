@@ -183,8 +183,9 @@ export interface Banner {
   ctaLabelAr?: string;
   ctaUrl: string;
   showCta: boolean;
-  /** Where description + CTA sit; defaults to right when omitted. */
-  contentAlign?: 'left' | 'right';
+  /** Which side the description + CTA sit on. 'auto' follows reading direction
+   *  (English → left, Arabic → right); 'left'/'right' force a side. */
+  contentAlign?: 'auto' | 'left' | 'right';
   isVisible: boolean;
 }
 

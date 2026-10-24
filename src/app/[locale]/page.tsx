@@ -1,7 +1,7 @@
 'use client';
 
 import { useNumerals } from '@/lib/useNumerals';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -110,7 +110,15 @@ function HomeBanner({
   onCta: (url: string) => void;
 }) {
   const { bannerDescription, bannerCtaLabel } = useBannerText();
-  // Text follows the reading direction: left on English pages, right on Arabic (RTL) pages.
+  const isRtl = useLocale() === 'ar';
+  // Resolve which physical side the text/CTA sit on. 'auto' (default) follows the
+  // reading direction (English → left, Arabic → right); 'left'/'right' force a side.
+  const side = banner.contentAlign && banner.contentAlign !== 'auto'
+    ? banner.contentAlign
+    : (isRtl ? 'right' : 'left');
+  // align-items is direction-relative, so map the physical side through the dir.
+  const alignItems = (side === 'left') !== isRtl ? 'items-start' : 'items-end';
+  const textAlign = side === 'left' ? 'text-left' : 'text-right';
 
   return (
     <div
@@ -125,11 +133,11 @@ function HomeBanner({
         onError={e => { e.currentTarget.style.display = 'none'; }}
       />
       <div
-        className="absolute inset-0 flex flex-col items-start justify-end bg-black/50 p-8"
+        className={`absolute inset-0 flex flex-col ${alignItems} justify-end bg-black/50 p-8`}
       >
         {!!bannerDescription(banner) && (
           <span
-            className={`mb-2 text-start font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
+            className={`mb-2 ${textAlign} font-clash font-light text-white ${isDesktop ? 'text-[24px]' : 'text-[16px]'}`}
           >
             {bannerDescription(banner)}
           </span>
@@ -137,7 +145,7 @@ function HomeBanner({
         {banner.showCta && !!bannerCtaLabel(banner) && (
           <button type="button" onClick={() => onCta(banner.ctaUrl)}>
             <span
-              className={`text-start font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
+              className={`${textAlign} font-clash text-white underline ${isDesktop ? 'text-[24px]' : 'text-[20px]'}`}
             >
               {bannerCtaLabel(banner)}
             </span>

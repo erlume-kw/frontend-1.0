@@ -121,7 +121,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
                 </button>
               ) : (
                 // Shopping disabled at launch: keep the cart visible but inert.
-                <button type="button" disabled aria-disabled="true" className="cursor-not-allowed opacity-40">
+                <button type="button" disabled aria-disabled="true" className="cursor-default opacity-40">
                   <span className="font-clash text-[16px] text-olive">{t('cart')}</span>
                 </button>
               )}
@@ -169,7 +169,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
         </button>
         ) : (
           // Shopping disabled at launch: keep the bag icon visible but inert.
-          <button type="button" disabled aria-disabled="true" className="relative cursor-not-allowed p-1 opacity-40" aria-label={t('cartAria')}>
+          <button type="button" disabled aria-disabled="true" className="relative cursor-default p-1 opacity-40" aria-label={t('cartAria')}>
             <ShoppingBagIcon />
           </button>
         )}

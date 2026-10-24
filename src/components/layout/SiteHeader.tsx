@@ -115,9 +115,14 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
                   {t('wishlist')}{wishlistCount > 0 ? ` (${num(wishlistCount)})` : ''}
                 </span>
               </button>
-              {SHOP_ENABLED && (
+              {SHOP_ENABLED ? (
                 <button onClick={() => go('/cart')}>
                   <span className="font-clash text-[16px] text-olive">{t('cart')} ({num(cartCount)})</span>
+                </button>
+              ) : (
+                // Shopping disabled at launch: keep the cart visible but inert.
+                <button type="button" disabled aria-disabled="true" className="cursor-not-allowed opacity-40">
+                  <span className="font-clash text-[16px] text-olive">{t('cart')}</span>
                 </button>
               )}
             </div>
@@ -149,7 +154,7 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             </span>
           )}
         </button>
-        {SHOP_ENABLED && (
+        {SHOP_ENABLED ? (
         <button
           onClick={() => go('/cart')}
           className="relative p-1"
@@ -162,6 +167,11 @@ export default function SiteHeader({ onMenuPress, onNavigate }: SiteHeaderProps)
             </span>
           )}
         </button>
+        ) : (
+          // Shopping disabled at launch: keep the bag icon visible but inert.
+          <button type="button" disabled aria-disabled="true" className="relative cursor-not-allowed p-1 opacity-40" aria-label={t('cartAria')}>
+            <ShoppingBagIcon />
+          </button>
         )}
       </div>
     </div>

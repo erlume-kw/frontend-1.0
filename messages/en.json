@@ -346,6 +346,40 @@
       "collection": "Collection and Handling",
       "general": "General"
     },
+    "uncollected": {
+      "title": "Uncollected Items",
+      "subtitle": "Here’s what happens, step by step, if an item due back to you isn’t collected.",
+      "items": [
+        {
+          "title": "Communication",
+          "body": "You agree to follow the notices we send about your items and to collect any item due back to you within the timeframe we specify. You must keep your contact details accurate and up to date."
+        },
+        {
+          "title": "Notice period",
+          "body": "If we can’t reach you, or you don’t respond, or you refuse or delay collecting an item due back to you, we’ll notify you at your registered details and keep a record of each notice and its date. You have 90 calendar days from our first notice to collect the item or tell us how you’d like it handled. Before this period ends, we’ll send you a final notice, where reasonably possible, reminding you of the deadline and what happens if you don’t respond."
+        },
+        {
+          "title": "After 90 days",
+          "body": "If the item remains uncollected, we may relist it at a price that reflects its condition and market value at the time, in line with our Pricing terms. That price may be lower than the original. We do this only where the law permits and within the authorisation you give by accepting these terms."
+        },
+        {
+          "title": "Costs",
+          "body": "In addition to our commission, we may deduct the actual, reasonable and documented costs of continuing to keep, store, handle or return the item, as far as the law allows. When you ask to settle your account, we’ll itemise these costs and pay any amount owed to you."
+        },
+        {
+          "title": "Your proceeds",
+          "body": "Your share of any sale is calculated and paid out as usual, and it remains yours. Not responding or not claiming it doesn’t mean you’ve waived it or that it belongs to erlume, and it will be handled as the law requires."
+        },
+        {
+          "title": "Ownership",
+          "body": "You remain the owner of the item until it is sold. The end of the notice period doesn’t transfer ownership to erlume or mean you’ve given the item up — it only lets us take the actions described here, within the limits of the law. This doesn’t remove any obligation we have by law."
+        },
+        {
+          "title": "Record of acceptance",
+          "body": "We keep a record of your acceptance of these terms, its date, and a copy of the version you accepted."
+        }
+      ]
+    },
     "cards": [
       {
         "title": "Written Quote",
@@ -396,8 +430,8 @@
         "body": "Your item is listed for the duration of its drop. We set the drop’s end date and share it with you before the drop opens, and a drop can run longer than a month. If your item has not sold by the time the drop ends, it is due to be returned to you, unless you ask us to include it in a later drop."
       },
       {
-        "title": "Uncollected Items",
-        "body": "If we cannot reach you to return an item, we will contact you at your registered details. Items uncollected six months after they become due may be donated."
+        "title": "If We Can’t Reach You",
+        "body": "Communication. You agree to follow the notices we send about your items and to collect any item due back to you within the timeframe we specify. You must keep your contact details accurate and up to date.\n\nNotice period. If we can’t reach you, or you don’t respond, or you refuse or delay collecting an item due back to you, we’ll notify you at your registered details and keep a record of each notice and its date. You have 90 calendar days from our first notice to collect the item or tell us how you’d like it handled. Before this period ends, we’ll send you a final notice, where reasonably possible, reminding you of the deadline and what happens if you don’t respond.\n\nAfter 90 days. If the item remains uncollected, we may relist it at a price that reflects its condition and market value at the time, in line with our Pricing terms. That price may be lower than the original. We do this only where the law permits and within the authorisation you give by accepting these terms.\n\nCosts. In addition to our commission, we may deduct the actual, reasonable and documented costs of continuing to keep, store, handle or return the item, as far as the law allows. When you ask to settle your account, we’ll itemise these costs and pay any amount owed to you.\n\nYour proceeds. Your share of any sale is calculated and paid out as usual, and it remains yours. Not responding or not claiming it doesn’t mean you’ve waived it or that it belongs to erlume, and it will be handled as the law requires.\n\nOwnership. You remain the owner of the item until it is sold. The end of the notice period doesn’t transfer ownership to erlume or mean you’ve given the item up — it only lets us take the actions described here, within the limits of the law. This doesn’t remove any obligation we have by law.\n\nRecord of acceptance. We keep a record of your acceptance of these terms, its date, and a copy of the version you accepted."
       },
       {
         "title": "Your Details",
@@ -406,6 +440,10 @@
       {
         "title": "Policy Changes",
         "body": "We may update these terms at any time and will notify you of any material change. Updated terms apply to items already with us once you accept them."
+      },
+      {
+        "title": "Uncollected Items",
+        "body": "What happens if we don’t hear from you about an item due back to you. See the full “Uncollected Items” terms under General below."
       }
     ]
   },

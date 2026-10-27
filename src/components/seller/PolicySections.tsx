@@ -6,6 +6,8 @@ import { useIsDesktop } from '@/lib/useIsDesktop';
 interface Policy {
   title: string;
   body: string;
+  /** Optional structured sub-points shown below the body (FAQ layout only). */
+  points?: { title: string; body: string }[];
 }
 
 export type PolicyLayout = 'features' | 'whyus' | 'faq';
@@ -182,13 +184,28 @@ function FaqList({ category, items, isDesktop }: { category: string; items: Poli
                 style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
               >
                 <div className="overflow-hidden">
-                  <p
-                    className={`px-5 pb-5 font-dm text-[14px] leading-[23px] text-olive transition-opacity duration-300 ease-out ${
+                  <div
+                    className={`px-5 pb-5 transition-opacity duration-300 ease-out ${
                       isOpen ? 'opacity-100' : 'opacity-0'
                     }`}
                   >
-                    {item.body}
-                  </p>
+                    <p className="whitespace-pre-line font-dm text-[14px] leading-[23px] text-olive">
+                      {item.body}
+                    </p>
+                    {item.points && (
+                      <div className="mt-4 flex flex-col gap-3">
+                        {item.points.map((pt) => (
+                          <div key={pt.title} className="flex flex-row items-start gap-[12px]">
+                            <span className="mt-[7px] block h-[6px] w-[6px] shrink-0 bg-secondary" />
+                            <p className="flex-1 font-dm text-[14px] leading-[23px] text-olive">
+                              <span className="font-clash font-semibold text-primary">{pt.title}.</span>{' '}
+                              {pt.body}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

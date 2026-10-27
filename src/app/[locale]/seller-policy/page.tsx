@@ -17,10 +17,14 @@ type Card = { title: string; body: string };
 //   0 Written Quote        1 Ownership & Warranty   2 Commission             3 Logistics & Handling
 //   4 Collection           5 Authentication         6 Prohibited Items       7 Care While With Us
 //   8 Photography          9 Pricing                10 Payout                11 How Long We List For
-//   12 Uncollected Items   13 Your Details          14 Policy Changes
+//   12 Uncollected Items   13 Your Details          14 Policy Changes   15 Uncollected (short)
+// Cards 12 and 15 (Uncollected Items) are no longer shown as cards: the clause is
+// too long for a grid card or an accordion row, so it's its own full section,
+// defined separately under SellerPolicy.uncollected and rendered between
+// Collection and General.
 const GROUPS: { key: 'pricing' | 'collection' | 'general'; layout: PolicyGroup['layout']; cards: number[] }[] = [
   { key: 'pricing', layout: 'features', cards: [0, 2, 3, 9, 10] },
-  { key: 'collection', layout: 'whyus', cards: [4, 11, 12, 7, 8] },
+  { key: 'collection', layout: 'whyus', cards: [4, 11, 15, 7, 8] },
   { key: 'general', layout: 'faq', cards: [1, 5, 6, 13, 14] },
 ];
 
@@ -36,6 +40,19 @@ export default function SellerPolicyPage() {
     layout,
     items: indexes.map(i => cards[i]),
   }));
+  // Uncollected Items (clause 14) is too long for a grid card, so it goes in the
+  // General accordion with its sub-parts as structured points inside the panel.
+  const general = groups.find(g => g.layout === 'faq');
+  if (general) {
+    general.items = [
+      ...general.items,
+      {
+        title: t('uncollected.title'),
+        body: t('uncollected.subtitle'),
+        points: t.raw('uncollected.items') as Card[],
+      },
+    ];
+  }
 
   return (
     <PageLayout

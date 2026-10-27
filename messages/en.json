@@ -330,7 +330,7 @@
     "fees": [
       {
         "title": "Commission",
-        "body": "25% of the item’s assessed value"
+        "body": "25% of the sale price, excluding the 2.5% charge (min. 10 KWD)"
       },
       {
         "title": "Logistics & handling",
@@ -357,7 +357,7 @@
       },
       {
         "title": "Commission",
-        "body": "25% of the item’s assessed value, deducted from the sale proceeds. Your quote states the exact amount in KWD."
+        "body": "25% of the price your item sells for, excluding the 2.5% logistics & handling charge, with a minimum of 10 KWD. It is deducted from the sale proceeds, and your quote states the expected amount in KWD."
       },
       {
         "title": "Logistics & Handling",
@@ -369,7 +369,7 @@
       },
       {
         "title": "Authentication & Verification",
-        "body": "All items are authenticated. We reserve the right to decline any item we cannot verify. Counterfeit items result in account suspension and forfeiture of earnings."
+        "body": "All items are authenticated. We reserve the right to decline any item we cannot verify. Counterfeit items result in account suspension and forfeiture of earnings. Items that fail authentication are returned to you. If they are not collected, our Uncollected Items terms apply, except that they will not be relisted."
       },
       {
         "title": "Prohibited Items",
@@ -385,7 +385,7 @@
       },
       {
         "title": "Pricing",
-        "body": "Prices are set by our valuation method — brand tier, age, condition and prices of similar pieces — rather than negotiated per item."
+        "body": "Prices are set by our valuation method — brand tier, age, condition and prices of similar pieces — rather than negotiated per item. If your item does not sell, its price may be reduced over time according to a schedule we share with you."
       },
       {
         "title": "Payout",
@@ -393,7 +393,7 @@
       },
       {
         "title": "How Long We List For",
-        "body": "Your item stays listed for its drop and continues afterwards while we work to sell it — a drop can run longer than a month."
+        "body": "Your item is listed for the duration of its drop. We set the drop’s end date and share it with you before the drop opens, and a drop can run longer than a month. If your item has not sold by the time the drop ends, it is due to be returned to you, unless you ask us to include it in a later drop."
       },
       {
         "title": "Uncollected Items",
@@ -405,7 +405,7 @@
       },
       {
         "title": "Policy Changes",
-        "body": "We may update these terms at any time. You will be notified of any material change."
+        "body": "We may update these terms at any time and will notify you of any material change. Updated terms apply to items already with us once you accept them."
       }
     ]
   },

@@ -1,7 +1,8 @@
 'use client';
 
 import { toWesternDigits, useNumerals } from '@/lib/useNumerals';
-import { useTranslations } from 'next-intl';
+import { track } from '@vercel/analytics';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMoney } from '@/lib/useMoney';
 import React, { useRef, useState } from 'react';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -63,6 +64,7 @@ const inputClass =
 
 export default function PricingEstimatorPage() {
   const isDesktop = useIsDesktop();
+  const locale = useLocale();
   const t = useTranslations('Estimator');
   const tc = useTranslations('Common');
   const money = useMoney();
@@ -94,6 +96,8 @@ export default function PricingEstimatorPage() {
 
   const handleWhatsApp = async () => {
     if (sendingPhotos) return;
+    // Conversion signal — how many estimate users go on to start a sell chat.
+    track('estimator_whatsapp_clicked', { brand: brand.trim() || 'unknown', locale });
     const text = year ? t('waMessageYear', { brand, year }) : t('waMessage', { brand });
     setSendingPhotos(true);
     try {
@@ -168,6 +172,16 @@ export default function PricingEstimatorPage() {
       });
       setResult(estimated);
       setSubmitted(true);
+      // Usage analytics — counts how many people actually run an estimate
+      // (visible in Vercel Analytics → Events). No personal data: brand is a
+      // luxury label, not the seller.
+      track('pricing_estimator_used', {
+        brand: brand.trim() || 'unknown',
+        condition,
+        accepted: !!estimated.accept,
+        usedPhotoAI: photos.length > 0,
+        locale,
+      });
     } catch (err: any) {
       setEstimateError(err?.message || t('estimateFailed'));
     } finally {

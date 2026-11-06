@@ -15,6 +15,7 @@ import { prepareTurnstileToken } from '@/lib/turnstile';
 import {
   identifyBagPhotos,
   estimateBagPrice,
+  markEstimatorContacted,
   type BagCondition,
   type EstimateBagPriceResult,
 } from '@/services/api';
@@ -98,6 +99,8 @@ export default function PricingEstimatorPage() {
     if (sendingPhotos) return;
     // Conversion signal — how many estimate users go on to start a sell chat.
     track('estimator_whatsapp_clicked', { brand: brand.trim() || 'unknown', locale });
+    // Flag the stored submission so staff can see this bag reached WhatsApp.
+    if (result?.submissionId) void markEstimatorContacted(result.submissionId);
     const text = year ? t('waMessageYear', { brand, year }) : t('waMessage', { brand });
     setSendingPhotos(true);
     try {

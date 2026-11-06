@@ -542,6 +542,8 @@ export interface EstimateBagPriceResult {
   pickupFee: number;
   accept: boolean;
   usingComps: boolean;
+  /** Id of the stored usage record — pass to markEstimatorContacted on WhatsApp click. */
+  submissionId?: string;
 }
 
 export async function estimateBagPrice(input: EstimateBagPriceInput): Promise<EstimateBagPriceResult> {
@@ -550,6 +552,18 @@ export async function estimateBagPrice(input: EstimateBagPriceInput): Promise<Es
     body: JSON.stringify(input),
   });
   return data;
+}
+
+/** Flag that the visitor clicked through to WhatsApp after their estimate. Best-effort. */
+export async function markEstimatorContacted(submissionId: string): Promise<void> {
+  try {
+    await request('/api/pricing-estimator/contacted', {
+      method: 'POST',
+      body: JSON.stringify({ submissionId }),
+    });
+  } catch {
+    // Non-critical analytics signal — never block the WhatsApp hand-off on it.
+  }
 }
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────

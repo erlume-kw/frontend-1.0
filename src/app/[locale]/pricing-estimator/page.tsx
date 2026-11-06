@@ -169,6 +169,8 @@ export default function PricingEstimatorPage() {
         originalPrice: parseFloat(originalPrice),
         yearPurchased: year.trim() ? parseInt(year, 10) : undefined,
         pickupFee: 0,
+        usedPhotoAI: photos.length > 0,
+        locale,
       });
       setResult(estimated);
       setSubmitted(true);

@@ -530,6 +530,9 @@ export interface EstimateBagPriceInput {
   size?: string;
   material?: string;
   color?: string;
+  // Usage-log context (stored server-side, surfaced in the backoffice).
+  usedPhotoAI?: boolean;
+  locale?: string;
 }
 
 export interface EstimateBagPriceResult {

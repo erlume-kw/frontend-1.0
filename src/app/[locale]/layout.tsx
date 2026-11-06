@@ -6,6 +6,7 @@ import { routing, isRTL } from '@/i18n/routing';
 import { SITE_URL } from '@/lib/config';
 import { clashDisplay, dmSans, sarina, montserratArabic } from '../fonts';
 import Providers from '../providers';
+import NewsletterPopup from '@/components/NewsletterPopup';
 import '../globals.css';
 
 const ICONS = {
@@ -78,6 +79,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>{children}</Providers>
+          <NewsletterPopup />
         </NextIntlClientProvider>
       </body>
     </html>

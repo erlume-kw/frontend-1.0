@@ -992,5 +992,11 @@
     "metaDescription": "Photos shared with erlume on WhatsApp.",
     "photoAlt": "Photo {n}",
     "backHome": "Go to erlume"
+  },
+  "NewsletterPopup": {
+    "title": "DON’T MISS A DROP",
+    "text": "Join our list for early access to new arrivals and exclusive pieces.",
+    "dismiss": "No, thanks",
+    "closeAria": "Close"
   }
 }

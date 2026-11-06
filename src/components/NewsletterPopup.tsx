@@ -121,14 +121,21 @@ export default function NewsletterPopup() {
 
   if (!open) return null;
 
+  // Keep a single overlay on screen at a time: hide the newsletter card while
+  // the OTP step or an error alert is showing, so the modals never stack on top
+  // of each other.
+  const overlayHidden = otpModalVisible || (errorOpen && !!emailError);
+
   return (
-    <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4"
-      onClick={dismiss}
-      role="dialog"
-      aria-modal="true"
-      aria-label={t('title')}
-    >
+    <>
+      {!overlayHidden && (
+      <div
+        className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4"
+        onClick={dismiss}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('title')}
+      >
       <div
         className="relative flex w-full max-w-[420px] flex-col gap-5 border border-border bg-white p-8"
         onClick={e => e.stopPropagation()}
@@ -186,6 +193,8 @@ export default function NewsletterPopup() {
           </>
         )}
       </div>
+      </div>
+      )}
 
       <ErrorModal
         visible={errorOpen && !!emailError}
@@ -202,6 +211,6 @@ export default function NewsletterPopup() {
         }}
         onVerified={completeSubscribe}
       />
-    </div>
+    </>
   );
 }

@@ -131,14 +131,12 @@ export default function NewsletterPopup() {
       {!overlayHidden && (
       <div
         className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4"
-        onClick={dismiss}
         role="dialog"
         aria-modal="true"
         aria-label={t('title')}
       >
       <div
         className="relative flex w-full max-w-[420px] flex-col gap-5 border border-border bg-white p-8"
-        onClick={e => e.stopPropagation()}
       >
         <button
           type="button"

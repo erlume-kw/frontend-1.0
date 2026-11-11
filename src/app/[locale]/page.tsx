@@ -271,7 +271,11 @@ export default function HomePage() {
         </MaxWidthContainer>
       </div>
 
-      {/* Our Latest Drop — shown on both mobile and desktop */}
+      {/* Our Latest Drop — only when there's an active drop with items to show
+          (skeletons while loading). With no active drop — e.g. only UPCOMING
+          drops — this is hidden instead of rendering an empty "Our Latest Drop"
+          heading; the countdown hero above already announces the upcoming drop. */}
+      {(loading || items.length > 0) && (
       <MaxWidthContainer
         className={`bg-white ${isDesktop ? 'px-16 pb-8 pt-6' : 'px-4 pb-6 pt-5'}`}
       >
@@ -361,6 +365,7 @@ export default function HomePage() {
           </div>
         )}
       </MaxWidthContainer>
+      )}
 
       {/* CMS homepage banners (ordered) */}
       {banners.map(banner => (
